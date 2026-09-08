@@ -18,7 +18,7 @@ export default function DailyTasks() {
   const fetchTasks = async () => {
     try {
       const response = await axios.get(
-        'http://localhost:5000/api/daily-tasks',
+        'https://student-platform-backend-h9zs.onrender.com/api/daily-tasks',
         { headers: { Authorization: `Bearer ${token}` } }
       );
       // Сортировка по времени
@@ -38,7 +38,7 @@ export default function DailyTasks() {
     setLoading(true);
     try {
       await axios.post(
-        'http://localhost:5000/api/daily-tasks',
+        'https://student-platform-backend-h9zs.onrender.com/api/daily-tasks',
         {
           task_title: newTask,
           task_time: newTime
@@ -59,7 +59,7 @@ export default function DailyTasks() {
   const handleToggleComplete = async (id, isCompleted) => {
     try {
       await axios.patch(
-        `http://localhost:5000/api/daily-tasks/${id}`,
+        `https://student-platform-backend-h9zs.onrender.com/api/daily-tasks/${id}`,
         { is_completed: !isCompleted },
         { headers: { Authorization: `Bearer ${token}` } }
       );

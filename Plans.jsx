@@ -21,7 +21,7 @@ export default function Plans() {
   const fetchPlans = async (date) => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/plans/${date}`,
+        `https://student-platform-backend-h9zs.onrender.com/api/plans/${date}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPlans(response.data);
@@ -37,7 +37,7 @@ export default function Plans() {
     setLoading(true);
     try {
       await axios.post(
-        'http://localhost:5000/api/plans',
+        'https://student-platform-backend-h9zs.onrender.com/api/plans',
         {
           plan_date: dateString,
           task_title: newTask,
@@ -59,7 +59,7 @@ export default function Plans() {
   const handleToggleComplete = async (id, isCompleted) => {
     try {
       await axios.patch(
-        `http://localhost:5000/api/plans/${id}`,
+        `https://student-platform-backend-h9zs.onrender.com/api/plans/${id}`,
         { is_completed: !isCompleted },
         { headers: { Authorization: `Bearer ${token}` } }
       );

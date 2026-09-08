@@ -16,7 +16,7 @@ export default function Login({ onLoginSuccess }) {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('https://student-platform-backend-h9zs.onrender.com/api/auth/login', {
         student_number,
         password
       });
@@ -37,7 +37,7 @@ export default function Login({ onLoginSuccess }) {
     setError('');
 
     try {
-      await axios.post('http://localhost:5000/api/auth/register', {
+      await axios.post('https://student-platform-backend-h9zs.onrender.com/api/auth/register', {
         student_number,
         password,
         name,

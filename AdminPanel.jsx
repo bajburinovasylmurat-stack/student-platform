@@ -31,7 +31,7 @@ export default function AdminPanel() {
 
     try {
       await axios.post(
-        'http://localhost:5000/api/materials',
+        'https://student-platform-backend-h9zs.onrender.com/api/materials',
         formData,
         { 
           headers: { 
@@ -62,7 +62,7 @@ export default function AdminPanel() {
     setLoading(true);
     try {
       await axios.post(
-        'http://localhost:5000/api/examinations',
+        'https://student-platform-backend-h9zs.onrender.com/api/examinations',
         {
           title: examTitle,
           category: examCategory,

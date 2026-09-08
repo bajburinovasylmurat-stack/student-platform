@@ -26,7 +26,7 @@ export default function Examinations({ isAdmin }) {
 
   const fetchExaminations = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/examinations');
+      const response = await axios.get('https://student-platform-backend-h9zs.onrender.com/api/examinations');
       setExaminations(response.data);
     } catch (error) {
       console.error('Нұсқалар алу қатесі:', error);
@@ -40,7 +40,7 @@ export default function Examinations({ isAdmin }) {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/api/examinations',
+        'https://student-platform-backend-h9zs.onrender.com/api/examinations',
         {
           ...formData,
           is_admin: 'true'

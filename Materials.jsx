@@ -12,7 +12,7 @@ export default function Materials() {
 
   const fetchMaterials = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/materials');
+      const response = await axios.get('https://student-platform-backend-h9zs.onrender.com/api/materials');
       setMaterials(response.data);
     } catch (error) {
       console.error('Материалдар алу қатесі:', error);
@@ -37,7 +37,7 @@ export default function Materials() {
               <p className="description">{material.description}</p>
               <p className="file-name">📄 {material.file_name}</p>
               <a 
-                href={`http://localhost:5000${material.file_path}`} 
+                href={`https://student-platform-backend-h9zs.onrender.com${material.file_path}`} 
                 download 
                 className="download-btn"
               >
