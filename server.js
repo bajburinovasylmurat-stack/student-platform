@@ -163,7 +163,7 @@ const verifyToken = (req, res, next) => {
 app.get('/api/materials', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, title, description, file_name, created_at FROM materials ORDER BY created_at DESC'
+      'SELECT id, title, description, file_path, file_name, created_at FROM materials ORDER BY created_at DESC'
     );
     res.json(result.rows);
   } catch (error) {
