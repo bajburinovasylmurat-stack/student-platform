@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import '../styles/AdminPanel.css';
 import UsersManager from './UsersManager';
+import { YoutubePreview } from './YoutubeThumb';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('materials');
@@ -77,7 +78,7 @@ export default function AdminPanel() {
       setExamDesc('');
     } catch (error) {
       console.error('Нұсқа қосу қатесі:', error);
-      alert('Нұсқа қосу сәтсіз');
+      alert(error.response?.data?.error || 'Нұсқа қосу сәтсіз');
     } finally {
       setLoading(false);
     }
@@ -189,6 +190,7 @@ export default function AdminPanel() {
                   placeholder="https://www.youtube.com/watch?v=..."
                   required
                 />
+                <YoutubePreview url={examUrl} />
               </div>
 
               <div className="form-group">

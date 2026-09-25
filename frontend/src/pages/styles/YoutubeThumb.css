@@ -1,0 +1,41 @@
+/* ===== YouTube афишасының алдын ала көрінісі ===== */
+.yt-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 12px;
+  animation: fadeUp 0.35s var(--ease) both;
+}
+
+.yt-preview-img {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--brand-softer);
+  box-shadow: var(--shadow-sm);
+}
+
+.yt-preview-ok {
+  font-size: 13px;
+  color: var(--success);
+  font-weight: 600;
+}
+
+.yt-preview.invalid {
+  font-size: 13px;
+  color: #a1462a;
+  background: #fdf1ec;
+  border: 1px solid #f5d5c7;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.exam-thumbnail {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--brand-softer);
+}

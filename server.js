@@ -654,13 +654,36 @@ app.delete('/api/materials/:id', verifyToken, requireRole('admin'), async (req, 
 
 // ===== НҰСҚА ТАЛДАУЛАР =====
 
-// Барлық нұсқалар
+// YouTube сілтемесінің кез келген түрінен видео ID-ін алу:
+// watch?v=, youtu.be/, live/, shorts/, embed/, m.youtube.com, music.youtube.com
+const youtubeId = (url) => {
+  try {
+    const u = new URL(String(url).trim());
+    const host = u.hostname.replace(/^(www|m|music)\./, '');
+    let id = null;
+    if (host === 'youtu.be') {
+      id = u.pathname.split('/')[1];
+    } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+      id = u.searchParams.get('v') || u.pathname.match(/^\/(?:live|shorts|embed|v)\/([^/?#]+)/)?.[1];
+    }
+    return /^[A-Za-z0-9_-]{11}$/.test(id || '') ? id : null;
+  } catch {
+    return null;
+  }
+};
+
+const youtubeThumbnail = (id) => `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
+
+// Барлық нұсқалар (афиша сілтемеден есептеледі, сондықтан бұрын қосылғандары да түзеледі)
 app.get('/api/examinations', async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT * FROM examinations ORDER BY category, created_at DESC'
     );
-    res.json(result.rows);
+    res.json(result.rows.map((exam) => {
+      const id = youtubeId(exam.youtube_url);
+      return { ...exam, video_id: id, thumbnail_url: id ? youtubeThumbnail(id) : exam.thumbnail_url };
+    }));
   } catch (error) {
     console.error('Нұсқалар алу қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
@@ -670,24 +693,19 @@ app.get('/api/examinations', async (req, res) => {
 // Нұсқа қосу (админ)
 app.post('/api/examinations', verifyToken, requireRole('admin'), async (req, res) => {
   try {
-
     const { title, category, youtube_url, description } = req.body;
-    
-    // YouTube афишасын алу
-    let thumbnail_url = null;
-    if (youtube_url) {
-      const videoId = youtube_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
-      if (videoId) {
-        thumbnail_url = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-      }
+
+    const id = youtubeId(youtube_url);
+    if (!title?.trim() || !id) {
+      return res.status(400).json({ error: 'Атау және дұрыс YouTube сілтемесі қажет' });
     }
 
     const result = await pool.query(
       'INSERT INTO examinations (title, category, youtube_url, thumbnail_url, description) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [title, category, youtube_url, thumbnail_url, description]
+      [title.trim(), category, youtube_url.trim(), youtubeThumbnail(id), description]
     );
 
-    res.status(201).json(result.rows[0]);
+    res.status(201).json({ ...result.rows[0], video_id: id });
   } catch (error) {
     console.error('Нұсқа қосу қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });

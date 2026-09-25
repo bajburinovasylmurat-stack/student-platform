@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/Examinations.css';
+import { YoutubeThumb, YoutubePreview } from './YoutubeThumb';
 
 export default function Examinations({ isAdmin }) {
   const [examinations, setExaminations] = useState([]);
@@ -51,7 +52,7 @@ export default function Examinations({ isAdmin }) {
       setShowAddForm(false);
     } catch (error) {
       console.error('Нұсқа қосу қатесі:', error);
-      alert('Нұсқа қосу сәтсіз');
+      alert(error.response?.data?.error || 'Нұсқа қосу сәтсіз');
     }
   };
 
@@ -98,6 +99,7 @@ export default function Examinations({ isAdmin }) {
             onChange={(e) => setFormData({...formData, youtube_url: e.target.value})}
             required
           />
+          <YoutubePreview url={formData.youtube_url} />
           <textarea
             placeholder="Сипаттамасы"
             value={formData.description}
@@ -128,13 +130,12 @@ export default function Examinations({ isAdmin }) {
       <div className="examinations-grid">
         {filteredExaminations.map(exam => (
           <div key={exam.id} className="exam-card">
-            {exam.thumbnail_url && (
-              <img 
-                src={exam.thumbnail_url} 
-                alt={exam.title} 
-                className="exam-thumbnail"
-              />
-            )}
+            <YoutubeThumb
+              url={exam.youtube_url}
+              fallbackSrc={exam.thumbnail_url}
+              alt={exam.title}
+              className="exam-thumbnail"
+            />
             <h3>{exam.title}</h3>
             <p className="category">{categories[exam.category]}</p>
             {exam.description && <p className="description">{exam.description}</p>}
