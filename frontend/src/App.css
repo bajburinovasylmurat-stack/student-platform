@@ -1,21 +1,21 @@
 /* ===== JUZ40 фирмалық шрифті ===== */
 @font-face {
-  font-family: 'JUZ40';
-  src: url('./assets/fonts/JUZ40-Regular.otf') format('opentype');
+  font-family: 'Brand';
+  src: url('./assets/fonts/juz-regular.woff2') format('woff2');
   font-weight: 400;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'JUZ40';
-  src: url('./assets/fonts/JUZ40-Medium.otf') format('opentype');
+  font-family: 'Brand';
+  src: url('./assets/fonts/juz-medium.woff2') format('woff2');
   font-weight: 500 600;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'JUZ40';
-  src: url('./assets/fonts/JUZ40-Bold.otf') format('opentype');
+  font-family: 'Brand';
+  src: url('./assets/fonts/juz-bold.woff2') format('woff2');
   font-weight: 700 900;
   font-display: swap;
 }
@@ -48,7 +48,7 @@
   --shadow-lg: 0 20px 50px rgba(16, 48, 60, 0.16);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
-  --font: 'JUZ40', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  --font: 'Brand', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
 * {

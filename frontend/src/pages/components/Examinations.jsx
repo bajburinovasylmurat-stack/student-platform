@@ -43,7 +43,6 @@ export default function Examinations({ isAdmin }) {
         'https://student-platform-backend-h9zs.onrender.com/api/examinations',
         {
           ...formData,
-          is_admin: 'true'
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );

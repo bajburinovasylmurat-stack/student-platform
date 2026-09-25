@@ -280,7 +280,42 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+// ===== РӨЛДЕР =====
+
+// Қолданушының рөлін базадан алу (рөл өзгеруі мүмкін, сондықтан токенге сенбейміз)
+const getRole = async (userId) => {
+  const result = await pool.query(
+    'SELECT role, student_number FROM students WHERE id = $1',
+    [userId]
+  );
+  const user = result.rows[0];
+  if (!user) return null;
+  if (user.student_number === 'admin') return 'admin';
+  return user.role || 'student';
+};
+
+const requireRole = (...roles) => async (req, res, next) => {
+  try {
+    const role = await getRole(req.student.id);
+    if (!roles.includes(role)) {
+      return res.status(403).json({ error: 'Бұл әрекетке рұқсат жоқ' });
+    }
+    req.role = role;
+    next();
+  } catch (error) {
+    console.error('Рөл тексеру қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+};
+
 // ===== МАТЕРИАЛДАР =====
+
+// multer файл атауын latin1 деп оқиды, сондықтан кирилл атаулар "ÐÑ..." болып бұзылады
+const fixFileName = (name) => {
+  if (!name || !/[\u0080-\u00ff]/.test(name) || /[^\u0000-\u00ff]/.test(name)) return name;
+  const decoded = Buffer.from(name, 'latin1').toString('utf8');
+  return decoded.includes('\ufffd') ? name : decoded;
+};
 
 // Материалдар сұрау
 app.get('/api/materials', async (req, res) => {
@@ -288,7 +323,8 @@ app.get('/api/materials', async (req, res) => {
     const result = await pool.query(
       'SELECT id, title, description, file_path, file_name, created_at FROM materials ORDER BY created_at DESC'
     );
-    res.json(result.rows);
+    // Бұрын бұзылып сақталған атауларды да дұрыс көрсету
+    res.json(result.rows.map((m) => ({ ...m, file_name: fixFileName(m.file_name) })));
   } catch (error) {
     console.error('Материалдар алу қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
@@ -296,16 +332,16 @@ app.get('/api/materials', async (req, res) => {
 });
 
 // Материал қосу (админ)
-app.post('/api/materials', verifyToken, upload.single('file'), async (req, res) => {
+// Рөл файл жүктелмей тұрып тексеріледі, әйтпесе админ емес адамның файлы дискіге сақталып қалады
+app.post('/api/materials', verifyToken, requireRole('admin'), upload.single('file'), async (req, res) => {
   try {
-    // Админ ғана болса
-    if (req.body.is_admin !== 'true') {
-      return res.status(403).json({ error: 'Админ ғана материалдар қосо алады' });
+    if (!req.file || !req.body.title) {
+      return res.status(400).json({ error: 'Файл және атау қажет' });
     }
 
     const { title, description } = req.body;
     const file_path = `/uploads/${req.file.filename}`;
-    const file_name = req.file.originalname;
+    const file_name = fixFileName(req.file.originalname);
 
     const result = await pool.query(
       'INSERT INTO materials (title, description, file_path, file_name, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *',
@@ -335,11 +371,8 @@ app.get('/api/examinations', async (req, res) => {
 });
 
 // Нұсқа қосу (админ)
-app.post('/api/examinations', verifyToken, async (req, res) => {
+app.post('/api/examinations', verifyToken, requireRole('admin'), async (req, res) => {
   try {
-    if (req.body.is_admin !== 'true') {
-      return res.status(403).json({ error: 'Админ ғана нұсқалар қосо алады' });
-    }
 
     const { title, category, youtube_url, description } = req.body;
     
@@ -536,34 +569,6 @@ app.get('/api/admin/check', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
-
-// ===== РӨЛДЕР =====
-
-// Қолданушының рөлін базадан алу (рөл өзгеруі мүмкін, сондықтан токенге сенбейміз)
-const getRole = async (userId) => {
-  const result = await pool.query(
-    'SELECT role, student_number FROM students WHERE id = $1',
-    [userId]
-  );
-  const user = result.rows[0];
-  if (!user) return null;
-  if (user.student_number === 'admin') return 'admin';
-  return user.role || 'student';
-};
-
-const requireRole = (...roles) => async (req, res, next) => {
-  try {
-    const role = await getRole(req.student.id);
-    if (!roles.includes(role)) {
-      return res.status(403).json({ error: 'Бұл әрекетке рұқсат жоқ' });
-    }
-    req.role = role;
-    next();
-  } catch (error) {
-    console.error('Рөл тексеру қатесі:', error);
-    res.status(500).json({ error: 'Сервер қатесі' });
-  }
-};
 
 // Жоспарды тапсырмаларымен бірге алу
 const PLAN_SELECT = `

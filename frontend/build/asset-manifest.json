@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.2d145602.css",
-    "main.js": "/static/js/main.b0b0dc62.js",
-    "static/media/JUZ40-Regular.otf": "/static/media/JUZ40-Regular.14bf1c27c433a74d0f6d.otf",
-    "static/media/JUZ40-Bold.otf": "/static/media/JUZ40-Bold.1e889f2e9de22bd97a43.otf",
-    "static/media/JUZ40-Medium.otf": "/static/media/JUZ40-Medium.78017b4ed657a44b98fc.otf",
+    "main.css": "/static/css/main.feca0b06.css",
+    "main.js": "/static/js/main.6d647d31.js",
+    "static/media/juz-regular.woff2": "/static/media/juz-regular.687ea94d296f2891c527.woff2",
+    "static/media/juz-bold.woff2": "/static/media/juz-bold.3445bce109f9084a56ef.woff2",
+    "static/media/juz-medium.woff2": "/static/media/juz-medium.9882664d5948287c97aa.woff2",
     "index.html": "/index.html",
-    "main.2d145602.css.map": "/static/css/main.2d145602.css.map",
-    "main.b0b0dc62.js.map": "/static/js/main.b0b0dc62.js.map"
+    "main.feca0b06.css.map": "/static/css/main.feca0b06.css.map",
+    "main.6d647d31.js.map": "/static/js/main.6d647d31.js.map"
   },
   "entrypoints": [
-    "static/css/main.2d145602.css",
-    "static/js/main.b0b0dc62.js"
+    "static/css/main.feca0b06.css",
+    "static/js/main.6d647d31.js"
   ]
 }

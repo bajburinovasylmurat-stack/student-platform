@@ -28,7 +28,6 @@ export default function AdminPanel() {
     formData.append('file', materialFile);
     formData.append('title', materialTitle);
     formData.append('description', materialDesc);
-    formData.append('is_admin', 'true');
 
     try {
       await axios.post(
@@ -69,7 +68,6 @@ export default function AdminPanel() {
           category: examCategory,
           youtube_url: examUrl,
           description: examDesc,
-          is_admin: 'true'
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
