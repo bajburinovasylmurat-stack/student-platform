@@ -430,6 +430,45 @@
   opacity: 0.5;
 }
 
+/* ----- Telegram арқылы растау ----- */
+.tg-box {
+  background: #eef7fc;
+  border: 1px solid #cfe7f5;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  animation: fadeUp 0.45s var(--ease) both;
+}
+
+.tg-box ol {
+  padding-left: 20px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #33505b;
+}
+
+.tg-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  background: #2aabee;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: transform 0.2s var(--ease), box-shadow 0.3s, background 0.2s;
+}
+
+.tg-btn:hover {
+  background: #229ed9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(42, 171, 238, 0.35);
+}
+
 /* ----- Қадамдар ----- */
 .steps {
   display: flex;

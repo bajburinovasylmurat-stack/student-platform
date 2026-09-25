@@ -64,6 +64,9 @@ CREATE TABLE IF NOT EXISTS phone_verifications (
   attempts INT NOT NULL DEFAULT 0,
   used BOOLEAN NOT NULL DEFAULT FALSE,
   expires_at TIMESTAMP NOT NULL,
+  channel VARCHAR(10) NOT NULL DEFAULT 'sms', -- 'sms' немесе 'telegram'
+  tg_token VARCHAR(64) UNIQUE,
+  tg_chat_id BIGINT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

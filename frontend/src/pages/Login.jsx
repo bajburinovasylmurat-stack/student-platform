@@ -56,6 +56,7 @@ export default function Login({ onLoginSuccess }) {
   const [newPassword, setNewPassword] = useState('');
   const [resendIn, setResendIn] = useState(0);
   const [devMode, setDevMode] = useState(false);
+  const [botUrl, setBotUrl] = useState('');
   const codeRefs = useRef([]);
 
   useEffect(() => {
@@ -109,6 +110,7 @@ export default function Login({ onLoginSuccess }) {
       const response = await axios.post(`${API}/api/auth/send-code`, { phone: `7${phoneDigits}` });
       setResendIn(response.data.resend_after || 60);
       setStep(2);
+      setBotUrl(response.data.channel === 'telegram' ? response.data.bot_url : '');
       if (response.data.dev_code) {
         setDevMode(true);
         setCode(response.data.dev_code.split(''));
@@ -137,7 +139,7 @@ export default function Login({ onLoginSuccess }) {
     e.preventDefault();
     const joined = code.join('');
     if (joined.length !== CODE_LENGTH) {
-      showError('SMS кодын толық енгізіңіз');
+      showError('Кодты толық енгізіңіз');
       return;
     }
     setLoading(true);
@@ -297,7 +299,7 @@ export default function Login({ onLoginSuccess }) {
                 <form onSubmit={handleSendCode}>
                   <div className="auth-heading">
                     <h2>Тіркелу</h2>
-                    <p>Телефон нөміріңізге SMS код жібереміз</p>
+                    <p>Нөміріңізді растау үшін 6 таңбалы код жібереміз</p>
                   </div>
 
                   <label className="field">
@@ -328,7 +330,7 @@ export default function Login({ onLoginSuccess }) {
                   {error && <div key={errorKey} className="auth-error">{error}</div>}
 
                   <button type="submit" className="auth-submit" disabled={loading || phoneDigits.length !== 10 || !name.trim()}>
-                    {loading ? <span className="spinner" /> : 'SMS код алу →'}
+                    {loading ? <span className="spinner" /> : 'Код алу →'}
                   </button>
                 </form>
               )}
@@ -338,12 +340,32 @@ export default function Login({ onLoginSuccess }) {
                   <div className="auth-heading">
                     <h2>Кодты енгізіңіз</h2>
                     <p>
-                      <strong>{formatPhone(phoneDigits)}</strong> нөміріне 6 таңбалы код жіберілді.{' '}
+                      {botUrl ? (
+                        <><strong>{formatPhone(phoneDigits)}</strong> нөмірін Telegram арқылы растаңыз.{' '}</>
+                      ) : (
+                        <><strong>{formatPhone(phoneDigits)}</strong> нөміріне 6 таңбалы код жіберілді.{' '}</>
+                      )}
                       <button type="button" className="link-btn" onClick={() => { setStep(1); setError(''); }}>
                         Нөмірді өзгерту
                       </button>
                     </p>
                   </div>
+
+                  {botUrl && (
+                    <div className="tg-box">
+                      <ol>
+                        <li>Төмендегі батырманы басып, ботты ашыңыз</li>
+                        <li>Ботта <b>Start</b>, содан кейін <b>«📱 Нөмірді жіберу»</b> басыңыз</li>
+                        <li>Бот жіберген кодты осында енгізіңіз</li>
+                      </ol>
+                      <a href={botUrl} target="_blank" rel="noopener noreferrer" className="tg-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <path d="M21.94 4.3 18.9 19.1c-.23 1.03-.83 1.29-1.69.8l-4.66-3.44-2.25 2.17c-.25.25-.46.46-.94.46l.33-4.76 8.66-7.83c.38-.33-.08-.52-.58-.19L7.06 13.05 2.45 11.6c-1-.31-1.02-1 .21-1.48L20.66 3.2c.83-.31 1.56.19 1.28 1.1z" />
+                        </svg>
+                        Telegram-да ашу
+                      </a>
+                    </div>
+                  )}
 
                   {devMode && (
                     <div className="dev-notice">

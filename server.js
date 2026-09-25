@@ -89,6 +89,173 @@ const sendSms = async (phone, text) => {
   }
 };
 
+// ===== TELEGRAM БОТ =====
+
+const TG_API = process.env.TELEGRAM_API_BASE || 'https://api.telegram.org';
+const telegramEnabled = () => Boolean(process.env.TELEGRAM_BOT_TOKEN);
+// Webhook-ты тек Telegram шақыра алуы үшін құпия
+const tgWebhookSecret = () =>
+  crypto.createHmac('sha256', JWT_SECRET).update('telegram-webhook').digest('hex').slice(0, 48);
+
+const tg = async (method, payload = {}) => {
+  const response = await fetch(`${TG_API}/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!data.ok) throw new Error(`Telegram ${method} қатесі: ${data.description || response.status}`);
+  return data.result;
+};
+
+let botUsername = process.env.TELEGRAM_BOT_USERNAME || null;
+const getBotUsername = async () => {
+  if (!botUsername) botUsername = (await tg('getMe')).username;
+  return botUsername;
+};
+
+const SHARE_PHONE_KEYBOARD = {
+  keyboard: [[{ text: '📱 Нөмірді жіберу', request_contact: true }]],
+  resize_keyboard: true,
+  one_time_keyboard: true
+};
+
+// Бот хабарларын өңдеу
+const handleTelegramUpdate = async (update) => {
+  const message = update.message;
+  if (!message?.chat) return;
+  const chatId = message.chat.id;
+
+  // /start <token>: сайттан келді, нөмірді сұраймыз
+  if (message.text?.startsWith('/start')) {
+    const token = message.text.split(' ')[1];
+    if (!token) {
+      await tg('sendMessage', {
+        chat_id: chatId,
+        text: 'Сәлем! 👋 Бұл JUZ40 Online Edu платформасының боты.\nТіркелу үшін сайтта «Код алу» батырмасын басыңыз.'
+      });
+      return;
+    }
+
+    const found = await pool.query(`
+      UPDATE phone_verifications SET tg_chat_id = $2
+      WHERE tg_token = $1 AND used = FALSE AND expires_at > NOW()
+      RETURNING id
+    `, [token, chatId]);
+
+    if (found.rows.length === 0) {
+      await tg('sendMessage', {
+        chat_id: chatId,
+        text: '⏰ Сілтеменің мерзімі өтті. Сайтқа оралып, кодты қайта сұраңыз.'
+      });
+      return;
+    }
+
+    await tg('sendMessage', {
+      chat_id: chatId,
+      text: 'Тіркелуді растау үшін төмендегі «📱 Нөмірді жіберу» батырмасын басыңыз.',
+      reply_markup: SHARE_PHONE_KEYBOARD
+    });
+    return;
+  }
+
+  // Контакт жіберілді: нөмір сайтта жазылғанмен бірдей ме?
+  if (message.contact) {
+    // Басқа адамның контактісін жіберсе, қабылдамаймыз
+    if (message.contact.user_id !== message.from?.id) {
+      await tg('sendMessage', {
+        chat_id: chatId,
+        text: '❌ Өз нөміріңізді «📱 Нөмірді жіберу» батырмасы арқылы жіберіңіз.',
+        reply_markup: SHARE_PHONE_KEYBOARD
+      });
+      return;
+    }
+
+    const phone = normalizePhone(message.contact.phone_number);
+    const pending = await pool.query(`
+      SELECT id, phone FROM phone_verifications
+      WHERE tg_chat_id = $1 AND channel = 'telegram' AND used = FALSE AND expires_at > NOW()
+      ORDER BY created_at DESC LIMIT 1
+    `, [chatId]);
+    const v = pending.rows[0];
+
+    if (!v) {
+      await tg('sendMessage', {
+        chat_id: chatId,
+        text: '⏰ Сұраныс табылмады немесе мерзімі өтті. Сайтта кодты қайта сұраңыз.',
+        reply_markup: { remove_keyboard: true }
+      });
+      return;
+    }
+
+    if (phone !== v.phone) {
+      await tg('sendMessage', {
+        chat_id: chatId,
+        text: `❌ Бұл Telegram аккаунты басқа нөмірге тіркелген.\nСайтта Telegram-ға тіркелген нөміріңізді жазыңыз.`,
+        reply_markup: { remove_keyboard: true }
+      });
+      return;
+    }
+
+    const code = String(crypto.randomInt(100000, 1000000));
+    await pool.query(
+      'UPDATE phone_verifications SET code_hash = $1, attempts = 0 WHERE id = $2',
+      [hashCode(v.phone, code), v.id]
+    );
+    await tg('sendMessage', {
+      chat_id: chatId,
+      text: `✅ Нөмір расталды!\n\nJUZ40 тіркелу коды: <b>${code}</b>\n\nКодты сайтқа енгізіңіз. Ешкімге айтпаңыз.`,
+      parse_mode: 'HTML',
+      reply_markup: { remove_keyboard: true }
+    });
+    return;
+  }
+
+  await tg('sendMessage', {
+    chat_id: chatId,
+    text: 'Тіркелу үшін сайтта «Код алу» батырмасын басып, берілген сілтеме арқылы келіңіз.'
+  });
+};
+
+app.post('/api/telegram/webhook', (req, res) => {
+  if (req.get('X-Telegram-Bot-Api-Secret-Token') !== tgWebhookSecret()) {
+    return res.sendStatus(401);
+  }
+  res.sendStatus(200);
+  handleTelegramUpdate(req.body).catch((error) => console.error('Telegram өңдеу қатесі:', error));
+});
+
+// Render-де сайттың жария адресі бар: webhook орнатамыз. Жергілікті ортада long polling
+const startTelegramBot = async () => {
+  if (!telegramEnabled()) return;
+  const publicUrl = process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL;
+
+  if (publicUrl) {
+    await tg('setWebhook', {
+      url: `${publicUrl.replace(/\/$/, '')}/api/telegram/webhook`,
+      secret_token: tgWebhookSecret(),
+      allowed_updates: ['message']
+    });
+    console.log(`🤖 Telegram бот @${await getBotUsername()} webhook арқылы қосылды`);
+    return;
+  }
+
+  console.log(`🤖 Telegram бот @${await getBotUsername()} polling режимінде`);
+  let offset = 0;
+  for (;;) {
+    try {
+      const updates = await tg('getUpdates', { offset, timeout: 30, allowed_updates: ['message'] });
+      for (const update of updates) {
+        offset = update.update_id + 1;
+        await handleTelegramUpdate(update).catch((error) => console.error('Telegram өңдеу қатесі:', error));
+      }
+    } catch (error) {
+      console.error(error.message);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+};
+
 // Тіркелу кодын жіберу
 app.post('/api/auth/send-code', async (req, res) => {
   try {
@@ -124,6 +291,24 @@ app.post('/api/auth/send-code', async (req, res) => {
     }
 
     const code = String(crypto.randomInt(100000, 1000000));
+
+    // Telegram: код бот нөмірді растағанда ғана жасалады, әзірге сілтеме токенін береміз
+    if (telegramEnabled()) {
+      const tgToken = crypto.randomBytes(16).toString('hex');
+      await pool.query(
+        `INSERT INTO phone_verifications (phone, code_hash, expires_at, channel, tg_token)
+         VALUES ($1, $2, NOW() + INTERVAL '${CODE_TTL_MIN} minutes', 'telegram', $3)`,
+        [phone, hashCode(phone, crypto.randomBytes(16).toString('hex')), tgToken]
+      );
+      const username = await getBotUsername();
+      return res.json({
+        message: 'Telegram ботқа өтіңіз',
+        channel: 'telegram',
+        bot_url: `https://t.me/${username}?start=${tgToken}`,
+        resend_after: RESEND_SECONDS
+      });
+    }
+
     await pool.query(
       `INSERT INTO phone_verifications (phone, code_hash, expires_at)
        VALUES ($1, $2, NOW() + INTERVAL '${CODE_TTL_MIN} minutes')`,
@@ -139,8 +324,8 @@ app.post('/api/auth/send-code', async (req, res) => {
     console.log(`📱 [ТЕСТ РЕЖИМІ] ${phone} коды: ${code}`);
     res.json({ message: 'Тест режимі: SMS жіберілмеді', resend_after: RESEND_SECONDS, dev_code: code });
   } catch (error) {
-    console.error('SMS жіберу қатесі:', error);
-    res.status(502).json({ error: 'SMS жіберу сәтсіз. Кейінірек қайталаңыз' });
+    console.error('Код жіберу қатесі:', error);
+    res.status(502).json({ error: 'Код жіберу сәтсіз. Кейінірек қайталаңыз' });
   }
 });
 
@@ -166,7 +351,7 @@ app.post('/api/auth/register', async (req, res) => {
     const v = verification.rows[0];
 
     if (!v || v.used) {
-      return res.status(400).json({ error: 'Алдымен SMS код алыңыз' });
+      return res.status(400).json({ error: 'Алдымен код алыңыз' });
     }
     if (v.expired) {
       return res.status(400).json({ error: 'Кодтың мерзімі өтті. Жаңа код алыңыз' });
@@ -911,6 +1096,9 @@ const runMigrations = async () => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_phone_verifications_phone ON phone_verifications(phone, created_at DESC);
+    ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS channel VARCHAR(10) NOT NULL DEFAULT 'sms';
+    ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS tg_token VARCHAR(64) UNIQUE;
+    ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS tg_chat_id BIGINT;
 
     CREATE TABLE IF NOT EXISTS curator_plans (
       id SERIAL PRIMARY KEY,
@@ -946,5 +1134,6 @@ runMigrations()
   .finally(() => {
     app.listen(PORT, () => {
       console.log(`🚀 Сервер ${PORT} портында жүргенде`);
+      startTelegramBot().catch((error) => console.error('Telegram бот қатесі:', error.message));
     });
   });
