@@ -4,7 +4,6 @@ import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -27,12 +26,10 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Render тегін тарифінде диск әр deploy сайын тазаланады, сондықтан материалдар базада сақталады
-const MAX_MATERIAL_MB = 25;
-const materialUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_MATERIAL_MB * 1024 * 1024 }
-});
+// Render тегін тарифінде диск әр deploy сайын тазаланады, сондықтан материалдар базада сақталады.
+// Файл 2 МБ-тық бөліктермен жүктеледі: бір үлкен сұраныс Render-де үзіліп қалатын
+const MAX_MATERIAL_MB = 50;
+const CHUNK_BYTES = 2 * 1024 * 1024;
 
 // PostgreSQL қосылуы
 const { Pool } = pg;
@@ -43,6 +40,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || 'password',
   port: process.env.DB_PORT || 5432,
 });
+
+// Бос тұрған байланыс үзілсе (база қайта іске қосылса т.б.), сервер құламауы үшін
+pool.on('error', (error) => console.error('PostgreSQL байланыс қатесі:', error.message));
 
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production';
@@ -548,7 +548,8 @@ const fixFileName = (name) => {
 app.get('/api/materials', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, title, description, file_path, file_name, created_at FROM materials ORDER BY created_at DESC'
+      `SELECT id, title, description, file_path, file_name, created_at FROM materials
+       WHERE COALESCE(status, 'ready') = 'ready' ORDER BY created_at DESC`
     );
     // Бұрын бұзылып сақталған атауларды да дұрыс көрсету
     res.json(result.rows.map((m) => ({ ...m, file_name: fixFileName(m.file_name) })));
@@ -558,48 +559,91 @@ app.get('/api/materials', async (req, res) => {
   }
 });
 
-// Материал қосу (админ)
-// Рөл файл жүктелмей тұрып тексеріледі, әйтпесе админ емес адамның файлы жадқа оқылып қалады
-app.post('/api/materials', verifyToken, requireRole('admin'), (req, res, next) => {
-  materialUpload.single('file')(req, res, (error) => {
-    if (error?.code === 'LIMIT_FILE_SIZE') {
-      return res.status(413).json({ error: `Файл ${MAX_MATERIAL_MB} МБ-тан аспауы керек` });
-    }
-    if (error) return next(error);
-    next();
-  });
-}, async (req, res) => {
-  const client = await pool.connect();
+// Материал қосу (админ), үш қадам:
+// 1) POST /api/materials/uploads — жазба жасау; 2) PUT .../chunks/:index — бөліктер; 3) POST .../complete
+app.post('/api/materials/uploads', verifyToken, requireRole('admin'), async (req, res) => {
   try {
-    if (!req.file || !req.body.title) {
+    const { title, description, file_name, file_mime, file_size } = req.body;
+    const size = Number(file_size);
+    if (!title?.trim() || !file_name || !size) {
       return res.status(400).json({ error: 'Файл және атау қажет' });
     }
+    if (size > MAX_MATERIAL_MB * 1024 * 1024) {
+      return res.status(413).json({ error: `Файл ${MAX_MATERIAL_MB} МБ-тан аспауы керек` });
+    }
 
-    const { title, description } = req.body;
-    const file_name = fixFileName(req.file.originalname);
+    // Аяқталмай қалған ескі жүктеулерді тазалау
+    await pool.query(`DELETE FROM materials WHERE status = 'uploading' AND created_at < NOW() - INTERVAL '1 day'`);
 
-    await client.query('BEGIN');
-    const inserted = await client.query(
-      `INSERT INTO materials (title, description, file_path, file_name, created_by, file_data, file_mime)
-       VALUES ($1, $2, '', $3, $4, $5, $6) RETURNING id`,
-      [title, description, file_name, req.student.id, req.file.buffer, req.file.mimetype]
+    const result = await pool.query(
+      `INSERT INTO materials (title, description, file_path, file_name, created_by, file_mime, file_size, status)
+       VALUES ($1, $2, '', $3, $4, $5, $6, 'uploading') RETURNING id`,
+      [title.trim(), description || null, file_name, req.student.id, file_mime || 'application/octet-stream', size]
     );
-    const id = inserted.rows[0].id;
-    const result = await client.query(
-      `UPDATE materials SET file_path = $1 WHERE id = $2
-       RETURNING id, title, description, file_path, file_name, created_at`,
-      [`/api/materials/${id}/file`, id]
-    );
-    await client.query('COMMIT');
+    const id = result.rows[0].id;
+    await pool.query('UPDATE materials SET file_path = $1 WHERE id = $2', [`/api/materials/${id}/file`, id]);
 
-    res.status(201).json(result.rows[0]);
+    res.status(201).json({ id, chunk_size: CHUNK_BYTES, chunks: Math.ceil(size / CHUNK_BYTES) });
   } catch (error) {
-    await client.query('ROLLBACK').catch(() => {});
-    console.error('Материал қосу қатесі:', error);
-    // Бұл тек админге ашық, сондықтан себебін көрсетуге болады
+    console.error('Материал жүктеуді бастау қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі', detail: error.message });
-  } finally {
-    client.release();
+  }
+});
+
+app.put(
+  '/api/materials/uploads/:id/chunks/:index',
+  verifyToken,
+  requireRole('admin'),
+  express.raw({ type: 'application/octet-stream', limit: CHUNK_BYTES + 1024 }),
+  async (req, res) => {
+    try {
+      const index = Number(req.params.index);
+      if (!Number.isInteger(index) || index < 0 || !Buffer.isBuffer(req.body) || req.body.length === 0) {
+        return res.status(400).json({ error: 'Бөлік қате' });
+      }
+      const result = await pool.query(
+        `INSERT INTO material_chunks (material_id, idx, data)
+         SELECT id, $2, $3 FROM materials WHERE id = $1 AND status = 'uploading'
+         ON CONFLICT (material_id, idx) DO UPDATE SET data = EXCLUDED.data
+         RETURNING idx`,
+        [req.params.id, index, req.body]
+      );
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Жүктеу табылмады' });
+      }
+      res.json({ ok: true });
+    } catch (error) {
+      console.error('Бөлік сақтау қатесі:', error);
+      res.status(500).json({ error: 'Сервер қатесі', detail: error.message });
+    }
+  }
+);
+
+app.post('/api/materials/uploads/:id/complete', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const check = await pool.query(`
+      SELECT m.file_size, COUNT(c.idx)::int AS chunks, COALESCE(SUM(octet_length(c.data)), 0)::bigint AS bytes
+      FROM materials m LEFT JOIN material_chunks c ON c.material_id = m.id
+      WHERE m.id = $1 AND m.status = 'uploading'
+      GROUP BY m.id
+    `, [req.params.id]);
+    const c = check.rows[0];
+    if (!c) {
+      return res.status(404).json({ error: 'Жүктеу табылмады' });
+    }
+    if (Number(c.bytes) !== Number(c.file_size)) {
+      return res.status(400).json({ error: `Файл толық жүктелмеді (${c.bytes} / ${c.file_size} байт)` });
+    }
+
+    const result = await pool.query(
+      `UPDATE materials SET status = 'ready' WHERE id = $1
+       RETURNING id, title, description, file_path, file_name, created_at`,
+      [req.params.id]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Жүктеуді аяқтау қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі', detail: error.message });
   }
 });
 
@@ -607,11 +651,13 @@ app.post('/api/materials', verifyToken, requireRole('admin'), (req, res, next) =
 app.get('/api/materials/:id/file', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT file_name, file_mime, file_data FROM materials WHERE id = $1',
+      `SELECT file_name, file_mime, file_size, file_data IS NOT NULL AS has_data,
+              (SELECT COUNT(*) FROM material_chunks WHERE material_id = m.id)::int AS chunks
+       FROM materials m WHERE id = $1 AND COALESCE(status, 'ready') = 'ready'`,
       [req.params.id]
     );
     const m = result.rows[0];
-    if (!m?.file_data) {
+    if (!m || (!m.has_data && m.chunks === 0)) {
       return res.status(404).json({ error: 'Файл табылмады' });
     }
     const name = fixFileName(m.file_name) || 'material.pdf';
@@ -621,9 +667,29 @@ app.get('/api/materials/:id/file', async (req, res) => {
       'Content-Disposition',
       `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(name)}`
     );
-    res.send(m.file_data);
+
+    // Бір сұраныспен сақталған ескі файл
+    if (m.has_data) {
+      const data = await pool.query('SELECT file_data FROM materials WHERE id = $1', [req.params.id]);
+      return res.send(data.rows[0].file_data);
+    }
+
+    // Бөліктерді кезекпен жіберу: бүкіл файл жадқа оқылмайды
+    if (m.file_size) res.setHeader('Content-Length', m.file_size);
+    for (let i = 0; i < m.chunks; i++) {
+      const chunk = await pool.query(
+        'SELECT data FROM material_chunks WHERE material_id = $1 AND idx = $2',
+        [req.params.id, i]
+      );
+      if (!chunk.rows[0]) break;
+      if (!res.write(chunk.rows[0].data)) {
+        await new Promise((resolve) => res.once('drain', resolve));
+      }
+    }
+    res.end();
   } catch (error) {
     console.error('Файл жүктеу қатесі:', error);
+    if (res.headersSent) return res.end();
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
@@ -1308,6 +1374,14 @@ const runMigrations = async () => {
 
     ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_data BYTEA;
     ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_mime VARCHAR(100);
+    ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_size BIGINT;
+    ALTER TABLE materials ADD COLUMN IF NOT EXISTS status VARCHAR(10) NOT NULL DEFAULT 'ready';
+    CREATE TABLE IF NOT EXISTS material_chunks (
+      material_id INT NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
+      idx INT NOT NULL,
+      data BYTEA NOT NULL,
+      PRIMARY KEY (material_id, idx)
+    );
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS purpose VARCHAR(10) NOT NULL DEFAULT 'register';
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS channel VARCHAR(10) NOT NULL DEFAULT 'sms';
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS tg_token VARCHAR(64) UNIQUE;

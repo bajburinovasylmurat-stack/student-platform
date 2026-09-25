@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../styles/AdminPanel.css';
+import '../styles/PlanTaskItem.css';
 import UsersManager from './UsersManager';
+import { uploadMaterial } from './materialUpload';
 import { YoutubePreview } from './YoutubeThumb';
 
 export default function AdminPanel() {
@@ -14,6 +16,7 @@ export default function AdminPanel() {
   const [examUrl, setExamUrl] = useState('');
   const [examDesc, setExamDesc] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
 
   const token = localStorage.getItem('token');
 
@@ -25,26 +28,19 @@ export default function AdminPanel() {
     }
 
     setLoading(true);
-    const formData = new FormData();
-    formData.append('file', materialFile);
-    formData.append('title', materialTitle);
-    formData.append('description', materialDesc);
-
+    setUploadProgress(0);
     try {
-      await axios.post(
-        'https://student-platform-backend-h9zs.onrender.com/api/materials',
-        formData,
-        { 
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          } 
-        }
-      );
+      await uploadMaterial({
+        file: materialFile,
+        title: materialTitle,
+        description: materialDesc,
+        onProgress: setUploadProgress
+      });
       alert('Материал сәтті қосылды!');
       setMaterialFile(null);
       setMaterialTitle('');
       setMaterialDesc('');
+      e.target.reset();
     } catch (error) {
       console.error('Материал қосу қатесі:', error);
       // Себебін көрсету: сервер хабары, HTTP коды немесе желі қатесі
@@ -55,6 +51,7 @@ export default function AdminPanel() {
       alert(`Материал қосу сәтсіз.\n${reason}`);
     } finally {
       setLoading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -150,11 +147,19 @@ export default function AdminPanel() {
                   required
                 />
                 {materialFile && <span className="file-name">✓ {materialFile.name}</span>}
+                {materialFile && (
+                  <span className="file-size">{(materialFile.size / 1024 / 1024).toFixed(1)} МБ · ең көбі 50 МБ</span>
+                )}
               </div>
 
               <button type="submit" disabled={loading} className="submit-btn">
-                {loading ? '⏳ Жүктеу...' : '✓ Материалды қосу'}
+                {loading ? `⏳ Жүктелуде... ${uploadProgress ?? 0}%` : '✓ Материалды қосу'}
               </button>
+              {uploadProgress !== null && (
+                <div className="upload-progress" aria-label="Жүктеу барысы">
+                  <div style={{ width: `${uploadProgress}%` }} />
+                </div>
+              )}
             </form>
           </div>
         )}

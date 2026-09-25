@@ -21,8 +21,18 @@ CREATE TABLE IF NOT EXISTS materials (
   file_name VARCHAR(255) NOT NULL,
   file_data BYTEA,          -- файлдың өзі (Render дискісі deploy сайын тазаланады)
   file_mime VARCHAR(100),
+  file_size BIGINT,
+  status VARCHAR(10) NOT NULL DEFAULT 'ready', -- 'uploading' жүктеліп жатқанда
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   created_by INT REFERENCES students(id)
+);
+
+-- Материал файлдарының 2 МБ-тық бөліктері
+CREATE TABLE IF NOT EXISTS material_chunks (
+  material_id INT NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
+  idx INT NOT NULL,
+  data BYTEA NOT NULL,
+  PRIMARY KEY (material_id, idx)
 );
 
 -- Нұсқа талдаулар кесте
