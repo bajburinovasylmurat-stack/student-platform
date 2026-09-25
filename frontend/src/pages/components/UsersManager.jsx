@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/Curator.css';
+import { prettyPhone } from '../../utils/phone';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
 
@@ -60,10 +61,13 @@ export default function UsersManager() {
     student: users.filter(u => u.role === 'student').length
   };
 
+  // "707 123" сияқты бос орынмен жазылған нөмірді де табу үшін цифрлармен салыстырамыз
+  const searchDigits = search.replace(/\D/g, '');
   const visible = users.filter(u =>
     (filter === 'all' || u.role === filter) &&
     (u.name.toLowerCase().includes(search.toLowerCase()) ||
-     u.student_number.toLowerCase().includes(search.toLowerCase()))
+     u.student_number.toLowerCase().includes(search.toLowerCase()) ||
+     (searchDigits && u.student_number.includes(searchDigits)))
   );
 
   if (loading) return <div className="loading">Жүктелуде...</div>;
@@ -99,7 +103,7 @@ export default function UsersManager() {
           <div key={user.id} className="user-row">
             <div className="user-info">
               <strong>{user.name}</strong>
-              <span className="muted">№ {user.student_number}</span>
+              <span className="muted">{prettyPhone(user.student_number)}</span>
               {user.role === 'student' && (
                 <span className="muted">
                   Куратор: {user.curator_name || '—'}

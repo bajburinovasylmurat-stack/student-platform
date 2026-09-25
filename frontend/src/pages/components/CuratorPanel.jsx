@@ -5,6 +5,7 @@ import {
   toDateString, parseDate, getEndDate, defaultStartDate,
   formatDay, formatRange, groupByDate, PLAN_TYPE_LABELS
 } from './planUtils';
+import { prettyPhone } from '../../utils/phone';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
 
@@ -170,7 +171,7 @@ export default function CuratorPanel() {
                 {available.length === 0 && <p className="empty-text">Кураторы жоқ оқушы табылмады</p>}
                 {available.map(s => (
                   <div key={s.id} className="available-item">
-                    <span>{s.name} <span className="muted">№ {s.student_number}</span></span>
+                    <span>{s.name} <span className="muted">{prettyPhone(s.student_number)}</span></span>
                     <button className="small-btn" onClick={() => addStudent(s)}>+</button>
                   </div>
                 ))}
@@ -190,7 +191,7 @@ export default function CuratorPanel() {
               >
                 <div>
                   <strong>{s.name}</strong>
-                  <span className="muted">№ {s.student_number} · {s.plans_count} жоспар</span>
+                  <span className="muted">{prettyPhone(s.student_number)} · {s.plans_count} жоспар</span>
                 </div>
                 <button
                   className="icon-btn"

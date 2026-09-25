@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/DailyTasks.css';
+import { formatKkDate } from '../../utils/kkDate';
 
 export default function DailyTasks() {
   const [tasks, setTasks] = useState([]);
@@ -76,12 +77,7 @@ export default function DailyTasks() {
       <h2>✅ Бүгінгі Тапсырмалар</h2>
 
       <div className="today-info">
-        <h3>📅 {currentDate.toLocaleDateString('kk-KZ', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        })}</h3>
+        <h3>📅 {formatKkDate(currentDate, { weekday: 'long', year: true })}</h3>
         <div className="progress">
           <span>{completedCount} / {tasks.length} орындалды</span>
           <div className="progress-bar">

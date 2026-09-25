@@ -1,3 +1,5 @@
+import { formatKkDate } from '../../utils/kkDate';
+
 // Күнді жергілікті уақыт бойынша YYYY-MM-DD түрінде (toISOString UTC-ке ауыстырып, күнді жылжытады)
 export const toDateString = (date) => {
   const y = date.getFullYear();
@@ -31,11 +33,10 @@ export const defaultStartDate = (planType) => {
 };
 
 export const formatDay = (str) =>
-  parseDate(str).toLocaleDateString('kk-KZ', { weekday: 'short', day: 'numeric', month: 'long' });
+  formatKkDate(parseDate(str), { weekday: 'short' });
 
 export const formatRange = (start, end) =>
-  `${parseDate(start).toLocaleDateString('kk-KZ', { day: 'numeric', month: 'long' })} — ${
-    parseDate(end).toLocaleDateString('kk-KZ', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  `${formatKkDate(parseDate(start))} — ${formatKkDate(parseDate(end), { year: true })}`;
 
 export const PLAN_TYPE_LABELS = {
   weekly: '📆 Апталық',

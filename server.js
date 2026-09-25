@@ -8,6 +8,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -52,37 +53,157 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-pr
 
 // ===== ТҮСІНІКТЕМЕ ФУНКЦИЯЛАРЫ =====
 
-// Студент тіркеу
+// ===== SMS РАСТАУ =====
+
+const CODE_TTL_MIN = 5;          // код қанша минут жарамды
+const RESEND_SECONDS = 60;       // қайта жіберуге дейінгі күту
+const MAX_ATTEMPTS = 5;          // бір кодты енгізу әрекеттері
+const MAX_SENDS_PER_HOUR = 5;    // бір нөмірге сағатына SMS саны
+
+// +7 (707) 123-45-67, 87071234567, 7071234567 -> 77071234567
+const normalizePhone = (input) => {
+  let digits = String(input || '').replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('8')) digits = '7' + digits.slice(1);
+  if (digits.length === 10) digits = '7' + digits;
+  return /^7\d{10}$/.test(digits) ? digits : null;
+};
+
+const hashCode = (phone, code) =>
+  crypto.createHmac('sha256', JWT_SECRET).update(`${phone}:${code}`).digest('hex');
+
+const smsEnabled = () => Boolean(process.env.MOBIZON_API_KEY);
+
+// Mobizon.kz арқылы SMS жіберу
+const sendSms = async (phone, text) => {
+  const domain = process.env.MOBIZON_API_DOMAIN || 'api.mobizon.kz';
+  const body = new URLSearchParams({ recipient: phone, text });
+  if (process.env.SMS_SENDER) body.append('from', process.env.SMS_SENDER);
+
+  const response = await fetch(
+    `https://${domain}/service/message/sendsmsmessage?output=json&api=v1&apiKey=${encodeURIComponent(process.env.MOBIZON_API_KEY)}`,
+    { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (data.code !== 0) {
+    throw new Error(`Mobizon қатесі: ${data.code} ${data.message || response.status}`);
+  }
+};
+
+// Тіркелу кодын жіберу
+app.post('/api/auth/send-code', async (req, res) => {
+  try {
+    const phone = normalizePhone(req.body.phone);
+    if (!phone) {
+      return res.status(400).json({ error: 'Телефон нөмірі қате. Мысалы: +7 707 123 45 67' });
+    }
+
+    const existing = await pool.query(
+      'SELECT id FROM students WHERE phone = $1 OR student_number = $1',
+      [phone]
+    );
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: 'Бұл нөмір бұрын тіркелген. Кіріңіз' });
+    }
+
+    const recent = await pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '1 hour')::int AS sends_last_hour,
+        EXTRACT(EPOCH FROM (NOW() - MAX(created_at)))::int AS seconds_since_last
+      FROM phone_verifications WHERE phone = $1
+    `, [phone]);
+    const { sends_last_hour, seconds_since_last } = recent.rows[0];
+
+    if (seconds_since_last !== null && seconds_since_last < RESEND_SECONDS) {
+      return res.status(429).json({
+        error: `Қайта жіберу үшін ${RESEND_SECONDS - seconds_since_last} секунд күтіңіз`,
+        retry_after: RESEND_SECONDS - seconds_since_last
+      });
+    }
+    if (sends_last_hour >= MAX_SENDS_PER_HOUR) {
+      return res.status(429).json({ error: 'Тым көп әрекет. Бір сағаттан кейін қайталаңыз' });
+    }
+
+    const code = String(crypto.randomInt(100000, 1000000));
+    await pool.query(
+      `INSERT INTO phone_verifications (phone, code_hash, expires_at)
+       VALUES ($1, $2, NOW() + INTERVAL '${CODE_TTL_MIN} minutes')`,
+      [phone, hashCode(phone, code)]
+    );
+
+    if (smsEnabled()) {
+      await sendSms(phone, `JUZ40: тіркелу коды ${code}. Кодты ешкімге айтпаңыз.`);
+      return res.json({ message: 'Код жіберілді', resend_after: RESEND_SECONDS });
+    }
+
+    // SMS қызметі бапталмаған: тест режимі, код жауапта қайтарылады
+    console.log(`📱 [ТЕСТ РЕЖИМІ] ${phone} коды: ${code}`);
+    res.json({ message: 'Тест режимі: SMS жіберілмеді', resend_after: RESEND_SECONDS, dev_code: code });
+  } catch (error) {
+    console.error('SMS жіберу қатесі:', error);
+    res.status(502).json({ error: 'SMS жіберу сәтсіз. Кейінірек қайталаңыз' });
+  }
+});
+
+// Студент тіркеу (SMS кодымен)
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { student_number, password, name, email } = req.body;
-    
-    if (!student_number || !password || !name) {
+    const { password, name, code } = req.body;
+    const phone = normalizePhone(req.body.phone);
+
+    if (!phone || !password || !name?.trim() || !code) {
       return res.status(400).json({ error: 'Барлық өрістерді толтырыңыз' });
     }
-
-    // Бұл студент номері бар ма?
-    const existing = await pool.query(
-      'SELECT * FROM students WHERE student_number = $1',
-      [student_number]
-    );
-    
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ error: 'Бұл студент номері бұрын тіркелген' });
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Пароль кемінде 6 таңбадан тұруы керек' });
     }
 
-    // Пароль хэшалау
+    // Соңғы жіберілген кодты тексеру
+    const verification = await pool.query(`
+      SELECT id, code_hash, attempts, expires_at < NOW() AS expired, used
+      FROM phone_verifications WHERE phone = $1
+      ORDER BY created_at DESC LIMIT 1
+    `, [phone]);
+    const v = verification.rows[0];
+
+    if (!v || v.used) {
+      return res.status(400).json({ error: 'Алдымен SMS код алыңыз' });
+    }
+    if (v.expired) {
+      return res.status(400).json({ error: 'Кодтың мерзімі өтті. Жаңа код алыңыз' });
+    }
+    if (v.attempts >= MAX_ATTEMPTS) {
+      return res.status(400).json({ error: 'Тым көп қате әрекет. Жаңа код алыңыз' });
+    }
+
+    const expected = Buffer.from(v.code_hash, 'hex');
+    const actual = Buffer.from(hashCode(phone, String(code).trim()), 'hex');
+    if (!crypto.timingSafeEqual(expected, actual)) {
+      await pool.query('UPDATE phone_verifications SET attempts = attempts + 1 WHERE id = $1', [v.id]);
+      const left = MAX_ATTEMPTS - v.attempts - 1;
+      return res.status(400).json({ error: `Код қате. Қалған әрекет: ${left}` });
+    }
+
+    const existing = await pool.query(
+      'SELECT id FROM students WHERE phone = $1 OR student_number = $1',
+      [phone]
+    );
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: 'Бұл нөмір бұрын тіркелген' });
+    }
+
     const password_hash = await bcrypt.hash(password, 10);
 
-    // Студент сақтау
+    // Телефон нөмірі логин ретінде де қолданылады
     const result = await pool.query(
-      'INSERT INTO students (student_number, password_hash, name, email) VALUES ($1, $2, $3, $4) RETURNING id, student_number, name',
-      [student_number, password_hash, name, email]
+      `INSERT INTO students (student_number, phone, password_hash, name, email, phone_verified)
+       VALUES ($1, $1, $2, $3, NULL, TRUE) RETURNING id, student_number, name`,
+      [phone, password_hash, name.trim()]
     );
+    await pool.query('UPDATE phone_verifications SET used = TRUE WHERE id = $1', [v.id]);
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: 'Тіркеу сәтті',
-      student: result.rows[0] 
+      student: result.rows[0]
     });
   } catch (error) {
     console.error('Тіркеу қатесі:', error);
@@ -96,17 +217,17 @@ app.post('/api/auth/login', async (req, res) => {
     const { student_number, password } = req.body;
 
     if (!student_number || !password) {
-      return res.status(400).json({ error: 'Студент номері және пароль қажет' });
+      return res.status(400).json({ error: 'Телефон нөмірі және пароль қажет' });
     }
 
-    // Студентті табу
+    // Студентті табу (логин немесе телефон нөмірі кез келген форматта)
     const result = await pool.query(
-      'SELECT * FROM students WHERE student_number = $1',
-      [student_number]
+      'SELECT * FROM students WHERE student_number = $1 OR phone = $2 ORDER BY (student_number = $1) DESC LIMIT 1',
+      [student_number.trim(), normalizePhone(student_number) || '']
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Студент табылмады' });
+      return res.status(401).json({ error: 'Бұл нөмірмен тіркелген қолданушы жоқ' });
     }
 
     const student = result.rows[0];
@@ -132,6 +253,7 @@ app.post('/api/auth/login', async (req, res) => {
         student_number: student.student_number,
         name: student.name,
         email: student.email,
+        phone: student.phone,
         role: student.role || 'student'
       }
     });
@@ -383,7 +505,7 @@ app.patch('/api/daily-tasks/:id', verifyToken, async (req, res) => {
 app.get('/api/profile', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, student_number, name, email, role, curator_id, created_at FROM students WHERE id = $1',
+      'SELECT id, student_number, phone, name, email, role, curator_id, created_at FROM students WHERE id = $1',
       [req.student.id]
     );
 
@@ -771,6 +893,19 @@ const runMigrations = async () => {
     ALTER TABLE students ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'student';
     ALTER TABLE students ADD COLUMN IF NOT EXISTS curator_id INT REFERENCES students(id) ON DELETE SET NULL;
     UPDATE students SET role = 'admin' WHERE student_number = 'admin' AND role <> 'admin';
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS phone VARCHAR(20) UNIQUE;
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN NOT NULL DEFAULT FALSE;
+
+    CREATE TABLE IF NOT EXISTS phone_verifications (
+      id SERIAL PRIMARY KEY,
+      phone VARCHAR(20) NOT NULL,
+      code_hash VARCHAR(64) NOT NULL,
+      attempts INT NOT NULL DEFAULT 0,
+      used BOOLEAN NOT NULL DEFAULT FALSE,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_phone_verifications_phone ON phone_verifications(phone, created_at DESC);
 
     CREATE TABLE IF NOT EXISTS curator_plans (
       id SERIAL PRIMARY KEY,

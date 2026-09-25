@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import logo from './assets/logo.png';
 
 export default function App() {
   const [student, setStudent] = useState(null);
@@ -33,7 +34,12 @@ export default function App() {
   };
 
   if (loading) {
-    return <div className="app-loading">Жүктеліуде...</div>;
+    return (
+      <div className="app-loading">
+        <img src={logo} alt="JUZ40" />
+        <div className="loader-bar" />
+      </div>
+    );
   }
 
   return (

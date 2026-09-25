@@ -34,7 +34,7 @@
 /* Батырмалар */
 .small-btn {
   padding: 8px 14px;
-  border: 1px solid #d0d0e0;
+  border: 1px solid var(--border);
   background: white;
   color: #444;
   border-radius: 6px;
@@ -46,19 +46,19 @@
 }
 
 .small-btn:hover:not(:disabled) {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--brand);
+  color: var(--brand);
 }
 
 .small-btn.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--brand-gradient);
   color: white;
   border-color: transparent;
 }
 
 .small-btn.primary:hover:not(:disabled) {
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+  box-shadow: 0 4px 12px rgba(41, 91, 110, 0.35);
 }
 
 .small-btn.danger {
@@ -103,7 +103,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--brand);
 }
 
 /* Сүзгі батырмалары */
@@ -126,8 +126,8 @@
 }
 
 .role-filter button.active {
-  background: #667eea;
-  border-color: #667eea;
+  background: var(--brand);
+  border-color: var(--brand);
   color: white;
 }
 
@@ -179,7 +179,7 @@
 }
 
 .role-admin { background: #fde8e8; color: #b83232; }
-.role-curator { background: #e8ecfd; color: #4a5bd4; }
+.role-curator { background: var(--brand-soft); color: var(--brand); }
 .role-student { background: #eef7ee; color: #3a8a3a; }
 
 /* ===== Куратор панелі ===== */
@@ -213,7 +213,7 @@
 
 .add-student-box {
   background: white;
-  border: 1px solid #e0e0f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px;
   margin-bottom: 12px;
@@ -258,12 +258,12 @@
 }
 
 .student-item:hover {
-  border-color: #d0d0f0;
+  border-color: var(--brand-light);
 }
 
 .student-item.active {
-  border-left-color: #667eea;
-  background: #f3f4fe;
+  border-left-color: var(--brand);
+  background: var(--brand-softer);
 }
 
 .curator-main {
@@ -273,7 +273,7 @@
 /* Жоспар формасы */
 .plan-form {
   background: #f9f9f9;
-  border: 1px solid #e6e6f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 20px;
@@ -316,7 +316,7 @@
 
 .plan-type-toggle {
   display: inline-flex;
-  background: #ececf5;
+  background: #e6eef1;
   border-radius: 8px;
   padding: 4px;
   margin-bottom: 16px;
@@ -334,7 +334,7 @@
 
 .plan-type-toggle button.active {
   background: white;
-  color: #667eea;
+  color: var(--brand);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -378,8 +378,8 @@
 
 .task-date-chip {
   font-size: 12px;
-  background: #e8ecfd;
-  color: #4a5bd4;
+  background: var(--brand-soft);
+  color: var(--brand);
   padding: 3px 8px;
   border-radius: 10px;
   white-space: nowrap;
@@ -393,7 +393,7 @@
 
 /* Жоспар карточкасы */
 .plan-card {
-  border: 1px solid #e6e6f0;
+  border: 1px solid var(--border);
   border-radius: 8px;
   margin-bottom: 12px;
   background: white;
@@ -401,8 +401,8 @@
 }
 
 .plan-card.current {
-  border-color: #667eea;
-  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.15);
+  border-color: var(--brand);
+  box-shadow: 0 2px 10px rgba(41, 91, 110, 0.15);
 }
 
 .plan-card-header {
@@ -434,7 +434,7 @@
 
 .type-weekly { background: #e8f4fd; color: #2a7ab8; }
 .type-monthly { background: #f3e8fd; color: #7a3ab8; }
-.type-badge.now { background: #667eea; color: white; }
+.type-badge.now { background: var(--brand); color: white; }
 
 .plan-progress {
   display: flex;
@@ -455,7 +455,7 @@
 
 .curator-panel .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, var(--brand-light), var(--brand));
   transition: width 0.3s;
 }
 
@@ -472,7 +472,7 @@
   color: #555;
   font-size: 14px;
   background: #fafafa;
-  border-left: 3px solid #667eea;
+  border-left: 3px solid var(--brand);
   padding: 8px 12px;
   margin: 8px 0 12px;
 }
@@ -490,7 +490,7 @@
 }
 
 .day-title.today {
-  color: #667eea;
+  color: var(--brand);
 }
 
 .plan-task {
@@ -507,13 +507,13 @@
 }
 
 .plan-task.clickable:hover {
-  background: #f6f6fb;
+  background: var(--brand-softer);
 }
 
 .plan-task input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: #667eea;
+  accent-color: var(--brand);
   cursor: pointer;
 }
 

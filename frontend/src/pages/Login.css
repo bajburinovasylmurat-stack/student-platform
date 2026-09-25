@@ -1,107 +1,576 @@
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* ===== Кіру / тіркелу беті ===== */
+
+.auth-page {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg);
 }
 
-.login-box {
-  background: white;
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 400px;
-}
-
-.login-box h1 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #333;
-  font-size: 28px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: #555;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.form-group input {
-  width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: border-color 0.3s;
-  box-sizing: border-box;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.error-message {
-  background: #ffebee;
-  color: #c62828;
-  padding: 12px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  border-left: 4px solid #c62828;
-}
-
-button[type="submit"] {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* ----- Сол жақ: бренд панелі ----- */
+.auth-brand {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #2f6a7f 0%, var(--brand) 35%, var(--brand-dark) 70%, var(--brand-deep) 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 14s ease-in-out infinite;
   color: white;
+  display: flex;
+  align-items: center;
+  padding: 64px 7vw;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+
+.brand-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.glow-1 {
+  width: 420px;
+  height: 420px;
+  background: #4f9db5;
+  top: -120px;
+  right: -100px;
+  animation: drift 16s ease-in-out infinite;
+}
+
+.glow-2 {
+  width: 320px;
+  height: 320px;
+  background: var(--accent);
+  opacity: 0.18;
+  bottom: -100px;
+  left: -60px;
+  animation: drift 20s ease-in-out infinite reverse;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-40px, 40px) scale(1.1); }
+}
+
+.floating-symbols span {
+  position: absolute;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.09);
+  animation: float 10s ease-in-out infinite;
+  user-select: none;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-28px) rotate(8deg); }
+}
+
+.brand-content {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+}
+
+.brand-logo {
+  height: 52px;
+  margin-bottom: 48px;
+  animation: fadeUp 0.7s var(--ease) both;
+}
+
+.brand-content h1 {
+  font-size: clamp(32px, 3.6vw, 48px);
+  line-height: 1.12;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 18px;
+  animation: fadeUp 0.7s var(--ease) 0.1s both;
+}
+
+.brand-content h1 span {
+  color: var(--accent);
+  position: relative;
+  white-space: nowrap;
+}
+
+.brand-content h1 span::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: underline 0.8s var(--ease) 0.8s forwards;
+}
+
+@keyframes underline {
+  to { transform: scaleX(1); }
+}
+
+.brand-subtitle {
+  font-size: 17px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 40px;
+  animation: fadeUp 0.7s var(--ease) 0.2s both;
+}
+
+.brand-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.brand-features li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  animation: slideIn 0.7s var(--ease) var(--d) both;
+  transition: transform 0.3s var(--ease), background 0.3s;
+}
+
+.brand-features li:hover {
+  transform: translateX(6px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.feature-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.brand-features strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.brand-features span {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ----- Оң жақ: форма ----- */
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  animation: fadeUp 0.7s var(--ease) 0.15s both;
+}
+
+.auth-card-logo {
+  display: none;
+  height: 44px;
+  margin: 0 auto 32px;
+}
+
+.auth-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 5px;
+  background: #e6eef1;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.auth-tabs-pill {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  width: calc(50% - 5px);
+  background: white;
+  border-radius: 9px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.4s var(--ease);
+}
+
+.auth-tabs.register .auth-tabs-pill {
+  transform: translateX(100%);
+}
+
+.auth-tabs button {
+  position: relative;
+  z-index: 1;
   border: none;
-  border-radius: 6px;
+  background: none;
+  padding: 11px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.auth-tabs button.active {
+  color: var(--brand);
+}
+
+.auth-form {
+  animation: fadeUp 0.45s var(--ease) both;
+}
+
+.auth-heading {
+  margin-bottom: 26px;
+}
+
+.auth-heading h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.auth-heading p {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.auth-heading p strong {
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.field {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.field > span {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3c525b;
+  margin-bottom: 8px;
+}
+
+.field input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  color: var(--text);
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input::placeholder {
+  color: #a8b8be;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px rgba(41, 91, 110, 0.12);
+}
+
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  padding-right: 92px;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: var(--brand-softer);
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.auth-submit {
+  position: relative;
+  width: 100%;
+  height: 52px;
+  margin-top: 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--brand-gradient);
+  color: white;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  margin-bottom: 20px;
+  overflow: hidden;
+  transition: transform 0.2s var(--ease), box-shadow 0.3s, opacity 0.2s;
 }
 
-button[type="submit"]:hover:not(:disabled) {
+/* Батырма үстінен өтетін жарық */
+.auth-submit::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s var(--ease);
+}
+
+.auth-submit:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 10px 24px rgba(41, 91, 110, 0.3);
 }
 
-button[type="submit"]:disabled {
-  opacity: 0.6;
+.auth-submit:hover:not(:disabled)::after {
+  left: 120%;
+}
+
+.auth-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.auth-submit:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
-.toggle-auth {
-  text-align: center;
-  color: #666;
+.spinner {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-error {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: #fdeeee;
+  color: #b53030;
+  border: 1px solid #f6d0d0;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
+  margin-bottom: 14px;
+  animation: shake 0.45s both;
 }
 
-.toggle-auth button {
-  background: none;
+.auth-error::before {
+  content: '⚠';
+}
+
+.dev-notice {
+  background: var(--accent-soft);
+  color: #8a5a12;
+  border: 1px solid #f5dcb3;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.45;
+  margin-bottom: 18px;
+}
+
+.link-btn {
   border: none;
-  color: #667eea;
-  cursor: pointer;
-  text-decoration: underline;
+  background: none;
+  color: var(--brand);
   font-weight: 600;
+  font-size: inherit;
+  cursor: pointer;
   padding: 0;
-  margin-left: 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.toggle-auth button:hover {
-  color: #764ba2;
+.link-btn:disabled {
+  opacity: 0.5;
+}
+
+/* ----- Қадамдар ----- */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #a3b3b9;
+  transition: color 0.3s;
+}
+
+.step span {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  font-size: 12px;
+  transition: all 0.3s var(--ease);
+}
+
+.step.active {
+  color: var(--brand);
+}
+
+.step.active span {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: white;
+}
+
+.step.done span {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.step-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--success);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease);
+}
+
+.step-line.filled::after {
+  transform: scaleX(1);
+}
+
+/* ----- SMS код ұяшықтары ----- */
+.code-inputs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.code-inputs input {
+  width: 100%;
+  aspect-ratio: 1 / 1.15;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--brand-dark);
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s var(--ease);
+  animation: fadeUp 0.4s var(--ease) calc(var(--i) * 0.05s) both;
+}
+
+.code-inputs input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px rgba(41, 91, 110, 0.12);
+  transform: translateY(-2px);
+}
+
+.code-inputs input.filled {
+  border-color: var(--brand-light);
+  background: var(--brand-softer);
+}
+
+.resend {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 22px;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 13px;
+  color: #a3b3b9;
+}
+
+/* ----- Мобильді ----- */
+@media (max-width: 900px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-brand {
+    display: none;
+  }
+
+  .auth-card-logo {
+    display: block;
+  }
+
+  .auth-main {
+    align-items: flex-start;
+    padding-top: 56px;
+  }
+}
+
+@media (max-width: 400px) {
+  .code-inputs {
+    gap: 6px;
+  }
+
+  .auth-heading h2 {
+    font-size: 24px;
+  }
 }

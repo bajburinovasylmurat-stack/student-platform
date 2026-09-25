@@ -7,7 +7,7 @@
   color: #333;
   margin-bottom: 24px;
   font-size: 24px;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 3px solid var(--brand);
   padding-bottom: 12px;
 }
 
@@ -33,7 +33,7 @@
 .exam-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-  border-color: #667eea;
+  border-color: var(--brand);
 }
 
 .material-card h3,
@@ -52,7 +52,7 @@
 }
 
 .category {
-  color: #667eea;
+  color: var(--brand);
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -76,7 +76,7 @@
 .watch-btn,
 .add-btn {
   display: inline-block;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--brand-gradient);
   color: white;
   padding: 10px 20px;
   border-radius: 6px;
@@ -92,7 +92,7 @@
 .watch-btn:hover,
 .add-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(41, 91, 110, 0.4);
 }
 
 .add-btn {
@@ -129,14 +129,14 @@
 }
 
 .category-filter button:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--brand);
+  color: var(--brand);
 }
 
 .category-filter button.active {
-  background: #667eea;
+  background: var(--brand);
   color: white;
-  border-color: #667eea;
+  border-color: var(--brand);
 }
 
 /* ===== FORMS ===== */
@@ -194,7 +194,7 @@
 .add-plan-form button,
 .add-task-form button,
 .admin-form button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--brand-gradient);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -209,7 +209,7 @@
 .add-task-form button:hover:not(:disabled),
 .admin-form button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(41, 91, 110, 0.4);
 }
 
 .add-form button:disabled,
@@ -221,7 +221,7 @@
 }
 
 .file-name {
-  color: #667eea;
+  color: var(--brand);
   margin-top: 6px;
   font-size: 14px;
   font-weight: 600;
@@ -275,7 +275,7 @@
 .plan-item:hover,
 .task-item:hover {
   background: #f9f9f9;
-  border-color: #667eea;
+  border-color: var(--brand);
 }
 
 .plan-item.completed,
@@ -289,7 +289,7 @@
   width: 20px;
   height: 20px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: var(--brand);
 }
 
 .plan-content,
@@ -333,7 +333,7 @@
 
 /* ===== DAILY TASKS ===== */
 .today-info {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--brand-gradient);
   color: white;
   padding: 20px;
   border-radius: 8px;
@@ -396,12 +396,12 @@
 }
 
 .admin-nav button:hover {
-  color: #667eea;
+  color: var(--brand);
 }
 
 .admin-nav button.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: var(--brand);
+  border-bottom-color: var(--brand);
 }
 
 .admin-section {
@@ -419,7 +419,7 @@
 .submit-btn {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--brand-gradient);
   color: white;
   border: none;
   border-radius: 6px;
@@ -431,38 +431,12 @@
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(41, 91, 110, 0.4);
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .plans-container {
     grid-template-columns: 1fr;
-  }
-
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .header-info {
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .dashboard-nav {
-    flex-direction: column;
-  }
-
-  .dashboard-nav button {
-    border-bottom: none;
-    border-left: 3px solid transparent;
-  }
-
-  .dashboard-nav button.active {
-    border-left-color: #667eea;
-    border-bottom: none;
   }
 }

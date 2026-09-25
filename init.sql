@@ -1,7 +1,9 @@
 -- Студент кесте
 CREATE TABLE IF NOT EXISTS students (
   id SERIAL PRIMARY KEY,
-  student_number VARCHAR(20) UNIQUE NOT NULL,
+  student_number VARCHAR(20) UNIQUE NOT NULL, -- логин (жаңа тіркелгендерде телефон нөмірі)
+  phone VARCHAR(20) UNIQUE,
+  phone_verified BOOLEAN NOT NULL DEFAULT FALSE,
   password_hash VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255),
@@ -51,6 +53,17 @@ CREATE TABLE IF NOT EXISTS daily_tasks (
   task_title VARCHAR(255) NOT NULL,
   task_time TIME,
   is_completed BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- SMS растау кодтары
+CREATE TABLE IF NOT EXISTS phone_verifications (
+  id SERIAL PRIMARY KEY,
+  phone VARCHAR(20) NOT NULL,
+  code_hash VARCHAR(64) NOT NULL,
+  attempts INT NOT NULL DEFAULT 0,
+  used BOOLEAN NOT NULL DEFAULT FALSE,
+  expires_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

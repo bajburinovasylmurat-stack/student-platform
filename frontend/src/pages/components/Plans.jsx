@@ -3,6 +3,7 @@ import axios from 'axios';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../styles/Plans.css';
+import { formatKkDate, calendarFormatters } from '../../utils/kkDate';
 
 export default function Plans() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -79,16 +80,12 @@ export default function Plans() {
             value={selectedDate}
             onChange={setSelectedDate}
             locale="kk"
+            {...calendarFormatters}
           />
         </div>
 
         <div className="plans-detail">
-          <h3>📍 {selectedDate.toLocaleDateString('kk-KZ', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}</h3>
+          <h3>📍 {formatKkDate(selectedDate, { weekday: 'long', year: true })}</h3>
 
           <form onSubmit={handleAddPlan} className="add-plan-form">
             <input
