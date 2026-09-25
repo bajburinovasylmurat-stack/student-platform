@@ -15,6 +15,7 @@ export default function UsersManager() {
   const [users, setUsers] = useState([]);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [curatorFilter, setCuratorFilter] = useState('all'); // 'all' | 'none' | куратор id
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
   const [tempPassword, setTempPassword] = useState(null);
@@ -88,12 +89,26 @@ export default function UsersManager() {
   };
 
   // "707 123" сияқты бос орынмен жазылған нөмірді де табу үшін цифрлармен салыстырамыз
+  const curators = users.filter((u) => u.role === 'curator').sort((a, b) => a.name.localeCompare(b.name));
+
+  const matchesCurator = (u) => {
+    if (curatorFilter === 'all') return true;
+    if (curatorFilter === 'none') return u.role === 'student' && !u.curator_id;
+    return u.curator_id === Number(curatorFilter);
+  };
+
+  // Аты, нөмірі немесе куратордың аты бойынша іздеу
+  const query = search.trim().toLowerCase();
   const searchDigits = search.replace(/\D/g, '');
-  const visible = users.filter(u =>
-    (filter === 'all' || u.role === filter) &&
-    (u.name.toLowerCase().includes(search.toLowerCase()) ||
-     u.student_number.toLowerCase().includes(search.toLowerCase()) ||
-     (searchDigits && u.student_number.includes(searchDigits)))
+  const matchesSearch = (u) =>
+    !query ||
+    u.name.toLowerCase().includes(query) ||
+    u.student_number.toLowerCase().includes(query) ||
+    (u.curator_name || '').toLowerCase().includes(query) ||
+    (searchDigits && u.student_number.includes(searchDigits));
+
+  const visible = users.filter((u) =>
+    (filter === 'all' || u.role === filter) && matchesCurator(u) && matchesSearch(u)
   );
 
   if (loading) return <div className="loading">Жүктелуде...</div>;
@@ -114,14 +129,38 @@ export default function UsersManager() {
             🎓 Оқушылар ({counts.student})
           </button>
         </div>
-        <input
-          type="text"
-          className="search-input"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="🔍 Аты немесе нөмірі"
-        />
+        <div className="users-search">
+          <select
+            className="search-input"
+            value={curatorFilter}
+            onChange={(e) => setCuratorFilter(e.target.value)}
+            aria-label="Куратор бойынша"
+          >
+            <option value="all">🧑‍🏫 Куратор бойынша: барлығы</option>
+            <option value="none">Кураторы жоқ оқушылар</option>
+            {curators.map((c) => (
+              <option key={c.id} value={c.id}>{c.name} ({c.students_count})</option>
+            ))}
+          </select>
+          <input
+            type="text"
+            className="search-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="🔍 Аты, нөмірі немесе куратор"
+          />
+        </div>
       </div>
+
+      {curatorFilter !== 'all' && (
+        <p className="filter-note">
+          {curatorFilter === 'none'
+            ? `Кураторы жоқ оқушылар: ${visible.length}`
+            : `${curators.find((c) => c.id === Number(curatorFilter))?.name || ''} кураторының оқушылары: ${visible.length}`}
+          {' '}
+          <button className="link-btn" onClick={() => setCuratorFilter('all')}>Сүзгіні алу</button>
+        </p>
+      )}
 
       <div className="users-list">
         {visible.length === 0 && <p className="empty-text">Қолданушы табылмады</p>}

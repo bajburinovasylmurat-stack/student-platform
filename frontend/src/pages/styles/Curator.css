@@ -182,6 +182,41 @@
 .role-curator { background: var(--brand-soft); color: var(--brand); }
 .role-student { background: #eef7ee; color: #3a8a3a; }
 
+/* Куратор бойынша сүзгі */
+.users-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.users-toolbar .users-search .search-input {
+  width: 240px;
+  max-width: 100%;
+}
+
+.filter-note {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.filter-note .link-btn {
+  border: none;
+  background: none;
+  color: var(--brand);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .users-toolbar .users-search,
+  .users-toolbar .users-search .search-input {
+    width: 100%;
+  }
+}
+
 /* Уақытша құпиясөз */
 .user-row {
   flex-wrap: wrap;
