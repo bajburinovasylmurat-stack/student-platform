@@ -1,0 +1,546 @@
+/* ===== Куратор / рөлдер ===== */
+
+.curator-panel {
+  padding: 20px;
+}
+
+.curator-panel h2 {
+  margin-top: 0;
+}
+
+.muted {
+  display: block;
+  color: #888;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.empty-text {
+  color: #999;
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+.empty-text.center {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Батырмалар */
+.small-btn {
+  padding: 8px 14px;
+  border: 1px solid #d0d0e0;
+  background: white;
+  color: #444;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.small-btn:hover:not(:disabled) {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.small-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: transparent;
+}
+
+.small-btn.primary:hover:not(:disabled) {
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+}
+
+.small-btn.danger {
+  color: #d9534f;
+  border-color: #f0c4c3;
+}
+
+.small-btn.danger:hover:not(:disabled) {
+  background: #fdf0f0;
+  color: #c9302c;
+  border-color: #d9534f;
+}
+
+.small-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.icon-btn {
+  border: none;
+  background: none;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.icon-btn:hover {
+  color: #d9534f;
+  background: #fdf0f0;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Сүзгі батырмалары */
+.role-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.role-filter button {
+  padding: 8px 14px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+}
+
+.role-filter button.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+/* ===== Админ: қолданушылар ===== */
+.users-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.users-toolbar .role-filter {
+  margin-bottom: 0;
+}
+
+.users-toolbar .search-input {
+  max-width: 260px;
+}
+
+.users-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.role-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.role-admin { background: #fde8e8; color: #b83232; }
+.role-curator { background: #e8ecfd; color: #4a5bd4; }
+.role-student { background: #eef7ee; color: #3a8a3a; }
+
+/* ===== Куратор панелі ===== */
+.curator-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.curator-sidebar {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.sidebar-header,
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sidebar-header h3,
+.main-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.add-student-box {
+  background: white;
+  border: 1px solid #e0e0f0;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+.available-list {
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.available-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+
+.available-item .muted {
+  display: inline;
+}
+
+.student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.student-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #eee;
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.student-item:hover {
+  border-color: #d0d0f0;
+}
+
+.student-item.active {
+  border-left-color: #667eea;
+  background: #f3f4fe;
+}
+
+.curator-main {
+  min-width: 0;
+}
+
+/* Жоспар формасы */
+.plan-form {
+  background: #f9f9f9;
+  border: 1px solid #e6e6f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.plan-form .form-group {
+  margin-bottom: 14px;
+}
+
+.plan-form label {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.plan-form input,
+.plan-form textarea,
+.plan-form select,
+.task-adder input,
+.task-adder select {
+  padding: 9px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.plan-form input[type="text"],
+.plan-form textarea {
+  width: 100%;
+}
+
+.plan-form textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.plan-type-toggle {
+  display: inline-flex;
+  background: #ececf5;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.plan-type-toggle button {
+  border: none;
+  background: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #666;
+}
+
+.plan-type-toggle button.active {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.range-text {
+  padding: 9px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.task-adder {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.task-adder input {
+  flex: 1;
+  min-width: 0;
+}
+
+.draft-tasks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.draft-tasks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e0e0e0;
+  font-size: 14px;
+}
+
+.task-date-chip {
+  font-size: 12px;
+  background: #e8ecfd;
+  color: #4a5bd4;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Жоспар карточкасы */
+.plan-card {
+  border: 1px solid #e6e6f0;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: white;
+  overflow: hidden;
+}
+
+.plan-card.current {
+  border-color: #667eea;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.15);
+}
+
+.plan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.plan-card-header.static {
+  cursor: default;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.plan-card-header strong {
+  margin-right: 6px;
+}
+
+.type-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-right: 8px;
+}
+
+.type-weekly { background: #e8f4fd; color: #2a7ab8; }
+.type-monthly { background: #f3e8fd; color: #7a3ab8; }
+.type-badge.now { background: #667eea; color: white; }
+
+.plan-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.curator-panel .progress-bar {
+  width: 100px;
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.curator-panel .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.3s;
+}
+
+.chevron {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.plan-card-body {
+  padding: 4px 16px 16px;
+}
+
+.plan-description {
+  color: #555;
+  font-size: 14px;
+  background: #fafafa;
+  border-left: 3px solid #667eea;
+  padding: 8px 12px;
+  margin: 8px 0 12px;
+}
+
+.day-group {
+  margin: 10px 0;
+}
+
+.day-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.day-title.today {
+  color: #667eea;
+}
+
+.plan-task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.plan-task.clickable {
+  cursor: pointer;
+}
+
+.plan-task.clickable:hover {
+  background: #f6f6fb;
+}
+
+.plan-task input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #667eea;
+  cursor: pointer;
+}
+
+.plan-task.done .grow {
+  text-decoration: line-through;
+  color: #aaa;
+}
+
+@media (max-width: 768px) {
+  .curator-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task-adder {
+    flex-wrap: wrap;
+  }
+
+  .users-toolbar .search-input {
+    max-width: none;
+  }
+
+  .user-row {
+    flex-wrap: wrap;
+  }
+}

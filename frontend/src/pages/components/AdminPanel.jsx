@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import '../styles/AdminPanel.css';
+import UsersManager from './UsersManager';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('materials');
@@ -101,9 +102,17 @@ export default function AdminPanel() {
         >
           🎬 Нұсқалар қосу
         </button>
+        <button 
+          className={activeTab === 'users' ? 'active' : ''} 
+          onClick={() => setActiveTab('users')}
+        >
+          👥 Қолданушылар
+        </button>
       </nav>
 
       <div className="admin-content">
+        {activeTab === 'users' && <UsersManager />}
+
         {activeTab === 'materials' && (
           <div className="admin-section">
             <h3>📚 Материалдар қосу</h3>

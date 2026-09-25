@@ -131,7 +131,8 @@ app.post('/api/auth/login', async (req, res) => {
         id: student.id,
         student_number: student.student_number,
         name: student.name,
-        email: student.email
+        email: student.email,
+        role: student.role || 'student'
       }
     });
   } catch (error) {
@@ -355,7 +356,6 @@ app.post('/api/daily-tasks', verifyToken, async (req, res) => {
   }
 });
 
-// Бүгінгі тапсырматы өндеу
 app.patch('/api/daily-tasks/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
@@ -383,7 +383,7 @@ app.patch('/api/daily-tasks/:id', verifyToken, async (req, res) => {
 app.get('/api/profile', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, student_number, name, email, created_at FROM students WHERE id = $1',
+      'SELECT id, student_number, name, email, role, curator_id, created_at FROM students WHERE id = $1',
       [req.student.id]
     );
 
@@ -404,8 +404,8 @@ app.get('/api/profile', verifyToken, async (req, res) => {
 app.get('/api/admin/check', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id FROM students WHERE id = $1 AND student_number = $2',
-      [req.student.id, 'admin']
+      "SELECT id FROM students WHERE id = $1 AND (role = 'admin' OR student_number = 'admin')",
+      [req.student.id]
     );
 
     res.json({ is_admin: result.rows.length > 0 });
@@ -415,9 +415,396 @@ app.get('/api/admin/check', verifyToken, async (req, res) => {
   }
 });
 
+// ===== РӨЛДЕР =====
+
+// Қолданушының рөлін базадан алу (рөл өзгеруі мүмкін, сондықтан токенге сенбейміз)
+const getRole = async (userId) => {
+  const result = await pool.query(
+    'SELECT role, student_number FROM students WHERE id = $1',
+    [userId]
+  );
+  const user = result.rows[0];
+  if (!user) return null;
+  if (user.student_number === 'admin') return 'admin';
+  return user.role || 'student';
+};
+
+const requireRole = (...roles) => async (req, res, next) => {
+  try {
+    const role = await getRole(req.student.id);
+    if (!roles.includes(role)) {
+      return res.status(403).json({ error: 'Бұл әрекетке рұқсат жоқ' });
+    }
+    req.role = role;
+    next();
+  } catch (error) {
+    console.error('Рөл тексеру қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+};
+
+// Жоспарды тапсырмаларымен бірге алу
+const PLAN_SELECT = `
+  SELECT p.id, p.student_id, p.curator_id, p.plan_type, p.title, p.description,
+         to_char(p.start_date, 'YYYY-MM-DD') AS start_date,
+         to_char(p.end_date, 'YYYY-MM-DD') AS end_date,
+         p.created_at,
+         c.name AS curator_name,
+         COALESCE(
+           json_agg(
+             json_build_object(
+               'id', t.id,
+               'task_date', to_char(t.task_date, 'YYYY-MM-DD'),
+               'task_title', t.task_title,
+               'is_completed', t.is_completed
+             ) ORDER BY t.task_date, t.id
+           ) FILTER (WHERE t.id IS NOT NULL),
+           '[]'
+         ) AS tasks
+  FROM curator_plans p
+  JOIN students c ON c.id = p.curator_id
+  LEFT JOIN curator_plan_tasks t ON t.plan_id = p.id
+`;
+
+// ===== АДМИН: ҚОЛДАНУШЫЛАР =====
+
+// Барлық тіркелген қолданушылар
+app.get('/api/admin/users', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT s.id, s.student_number, s.name, s.email, s.created_at,
+             CASE WHEN s.student_number = 'admin' THEN 'admin' ELSE COALESCE(s.role, 'student') END AS role,
+             s.curator_id, c.name AS curator_name,
+             (SELECT COUNT(*) FROM students x WHERE x.curator_id = s.id)::int AS students_count
+      FROM students s
+      LEFT JOIN students c ON c.id = s.curator_id
+      ORDER BY s.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Қолданушылар алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Рөл беру: student <-> curator
+app.patch('/api/admin/users/:id/role', verifyToken, requireRole('admin'), async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!['student', 'curator'].includes(role)) {
+      return res.status(400).json({ error: 'Рөл қате' });
+    }
+
+    const target = await client.query('SELECT id, role, student_number FROM students WHERE id = $1', [id]);
+    if (target.rows.length === 0) {
+      return res.status(404).json({ error: 'Қолданушы табылмады' });
+    }
+    if (target.rows[0].role === 'admin' || target.rows[0].student_number === 'admin') {
+      return res.status(400).json({ error: 'Админнің рөлін өзгертуге болмайды' });
+    }
+
+    await client.query('BEGIN');
+    if (role === 'curator') {
+      // Куратор өзі біреудің оқушысы бола алмайды
+      await client.query('UPDATE students SET role = $1, curator_id = NULL WHERE id = $2', [role, id]);
+    } else {
+      // Куратордан алынса, оқушылары бос қалады
+      await client.query('UPDATE students SET curator_id = NULL WHERE curator_id = $1', [id]);
+      await client.query('UPDATE students SET role = $1 WHERE id = $2', [role, id]);
+    }
+    await client.query('COMMIT');
+
+    res.json({ id: Number(id), role });
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Рөл өзгерту қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  } finally {
+    client.release();
+  }
+});
+
+// ===== КУРАТОР =====
+
+// Куратордың оқушылары
+app.get('/api/curator/students', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT s.id, s.student_number, s.name, s.email,
+             (SELECT COUNT(*) FROM curator_plans p WHERE p.student_id = s.id AND p.curator_id = $1)::int AS plans_count
+      FROM students s
+      WHERE s.curator_id = $1
+      ORDER BY s.name
+    `, [req.student.id]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Оқушылар алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Кураторы жоқ оқушылар (қосу үшін)
+app.get('/api/curator/available-students', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const q = `%${(req.query.q || '').trim()}%`;
+    const result = await pool.query(`
+      SELECT id, student_number, name
+      FROM students
+      WHERE curator_id IS NULL
+        AND COALESCE(role, 'student') = 'student'
+        AND student_number <> 'admin'
+        AND (name ILIKE $1 OR student_number ILIKE $1)
+      ORDER BY name
+      LIMIT 50
+    `, [q]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Бос оқушылар алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Оқушыны өзіне қосу
+app.post('/api/curator/students', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const { student_id } = req.body;
+    const result = await pool.query(`
+      UPDATE students SET curator_id = $1
+      WHERE id = $2 AND curator_id IS NULL
+        AND COALESCE(role, 'student') = 'student' AND student_number <> 'admin'
+      RETURNING id, student_number, name, email
+    `, [req.student.id, student_id]);
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Оқушы табылмады немесе басқа куратордың оқушысы' });
+    }
+    res.status(201).json({ ...result.rows[0], plans_count: 0 });
+  } catch (error) {
+    console.error('Оқушы қосу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Оқушыны тізімнен шығару
+app.delete('/api/curator/students/:id', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const result = await pool.query(
+      'UPDATE students SET curator_id = NULL WHERE id = $1 AND curator_id = $2 RETURNING id',
+      [req.params.id, req.student.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Оқушы табылмады' });
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Оқушыны шығару қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Оқушының жоспарлары (куратор үшін)
+app.get('/api/curator/students/:id/plans', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `${PLAN_SELECT} WHERE p.student_id = $1 AND p.curator_id = $2
+       GROUP BY p.id, c.name ORDER BY p.start_date DESC`,
+      [req.params.id, req.student.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Жоспарлар алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Апталық / айлық жоспар құру
+app.post('/api/curator/plans', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { student_id, plan_type, start_date, title, description, tasks = [] } = req.body;
+
+    if (!['weekly', 'monthly'].includes(plan_type) || !start_date || !title) {
+      return res.status(400).json({ error: 'Жоспар түрі, басталу күні және атауы қажет' });
+    }
+
+    const own = await client.query(
+      'SELECT id FROM students WHERE id = $1 AND curator_id = $2',
+      [student_id, req.student.id]
+    );
+    if (own.rows.length === 0) {
+      return res.status(403).json({ error: 'Бұл сіздің оқушыңыз емес' });
+    }
+
+    await client.query('BEGIN');
+    const plan = await client.query(`
+      INSERT INTO curator_plans (curator_id, student_id, plan_type, title, description, start_date, end_date)
+      VALUES ($1, $2, $3, $4, $5, $6::date,
+              $6::date + CASE WHEN $3::varchar = 'weekly' THEN INTERVAL '6 days' ELSE INTERVAL '1 month' - INTERVAL '1 day' END)
+      RETURNING id, start_date, end_date
+    `, [req.student.id, student_id, plan_type, title, description || null, start_date]);
+
+    const planId = plan.rows[0].id;
+    for (const t of tasks) {
+      if (!t.task_title?.trim() || !t.task_date) continue;
+      // Тапсырма күні жоспар аралығында болуы керек
+      await client.query(`
+        INSERT INTO curator_plan_tasks (plan_id, task_date, task_title)
+        SELECT $1, $2::date, $3
+        FROM curator_plans WHERE id = $1 AND $2::date BETWEEN start_date AND end_date
+      `, [planId, t.task_date, t.task_title.trim()]);
+    }
+    await client.query('COMMIT');
+
+    const result = await pool.query(`${PLAN_SELECT} WHERE p.id = $1 GROUP BY p.id, c.name`, [planId]);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Жоспар құру қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  } finally {
+    client.release();
+  }
+});
+
+// Жоспарды өшіру
+app.delete('/api/curator/plans/:id', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM curator_plans WHERE id = $1 AND curator_id = $2 RETURNING id',
+      [req.params.id, req.student.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Жоспар табылмады' });
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Жоспар өшіру қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Бар жоспарға тапсырма қосу
+app.post('/api/curator/plans/:id/tasks', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const { task_date, task_title } = req.body;
+    if (!task_title?.trim() || !task_date) {
+      return res.status(400).json({ error: 'Күн және тапсырма қажет' });
+    }
+
+    const result = await pool.query(`
+      INSERT INTO curator_plan_tasks (plan_id, task_date, task_title)
+      SELECT id, $3::date, $4 FROM curator_plans
+      WHERE id = $1 AND curator_id = $2 AND $3::date BETWEEN start_date AND end_date
+      RETURNING id, to_char(task_date, 'YYYY-MM-DD') AS task_date, task_title, is_completed
+    `, [req.params.id, req.student.id, task_date, task_title.trim()]);
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Жоспар табылмады немесе күн жоспар аралығынан тыс' });
+    }
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Тапсырма қосу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Жоспардан тапсырма өшіру
+app.delete('/api/curator/plan-tasks/:id', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const result = await pool.query(`
+      DELETE FROM curator_plan_tasks t USING curator_plans p
+      WHERE t.id = $1 AND t.plan_id = p.id AND p.curator_id = $2
+      RETURNING t.id
+    `, [req.params.id, req.student.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Тапсырма табылмады' });
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Тапсырма өшіру қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// ===== ОҚУШЫ: КУРАТОР ЖОСПАРЛАРЫ =====
+
+app.get('/api/my-curator-plans', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `${PLAN_SELECT} WHERE p.student_id = $1 GROUP BY p.id, c.name ORDER BY p.start_date DESC`,
+      [req.student.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Куратор жоспарлары алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Оқушы тапсырманы орындалды деп белгілейді
+app.patch('/api/curator-plan-tasks/:id', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      UPDATE curator_plan_tasks t SET is_completed = $1
+      FROM curator_plans p
+      WHERE t.id = $2 AND t.plan_id = p.id AND p.student_id = $3
+      RETURNING t.id, t.is_completed
+    `, [!!req.body.is_completed, req.params.id, req.student.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Тапсырма табылмады' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Тапсырма белгілеу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// ===== МИГРАЦИЯ =====
+
+// Сервер қосылғанда жаңа бағандар мен кестелерді құру (қайта іске қосуға қауіпсіз)
+const runMigrations = async () => {
+  await pool.query(`
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'student';
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS curator_id INT REFERENCES students(id) ON DELETE SET NULL;
+    UPDATE students SET role = 'admin' WHERE student_number = 'admin' AND role <> 'admin';
+
+    CREATE TABLE IF NOT EXISTS curator_plans (
+      id SERIAL PRIMARY KEY,
+      curator_id INT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+      student_id INT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+      plan_type VARCHAR(10) NOT NULL CHECK (plan_type IN ('weekly', 'monthly')),
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      start_date DATE NOT NULL,
+      end_date DATE NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS curator_plan_tasks (
+      id SERIAL PRIMARY KEY,
+      plan_id INT NOT NULL REFERENCES curator_plans(id) ON DELETE CASCADE,
+      task_date DATE NOT NULL,
+      task_title VARCHAR(255) NOT NULL,
+      is_completed BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_students_curator ON students(curator_id);
+    CREATE INDEX IF NOT EXISTS idx_curator_plans_student ON curator_plans(student_id);
+  `);
+};
+
 // ===== СЕРВЕР ҚОСУ =====
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Сервер ${PORT} портында жүргенде`);
-});
+runMigrations()
+  .catch((error) => console.error('Миграция қатесі:', error))
+  .finally(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Сервер ${PORT} портында жүргенде`);
+    });
+  });
