@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS materials (
   description TEXT,
   file_path VARCHAR(500) NOT NULL,
   file_name VARCHAR(255) NOT NULL,
+  file_data BYTEA,          -- файлдың өзі (Render дискісі deploy сайын тазаланады)
+  file_mime VARCHAR(100),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   created_by INT REFERENCES students(id)
 );

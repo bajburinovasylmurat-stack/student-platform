@@ -27,16 +27,12 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Multer конфигурациясы PDF немесе файлдар үшін
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
+// Render тегін тарифінде диск әр deploy сайын тазаланады, сондықтан материалдар базада сақталады
+const MAX_MATERIAL_MB = 25;
+const materialUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_MATERIAL_MB * 1024 * 1024 }
 });
-const upload = multer({ storage });
 
 // PostgreSQL қосылуы
 const { Pool } = pg;
@@ -517,25 +513,95 @@ app.get('/api/materials', async (req, res) => {
 });
 
 // Материал қосу (админ)
-// Рөл файл жүктелмей тұрып тексеріледі, әйтпесе админ емес адамның файлы дискіге сақталып қалады
-app.post('/api/materials', verifyToken, requireRole('admin'), upload.single('file'), async (req, res) => {
+// Рөл файл жүктелмей тұрып тексеріледі, әйтпесе админ емес адамның файлы жадқа оқылып қалады
+app.post('/api/materials', verifyToken, requireRole('admin'), (req, res, next) => {
+  materialUpload.single('file')(req, res, (error) => {
+    if (error?.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: `Файл ${MAX_MATERIAL_MB} МБ-тан аспауы керек` });
+    }
+    if (error) return next(error);
+    next();
+  });
+}, async (req, res) => {
+  const client = await pool.connect();
   try {
     if (!req.file || !req.body.title) {
       return res.status(400).json({ error: 'Файл және атау қажет' });
     }
 
     const { title, description } = req.body;
-    const file_path = `/uploads/${req.file.filename}`;
     const file_name = fixFileName(req.file.originalname);
 
-    const result = await pool.query(
-      'INSERT INTO materials (title, description, file_path, file_name, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [title, description, file_path, file_name, req.student.id]
+    await client.query('BEGIN');
+    const inserted = await client.query(
+      `INSERT INTO materials (title, description, file_path, file_name, created_by, file_data, file_mime)
+       VALUES ($1, $2, '', $3, $4, $5, $6) RETURNING id`,
+      [title, description, file_name, req.student.id, req.file.buffer, req.file.mimetype]
     );
+    const id = inserted.rows[0].id;
+    const result = await client.query(
+      `UPDATE materials SET file_path = $1 WHERE id = $2
+       RETURNING id, title, description, file_path, file_name, created_at`,
+      [`/api/materials/${id}/file`, id]
+    );
+    await client.query('COMMIT');
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
     console.error('Материал қосу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  } finally {
+    client.release();
+  }
+});
+
+// Материал файлын жүктеу
+app.get('/api/materials/:id/file', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT file_name, file_mime, file_data FROM materials WHERE id = $1',
+      [req.params.id]
+    );
+    const m = result.rows[0];
+    if (!m?.file_data) {
+      return res.status(404).json({ error: 'Файл табылмады' });
+    }
+    const name = fixFileName(m.file_name) || 'material.pdf';
+    const asciiName = name.replace(/[^\x20-\x7e]/g, '_').replace(/"/g, '');
+    res.setHeader('Content-Type', m.file_mime || 'application/octet-stream');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(name)}`
+    );
+    res.send(m.file_data);
+  } catch (error) {
+    console.error('Файл жүктеу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Материалды өшіру (админ)
+app.delete('/api/materials/:id', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM materials WHERE id = $1 RETURNING file_path',
+      [req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Материал табылмады' });
+    }
+
+    // Ескі материалдардың файлы дискіде болса, оны да өшіреміз
+    const filePath = result.rows[0].file_path;
+    if (filePath?.startsWith('/uploads/')) {
+      const fullPath = path.join(uploadsDir, path.basename(filePath));
+      fs.promises.unlink(fullPath).catch(() => {});
+    }
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Материал өшіру қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
@@ -583,17 +649,37 @@ app.post('/api/examinations', verifyToken, requireRole('admin'), async (req, res
 });
 
 // ===== ЖОСПАРЛАР =====
+// Жоспар мен бүгінгі тапсырмалар бір кестеде (plans): белгілі күнге қосылған жоспар
+// сол күні «Бүгінгі тапсырмалар» бөлімінде көрінеді
 
-// Студенттің жоспарын сұрау
+const PLAN_COLUMNS = `
+  id, student_id, task_title, is_completed, created_at,
+  to_char(plan_date, 'YYYY-MM-DD') AS plan_date,
+  to_char(task_time, 'HH24:MI') AS task_time
+`;
+const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value || '');
+const isTime = (value) => /^\d{2}:\d{2}$/.test(value || '');
+
+// Клиент өз жергілікті күнін жібереді; жібермесе, Қазақстан уақыты бойынша бүгін
+const todayDate = async (clientDate) => {
+  if (isDate(clientDate)) return clientDate;
+  const result = await pool.query(`SELECT to_char((NOW() AT TIME ZONE 'Asia/Almaty')::date, 'YYYY-MM-DD') AS d`);
+  return result.rows[0].d;
+};
+
+const listPlans = (studentId, date) => pool.query(
+  `SELECT ${PLAN_COLUMNS} FROM plans WHERE student_id = $1 AND plan_date = $2
+   ORDER BY task_time NULLS LAST, id`,
+  [studentId, date]
+);
+
+// Белгілі күннің жоспары
 app.get('/api/plans/:date', verifyToken, async (req, res) => {
   try {
-    const { date } = req.params;
-    
-    const result = await pool.query(
-      'SELECT * FROM plans WHERE student_id = $1 AND plan_date = $2 ORDER BY task_time',
-      [req.student.id, date]
-    );
-    
+    if (!isDate(req.params.date)) {
+      return res.status(400).json({ error: 'Күн форматы қате' });
+    }
+    const result = await listPlans(req.student.id, req.params.date);
     res.json(result.rows);
   } catch (error) {
     console.error('Жоспарлар алу қатесі:', error);
@@ -601,18 +687,18 @@ app.get('/api/plans/:date', verifyToken, async (req, res) => {
   }
 });
 
-// Жоспарды месячный календарь ретінде сұрау
+// Айдағы жоспары бар күндер (күнтізбеде белгілеу үшін)
 app.get('/api/plans-month/:year/:month', verifyToken, async (req, res) => {
   try {
-    const { year, month } = req.params;
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0);
-
+    const year = Number(req.params.year);
+    const month = Number(req.params.month);
     const result = await pool.query(
-      'SELECT * FROM plans WHERE student_id = $1 AND plan_date BETWEEN $2 AND $3 ORDER BY plan_date, task_time',
-      [req.student.id, start, end]
+      `SELECT ${PLAN_COLUMNS} FROM plans
+       WHERE student_id = $1 AND plan_date >= make_date($2, $3, 1)
+         AND plan_date < make_date($2, $3, 1) + INTERVAL '1 month'
+       ORDER BY plan_date, task_time NULLS LAST, id`,
+      [req.student.id, year, month]
     );
-
     res.json(result.rows);
   } catch (error) {
     console.error('Ай жоспарлары алу қатесі:', error);
@@ -624,12 +710,15 @@ app.get('/api/plans-month/:year/:month', verifyToken, async (req, res) => {
 app.post('/api/plans', verifyToken, async (req, res) => {
   try {
     const { plan_date, task_title, task_time } = req.body;
+    if (!isDate(plan_date) || !task_title?.trim()) {
+      return res.status(400).json({ error: 'Күн және тапсырма қажет' });
+    }
 
     const result = await pool.query(
-      'INSERT INTO plans (student_id, plan_date, task_title, task_time) VALUES ($1, $2, $3, $4) RETURNING *',
-      [req.student.id, plan_date, task_title, task_time]
+      `INSERT INTO plans (student_id, plan_date, task_title, task_time)
+       VALUES ($1, $2, $3, $4) RETURNING ${PLAN_COLUMNS}`,
+      [req.student.id, plan_date, task_title.trim(), isTime(task_time) ? task_time : null]
     );
-
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Жоспар қосу қатесі:', error);
@@ -637,40 +726,69 @@ app.post('/api/plans', verifyToken, async (req, res) => {
   }
 });
 
-// Жоспарды өндеу (галочка білену)
+// Жоспарды өзгерту: атауы, уақыты, күні немесе орындалғаны
 app.patch('/api/plans/:id', verifyToken, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { is_completed } = req.body;
+    const { task_title, task_time, plan_date, is_completed } = req.body;
+    if (task_title !== undefined && !task_title.trim()) {
+      return res.status(400).json({ error: 'Тапсырма бос болмауы керек' });
+    }
+    if (plan_date !== undefined && !isDate(plan_date)) {
+      return res.status(400).json({ error: 'Күн форматы қате' });
+    }
 
     const result = await pool.query(
-      'UPDATE plans SET is_completed = $1 WHERE id = $2 AND student_id = $3 RETURNING *',
-      [is_completed, id, req.student.id]
+      `UPDATE plans SET
+         task_title = COALESCE($1, task_title),
+         task_time = CASE WHEN $2::boolean THEN $3::time ELSE task_time END,
+         plan_date = COALESCE($4::date, plan_date),
+         is_completed = COALESCE($5, is_completed)
+       WHERE id = $6 AND student_id = $7
+       RETURNING ${PLAN_COLUMNS}`,
+      [
+        task_title?.trim() ?? null,
+        task_time !== undefined,
+        isTime(task_time) ? task_time : null,
+        plan_date ?? null,
+        typeof is_completed === 'boolean' ? is_completed : null,
+        req.params.id,
+        req.student.id
+      ]
     );
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Жоспар табылмады' });
     }
-
     res.json(result.rows[0]);
   } catch (error) {
-    console.error('Жоспар өндеу қатесі:', error);
+    console.error('Жоспар өзгерту қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Жоспарды өшіру
+app.delete('/api/plans/:id', verifyToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM plans WHERE id = $1 AND student_id = $2 RETURNING id',
+      [req.params.id, req.student.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Жоспар табылмады' });
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Жоспар өшіру қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
 
 // ===== БҮГІНГІ ТАПСЫРМАЛАР =====
+// Бүгінгі күннің жоспарлары; ?date=YYYY-MM-DD арқылы клиенттің жергілікті күні беріледі
 
-// Бүгінгі тапсырмалар
 app.get('/api/daily-tasks', verifyToken, async (req, res) => {
   try {
-    const today = new Date().toISOString().split('T')[0];
-
-    const result = await pool.query(
-      'SELECT * FROM daily_tasks WHERE student_id = $1 AND task_date = $2 ORDER BY task_time',
-      [req.student.id, today]
-    );
-
+    const result = await listPlans(req.student.id, await todayDate(req.query.date));
     res.json(result.rows);
   } catch (error) {
     console.error('Бүгінгі тапсырмалар алу қатесі:', error);
@@ -678,17 +796,17 @@ app.get('/api/daily-tasks', verifyToken, async (req, res) => {
   }
 });
 
-// Бүгінгі тапсырма қосу
 app.post('/api/daily-tasks', verifyToken, async (req, res) => {
   try {
-    const { task_title, task_time } = req.body;
-    const today = new Date().toISOString().split('T')[0];
-
+    const { task_title, task_time, date } = req.body;
+    if (!task_title?.trim()) {
+      return res.status(400).json({ error: 'Тапсырма қажет' });
+    }
     const result = await pool.query(
-      'INSERT INTO daily_tasks (student_id, task_date, task_title, task_time) VALUES ($1, $2, $3, $4) RETURNING *',
-      [req.student.id, today, task_title, task_time]
+      `INSERT INTO plans (student_id, plan_date, task_title, task_time)
+       VALUES ($1, $2, $3, $4) RETURNING ${PLAN_COLUMNS}`,
+      [req.student.id, await todayDate(date), task_title.trim(), isTime(task_time) ? task_time : null]
     );
-
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Бүгінгі тапсырма қосу қатесі:', error);
@@ -698,18 +816,13 @@ app.post('/api/daily-tasks', verifyToken, async (req, res) => {
 
 app.patch('/api/daily-tasks/:id', verifyToken, async (req, res) => {
   try {
-    const { id } = req.params;
-    const { is_completed } = req.body;
-
     const result = await pool.query(
-      'UPDATE daily_tasks SET is_completed = $1 WHERE id = $2 AND student_id = $3 RETURNING *',
-      [is_completed, id, req.student.id]
+      `UPDATE plans SET is_completed = $1 WHERE id = $2 AND student_id = $3 RETURNING ${PLAN_COLUMNS}`,
+      [!!req.body.is_completed, req.params.id, req.student.id]
     );
-
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Тапсырма табылмады' });
     }
-
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Тапсырма өндеу қатесі:', error);
@@ -1096,6 +1209,15 @@ const runMigrations = async () => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     CREATE INDEX IF NOT EXISTS idx_phone_verifications_phone ON phone_verifications(phone, created_at DESC);
+    -- Бүгінгі тапсырмалар енді plans кестесінде; ескі жазбаларды бір рет көшіреміз
+    WITH moved AS (
+      DELETE FROM daily_tasks RETURNING student_id, task_date, task_title, task_time, is_completed, created_at
+    )
+    INSERT INTO plans (student_id, plan_date, task_title, task_time, is_completed, created_at)
+    SELECT student_id, task_date, task_title, task_time, is_completed, created_at FROM moved;
+
+    ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_data BYTEA;
+    ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_mime VARCHAR(100);
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS channel VARCHAR(10) NOT NULL DEFAULT 'sms';
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS tg_token VARCHAR(64) UNIQUE;
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS tg_chat_id BIGINT;

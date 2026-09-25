@@ -1,35 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../styles/Plans.css';
 import { formatKkDate, calendarFormatters } from '../../utils/kkDate';
+import { toDateString } from './planUtils';
+import PlanTaskItem from './PlanTaskItem';
+import {
+  fetchPlansForDate, fetchPlansForMonth, createPlan, updatePlan, deletePlan, sortPlans
+} from './planApi';
 
 export default function Plans() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [viewMonth, setViewMonth] = useState(new Date());
   const [plans, setPlans] = useState([]);
+  const [plannedDays, setPlannedDays] = useState(new Set());
   const [newTask, setNewTask] = useState('');
   const [newTime, setNewTime] = useState('09:00');
   const [loading, setLoading] = useState(false);
 
-  const token = localStorage.getItem('token');
-  const dateString = selectedDate.toISOString().split('T')[0];
+  // toISOString() UTC-ке ауыстырады: Қазақстанда 26-сын таңдасаң, 25-ке сақталатын
+  const dateString = toDateString(selectedDate);
 
-  useEffect(() => {
-    fetchPlans(dateString);
-  }, [selectedDate]);
-
-  const fetchPlans = async (date) => {
+  const loadDay = useCallback(async () => {
     try {
-      const response = await axios.get(
-        `https://student-platform-backend-h9zs.onrender.com/api/plans/${date}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setPlans(response.data);
+      setPlans(await fetchPlansForDate(dateString));
     } catch (error) {
       console.error('Жоспарлар алу қатесі:', error);
     }
-  };
+  }, [dateString]);
+
+  // Күнтізбеде жоспары бар күндерді белгілеу
+  const loadMonth = useCallback(async () => {
+    try {
+      const monthPlans = await fetchPlansForMonth(viewMonth.getFullYear(), viewMonth.getMonth() + 1);
+      setPlannedDays(new Set(monthPlans.map((p) => p.plan_date)));
+    } catch (error) {
+      console.error('Ай жоспарлары алу қатесі:', error);
+    }
+  }, [viewMonth]);
+
+  useEffect(() => { loadDay(); }, [loadDay]);
+  useEffect(() => { loadMonth(); }, [loadMonth]);
 
   const handleAddPlan = async (e) => {
     e.preventDefault();
@@ -37,18 +48,10 @@ export default function Plans() {
 
     setLoading(true);
     try {
-      await axios.post(
-        'https://student-platform-backend-h9zs.onrender.com/api/plans',
-        {
-          plan_date: dateString,
-          task_title: newTask,
-          task_time: newTime
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchPlans(dateString);
+      const plan = await createPlan({ plan_date: dateString, task_title: newTask, task_time: newTime });
+      setPlans(sortPlans([...plans, plan]));
+      setPlannedDays(new Set([...plannedDays, dateString]));
       setNewTask('');
-      setNewTime('09:00');
     } catch (error) {
       console.error('Жоспар қосу қатесі:', error);
       alert('Жоспар қосу сәтсіз');
@@ -57,18 +60,42 @@ export default function Plans() {
     }
   };
 
-  const handleToggleComplete = async (id, isCompleted) => {
+  const handleToggle = async (task) => {
     try {
-      await axios.patch(
-        `https://student-platform-backend-h9zs.onrender.com/api/plans/${id}`,
-        { is_completed: !isCompleted },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchPlans(dateString);
+      const updated = await updatePlan(task.id, { is_completed: !task.is_completed });
+      setPlans(plans.map((p) => (p.id === task.id ? updated : p)));
     } catch (error) {
       console.error('Жоспар өндеу қатесі:', error);
     }
   };
+
+  const handleSave = async (task, changes) => {
+    try {
+      const updated = await updatePlan(task.id, changes);
+      // Басқа күнге ауыстырылса, бұл күннің тізімінен кетеді
+      setPlans(updated.plan_date === dateString
+        ? sortPlans(plans.map((p) => (p.id === task.id ? updated : p)))
+        : plans.filter((p) => p.id !== task.id));
+      loadMonth();
+      return true;
+    } catch (error) {
+      alert(error.response?.data?.error || 'Жоспарды сақтау сәтсіз');
+      return false;
+    }
+  };
+
+  const handleDelete = async (task) => {
+    if (!window.confirm(`«${task.task_title}» жоспарын өшіресіз бе?`)) return;
+    try {
+      await deletePlan(task.id);
+      setPlans(plans.filter((p) => p.id !== task.id));
+      loadMonth();
+    } catch (error) {
+      alert(error.response?.data?.error || 'Жоспарды өшіру сәтсіз');
+    }
+  };
+
+  const isToday = dateString === toDateString(new Date());
 
   return (
     <div className="plans-section">
@@ -79,13 +106,17 @@ export default function Plans() {
           <Calendar
             value={selectedDate}
             onChange={setSelectedDate}
+            onActiveStartDateChange={({ activeStartDate }) => setViewMonth(activeStartDate)}
             locale="kk"
             {...calendarFormatters}
+            tileClassName={({ date, view }) =>
+              view === 'month' && plannedDays.has(toDateString(date)) ? 'has-plan' : null}
           />
         </div>
 
         <div className="plans-detail">
           <h3>📍 {formatKkDate(selectedDate, { weekday: 'long', year: true })}</h3>
+          {isToday && <p className="today-hint">Бүгінгі жоспарлар «Бүгінгі тапсырмалар» бөлімінде де көрінеді</p>}
 
           <form onSubmit={handleAddPlan} className="add-plan-form">
             <input
@@ -107,24 +138,16 @@ export default function Plans() {
 
           <div className="plans-list">
             {plans.length === 0 ? (
-              <p className="no-plans">Бұл күндің жоспары жоқ</p>
+              <p className="no-plans">Бұл күннің жоспары жоқ</p>
             ) : (
-              plans.map(plan => (
-                <div 
-                  key={plan.id} 
-                  className={`plan-item ${plan.is_completed ? 'completed' : ''}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={plan.is_completed}
-                    onChange={() => handleToggleComplete(plan.id, plan.is_completed)}
-                    className="plan-checkbox"
-                  />
-                  <div className="plan-content">
-                    <span className="plan-time">🕐 {plan.task_time}</span>
-                    <span className="plan-title">{plan.task_title}</span>
-                  </div>
-                </div>
+              plans.map((plan) => (
+                <PlanTaskItem
+                  key={plan.id}
+                  task={plan}
+                  onToggle={handleToggle}
+                  onSave={handleSave}
+                  onDelete={handleDelete}
+                />
               ))
             )}
           </div>

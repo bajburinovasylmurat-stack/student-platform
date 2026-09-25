@@ -1,36 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/DailyTasks.css';
 import { formatKkDate } from '../../utils/kkDate';
+import { toDateString, parseDate } from './planUtils';
+import PlanTaskItem from './PlanTaskItem';
+import { fetchPlansForDate, createPlan, updatePlan, deletePlan, sortPlans } from './planApi';
 
+// «Жоспар» бетінде бүгінгі күнге қосылғандардың бәрі осында көрінеді
 export default function DailyTasks() {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState('');
   const [newTime, setNewTime] = useState('09:00');
   const [loading, setLoading] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [today, setToday] = useState(toDateString(new Date()));
 
-  const token = localStorage.getItem('token');
-
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
-      const response = await axios.get(
-        'https://student-platform-backend-h9zs.onrender.com/api/daily-tasks',
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      // Сортировка по времени
-      const sorted = response.data.sort((a, b) => {
-        return a.task_time.localeCompare(b.task_time);
-      });
-      setTasks(sorted);
+      setTasks(sortPlans(await fetchPlansForDate(today)));
     } catch (error) {
       console.error('Тапсырмалар алу қатесі:', error);
     }
-  };
+  }, [today]);
+
+  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+
+  // Бет түн ортасынан кейін ашық тұрса, келесі күнге ауысады
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = toDateString(new Date());
+      if (now !== today) setToday(now);
+    }, 60 * 1000);
+    return () => clearInterval(timer);
+  }, [today]);
 
   const handleAddTask = async (e) => {
     e.preventDefault();
@@ -38,17 +38,9 @@ export default function DailyTasks() {
 
     setLoading(true);
     try {
-      await axios.post(
-        'https://student-platform-backend-h9zs.onrender.com/api/daily-tasks',
-        {
-          task_title: newTask,
-          task_time: newTime
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchTasks();
+      const task = await createPlan({ plan_date: today, task_title: newTask, task_time: newTime });
+      setTasks(sortPlans([...tasks, task]));
       setNewTask('');
-      setNewTime('09:00');
     } catch (error) {
       console.error('Тапсырма қосу қатесі:', error);
       alert('Тапсырма қосу сәтсіз');
@@ -57,32 +49,51 @@ export default function DailyTasks() {
     }
   };
 
-  const handleToggleComplete = async (id, isCompleted) => {
+  const handleToggle = async (task) => {
     try {
-      await axios.patch(
-        `https://student-platform-backend-h9zs.onrender.com/api/daily-tasks/${id}`,
-        { is_completed: !isCompleted },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchTasks();
+      const updated = await updatePlan(task.id, { is_completed: !task.is_completed });
+      setTasks(tasks.map((t) => (t.id === task.id ? updated : t)));
     } catch (error) {
       console.error('Тапсырма өндеу қатесі:', error);
     }
   };
 
-  const completedCount = tasks.filter(t => t.is_completed).length;
+  const handleSave = async (task, changes) => {
+    try {
+      const updated = await updatePlan(task.id, changes);
+      setTasks(updated.plan_date === today
+        ? sortPlans(tasks.map((t) => (t.id === task.id ? updated : t)))
+        : tasks.filter((t) => t.id !== task.id));
+      return true;
+    } catch (error) {
+      alert(error.response?.data?.error || 'Тапсырманы сақтау сәтсіз');
+      return false;
+    }
+  };
+
+  const handleDelete = async (task) => {
+    if (!window.confirm(`«${task.task_title}» тапсырмасын өшіресіз бе?`)) return;
+    try {
+      await deletePlan(task.id);
+      setTasks(tasks.filter((t) => t.id !== task.id));
+    } catch (error) {
+      alert(error.response?.data?.error || 'Тапсырманы өшіру сәтсіз');
+    }
+  };
+
+  const completedCount = tasks.filter((t) => t.is_completed).length;
 
   return (
     <div className="daily-tasks-section">
       <h2>✅ Бүгінгі Тапсырмалар</h2>
 
       <div className="today-info">
-        <h3>📅 {formatKkDate(currentDate, { weekday: 'long', year: true })}</h3>
+        <h3>📅 {formatKkDate(parseDate(today), { weekday: 'long', year: true })}</h3>
         <div className="progress">
           <span>{completedCount} / {tasks.length} орындалды</span>
           <div className="progress-bar">
-            <div 
-              className="progress-fill" 
+            <div
+              className="progress-fill"
               style={{ width: tasks.length ? `${(completedCount / tasks.length) * 100}%` : '0%' }}
             />
           </div>
@@ -109,27 +120,17 @@ export default function DailyTasks() {
 
       <div className="tasks-list">
         {tasks.length === 0 ? (
-          <p className="no-tasks">Бүгінгі тапсырмалар жоқ. Ынамдарыңызды немесе мұғалімінің тапсырмасын қоссаңыз!</p>
+          <p className="no-tasks">Бүгінге тапсырма жоқ. «Жоспар» бөлімінде алдын ала жоспарлауға да болады.</p>
         ) : (
-          tasks.map(task => (
-            <div 
-              key={task.id} 
-              className={`task-item ${task.is_completed ? 'completed' : ''}`}
-            >
-              <input
-                type="checkbox"
-                checked={task.is_completed}
-                onChange={() => handleToggleComplete(task.id, task.is_completed)}
-                className="task-checkbox"
-              />
-              <div className="task-content">
-                <span className="task-time">🕐 {task.task_time}</span>
-                <span className="task-title">{task.task_title}</span>
-              </div>
-              <span className={`task-status ${task.is_completed ? 'done' : 'pending'}`}>
-                {task.is_completed ? '✓ Орындалды' : '⏳ Орындалу керек'}
-              </span>
-            </div>
+          tasks.map((task) => (
+            <PlanTaskItem
+              key={task.id}
+              task={task}
+              onToggle={handleToggle}
+              onSave={handleSave}
+              onDelete={handleDelete}
+              showStatus
+            />
           ))
         )}
       </div>

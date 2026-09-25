@@ -137,7 +137,7 @@ export default function Dashboard({ student, onLogout }) {
       </section>
 
       <main className="dashboard-content" key={activeTab}>
-        {activeTab === 'materials' && <Materials />}
+        {activeTab === 'materials' && <Materials isAdmin={isAdmin} />}
         {activeTab === 'examinations' && <Examinations isAdmin={isAdmin} />}
         {activeTab === 'plans' && <Plans />}
         {activeTab === 'daily' && <DailyTasks />}
