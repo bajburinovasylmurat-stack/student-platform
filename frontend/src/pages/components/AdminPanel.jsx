@@ -11,6 +11,7 @@ export default function AdminPanel() {
   const [materialFile, setMaterialFile] = useState(null);
   const [materialTitle, setMaterialTitle] = useState('');
   const [materialDesc, setMaterialDesc] = useState('');
+  const [materialCategory, setMaterialCategory] = useState('practice');
   const [examTitle, setExamTitle] = useState('');
   const [examCategory, setExamCategory] = useState('24_hour');
   const [examUrl, setExamUrl] = useState('');
@@ -34,6 +35,7 @@ export default function AdminPanel() {
         file: materialFile,
         title: materialTitle,
         description: materialDesc,
+        category: materialCategory,
         onProgress: setUploadProgress
       });
       alert('Материал сәтті қосылды!');
@@ -127,6 +129,14 @@ export default function AdminPanel() {
                   placeholder="мысалы: Аффиндік функциялар"
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label>Бөлім:</label>
+                <select value={materialCategory} onChange={(e) => setMaterialCategory(e.target.value)}>
+                  <option value="practice">📝 Практика</option>
+                  <option value="formula">📐 Формула</option>
+                </select>
               </div>
 
               <div className="form-group">

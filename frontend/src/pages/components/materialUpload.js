@@ -4,12 +4,13 @@ const API = 'https://student-platform-backend-h9zs.onrender.com';
 
 // Материалды 2 МБ-тық бөліктермен жүктеу: бір үлкен сұраныс Render-де үзіліп қалатын.
 // onProgress(0..100) жүктеу барысын береді
-export async function uploadMaterial({ file, title, description, onProgress }) {
+export async function uploadMaterial({ file, title, description, category, onProgress }) {
   const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
 
   const { data: upload } = await axios.post(`${API}/api/materials/uploads`, {
     title,
     description,
+    category,
     file_name: file.name,
     file_mime: file.type || 'application/octet-stream',
     file_size: file.size

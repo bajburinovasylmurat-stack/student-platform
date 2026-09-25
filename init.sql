@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS materials (
   file_data BYTEA,          -- файлдың өзі (Render дискісі deploy сайын тазаланады)
   file_mime VARCHAR(100),
   file_size BIGINT,
+  category VARCHAR(20) NOT NULL DEFAULT 'practice', -- 'practice' немесе 'formula'
   status VARCHAR(10) NOT NULL DEFAULT 'ready', -- 'uploading' жүктеліп жатқанда
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   created_by INT REFERENCES students(id)

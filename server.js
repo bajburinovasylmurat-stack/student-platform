@@ -29,6 +29,7 @@ if (!fs.existsSync(uploadsDir)) {
 // Render тегін тарифінде диск әр deploy сайын тазаланады, сондықтан материалдар базада сақталады.
 // Файл 2 МБ-тық бөліктермен жүктеледі: бір үлкен сұраныс Render-де үзіліп қалатын
 const MAX_MATERIAL_MB = 50;
+const MATERIAL_CATEGORIES = ['practice', 'formula'];
 const CHUNK_BYTES = 2 * 1024 * 1024;
 
 // PostgreSQL қосылуы
@@ -548,7 +549,7 @@ const fixFileName = (name) => {
 app.get('/api/materials', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, title, description, file_path, file_name, created_at FROM materials
+      `SELECT id, title, description, file_path, file_name, category, created_at FROM materials
        WHERE COALESCE(status, 'ready') = 'ready' ORDER BY created_at DESC`
     );
     // Бұрын бұзылып сақталған атауларды да дұрыс көрсету
@@ -564,6 +565,7 @@ app.get('/api/materials', async (req, res) => {
 app.post('/api/materials/uploads', verifyToken, requireRole('admin'), async (req, res) => {
   try {
     const { title, description, file_name, file_mime, file_size } = req.body;
+    const category = MATERIAL_CATEGORIES.includes(req.body.category) ? req.body.category : 'practice';
     const size = Number(file_size);
     if (!title?.trim() || !file_name || !size) {
       return res.status(400).json({ error: 'Файл және атау қажет' });
@@ -576,9 +578,9 @@ app.post('/api/materials/uploads', verifyToken, requireRole('admin'), async (req
     await pool.query(`DELETE FROM materials WHERE status = 'uploading' AND created_at < NOW() - INTERVAL '1 day'`);
 
     const result = await pool.query(
-      `INSERT INTO materials (title, description, file_path, file_name, created_by, file_mime, file_size, status)
-       VALUES ($1, $2, '', $3, $4, $5, $6, 'uploading') RETURNING id`,
-      [title.trim(), description || null, file_name, req.student.id, file_mime || 'application/octet-stream', size]
+      `INSERT INTO materials (title, description, file_path, file_name, created_by, file_mime, file_size, status, category)
+       VALUES ($1, $2, '', $3, $4, $5, $6, 'uploading', $7) RETURNING id`,
+      [title.trim(), description || null, file_name, req.student.id, file_mime || 'application/octet-stream', size, category]
     );
     const id = result.rows[0].id;
     await pool.query('UPDATE materials SET file_path = $1 WHERE id = $2', [`/api/materials/${id}/file`, id]);
@@ -637,7 +639,7 @@ app.post('/api/materials/uploads/:id/complete', verifyToken, requireRole('admin'
 
     const result = await pool.query(
       `UPDATE materials SET status = 'ready' WHERE id = $1
-       RETURNING id, title, description, file_path, file_name, created_at`,
+       RETURNING id, title, description, file_path, file_name, category, created_at`,
       [req.params.id]
     );
     res.json(result.rows[0]);
@@ -690,6 +692,26 @@ app.get('/api/materials/:id/file', async (req, res) => {
   } catch (error) {
     console.error('Файл жүктеу қатесі:', error);
     if (res.headersSent) return res.end();
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Материалдың бөлімін ауыстыру (админ): практика <-> формула
+app.patch('/api/materials/:id', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    if (!MATERIAL_CATEGORIES.includes(req.body.category)) {
+      return res.status(400).json({ error: 'Бөлім қате' });
+    }
+    const result = await pool.query(
+      'UPDATE materials SET category = $1 WHERE id = $2 RETURNING id, category',
+      [req.body.category, req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Материал табылмады' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Материал бөлімін өзгерту қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
@@ -1375,6 +1397,7 @@ const runMigrations = async () => {
     ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_data BYTEA;
     ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_mime VARCHAR(100);
     ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_size BIGINT;
+    ALTER TABLE materials ADD COLUMN IF NOT EXISTS category VARCHAR(20) NOT NULL DEFAULT 'practice';
     ALTER TABLE materials ADD COLUMN IF NOT EXISTS status VARCHAR(10) NOT NULL DEFAULT 'ready';
     CREATE TABLE IF NOT EXISTS material_chunks (
       material_id INT NOT NULL REFERENCES materials(id) ON DELETE CASCADE,
