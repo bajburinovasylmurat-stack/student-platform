@@ -55,7 +55,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-pr
 
 // ===== SMS РАСТАУ =====
 
-const CODE_TTL_MIN = 5;          // код қанша минут жарамды
+const CODE_TTL_MIN = 15;         // код қанша минут жарамды (Mobizon модерациясы 10 минутқа дейін созылады)
 const RESEND_SECONDS = 60;       // қайта жіберуге дейінгі күту
 const MAX_ATTEMPTS = 5;          // бір кодты енгізу әрекеттері
 const MAX_SENDS_PER_HOUR = 5;    // бір нөмірге сағатына SMS саны
