@@ -39,6 +39,7 @@ const FEATURES = [
 
 export default function Login({ onLoginSuccess }) {
   const [mode, setMode] = useState('login');
+  const isReset = mode === 'reset';
   const [error, setError] = useState('');
   const [errorKey, setErrorKey] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -107,7 +108,10 @@ export default function Login({ onLoginSuccess }) {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.post(`${API}/api/auth/send-code`, { phone: `7${phoneDigits}` });
+      const response = await axios.post(`${API}/api/auth/send-code`, {
+        phone: `7${phoneDigits}`,
+        purpose: isReset ? 'reset' : 'register'
+      });
       setResendIn(response.data.resend_after || 60);
       setStep(2);
       setBotUrl(response.data.channel === 'telegram' ? response.data.bot_url : '');
@@ -135,7 +139,8 @@ export default function Login({ onLoginSuccess }) {
     sendCode();
   };
 
-  const handleRegister = async (e) => {
+  // Тіркелу немесе құпиясөзді қалпына келтіру: екеуі де кодпен расталады
+  const handleVerify = async (e) => {
     e.preventDefault();
     const joined = code.join('');
     if (joined.length !== CODE_LENGTH) {
@@ -145,16 +150,24 @@ export default function Login({ onLoginSuccess }) {
     setLoading(true);
     setError('');
     try {
-      await axios.post(`${API}/api/auth/register`, {
-        phone: `7${phoneDigits}`,
-        code: joined,
-        name,
-        password: newPassword
-      });
-      // Тіркелгеннен кейін бірден кіру
+      if (isReset) {
+        await axios.post(`${API}/api/auth/reset-password`, {
+          phone: `7${phoneDigits}`,
+          code: joined,
+          password: newPassword
+        });
+      } else {
+        await axios.post(`${API}/api/auth/register`, {
+          phone: `7${phoneDigits}`,
+          code: joined,
+          name,
+          password: newPassword
+        });
+      }
+      // Сәтті болса, бірден кіру
       await doLogin(`7${phoneDigits}`, newPassword);
     } catch (err) {
-      showError(err.response?.data?.error || 'Тіркеу сәтсіз');
+      showError(err.response?.data?.error || (isReset ? 'Құпиясөзді жаңарту сәтсіз' : 'Тіркеу сәтсіз'));
     } finally {
       setLoading(false);
     }
@@ -275,6 +288,12 @@ export default function Login({ onLoginSuccess }) {
                 </div>
               </label>
 
+              <div className="forgot-row">
+                <button type="button" className="link-btn" onClick={() => switchMode('reset')}>
+                  Құпиясөзді ұмыттыңыз ба?
+                </button>
+              </div>
+
               {error && <div key={errorKey} className="auth-error">{error}</div>}
 
               <button type="submit" className="auth-submit" disabled={loading}>
@@ -283,8 +302,8 @@ export default function Login({ onLoginSuccess }) {
             </form>
           )}
 
-          {mode === 'register' && (
-            <div className="auth-form" key={`register-${step}`}>
+          {(mode === 'register' || isReset) && (
+            <div className="auth-form" key={`${mode}-${step}`}>
               <div className="steps">
                 <div className={`step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'done' : ''}`}>
                   <span>{step > 1 ? '✓' : '1'}</span> Нөмір
@@ -298,10 +317,15 @@ export default function Login({ onLoginSuccess }) {
               {step === 1 && (
                 <form onSubmit={handleSendCode}>
                   <div className="auth-heading">
-                    <h2>Тіркелу</h2>
-                    <p>Нөміріңізді растау үшін 6 таңбалы код жібереміз</p>
+                    <h2>{isReset ? 'Құпиясөзді қалпына келтіру' : 'Тіркелу'}</h2>
+                    <p>
+                      {isReset
+                        ? 'Тіркелген нөміріңізді жазыңыз, растау коды жіберіледі'
+                        : 'Нөміріңізді растау үшін 6 таңбалы код жібереміз'}
+                    </p>
                   </div>
 
+                  {!isReset && (
                   <label className="field">
                     <span>Аты-жөніңіз</span>
                     <input
@@ -313,6 +337,7 @@ export default function Login({ onLoginSuccess }) {
                       required
                     />
                   </label>
+                  )}
 
                   <label className="field">
                     <span>Телефон нөмірі</span>
@@ -329,14 +354,21 @@ export default function Login({ onLoginSuccess }) {
 
                   {error && <div key={errorKey} className="auth-error">{error}</div>}
 
-                  <button type="submit" className="auth-submit" disabled={loading || phoneDigits.length !== 10 || !name.trim()}>
+                  <button type="submit" className="auth-submit" disabled={loading || phoneDigits.length !== 10 || (!isReset && !name.trim())}>
                     {loading ? <span className="spinner" /> : 'Код алу →'}
                   </button>
+                  {isReset && (
+                    <div className="forgot-row center">
+                      <button type="button" className="link-btn" onClick={() => switchMode('login')}>
+                        ← Кіруге оралу
+                      </button>
+                    </div>
+                  )}
                 </form>
               )}
 
               {step === 2 && (
-                <form onSubmit={handleRegister}>
+                <form onSubmit={handleVerify}>
                   <div className="auth-heading">
                     <h2>Кодты енгізіңіз</h2>
                     <p>
@@ -403,7 +435,7 @@ export default function Login({ onLoginSuccess }) {
                   </div>
 
                   <label className="field">
-                    <span>Құпиясөз ойлап табыңыз</span>
+                    <span>{isReset ? 'Жаңа құпиясөз' : 'Құпиясөз ойлап табыңыз'}</span>
                     <div className="password-wrap">
                       <input
                         type={showPassword ? 'text' : 'password'}
@@ -423,7 +455,7 @@ export default function Login({ onLoginSuccess }) {
                   {error && <div key={errorKey} className="auth-error">{error}</div>}
 
                   <button type="submit" className="auth-submit" disabled={loading}>
-                    {loading ? <span className="spinner" /> : 'Тіркелу ✓'}
+                    {loading ? <span className="spinner" /> : (isReset ? 'Құпиясөзді жаңарту ✓' : 'Тіркелу ✓')}
                   </button>
                 </form>
               )}

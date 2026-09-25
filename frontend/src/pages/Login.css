@@ -430,6 +430,27 @@
   opacity: 0.5;
 }
 
+/* ----- Құпиясөзді ұмыттыңыз ба ----- */
+.forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: -8px 0 16px;
+  font-size: 14px;
+}
+
+.forgot-row.center {
+  justify-content: center;
+  margin: 18px 0 0;
+}
+
+.forgot-row .link-btn {
+  text-decoration: none;
+}
+
+.forgot-row .link-btn:hover {
+  text-decoration: underline;
+}
+
 /* ----- Telegram арқылы растау ----- */
 .tg-box {
   background: #eef7fc;

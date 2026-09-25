@@ -169,7 +169,7 @@ const handleTelegramUpdate = async (update) => {
 
     const phone = normalizePhone(message.contact.phone_number);
     const pending = await pool.query(`
-      SELECT id, phone FROM phone_verifications
+      SELECT id, phone, purpose FROM phone_verifications
       WHERE tg_chat_id = $1 AND channel = 'telegram' AND used = FALSE AND expires_at > NOW()
       ORDER BY created_at DESC LIMIT 1
     `, [chatId]);
@@ -200,7 +200,7 @@ const handleTelegramUpdate = async (update) => {
     );
     await tg('sendMessage', {
       chat_id: chatId,
-      text: `✅ Нөмір расталды!\n\nJUZ40 тіркелу коды: <b>${code}</b>\n\nКодты сайтқа енгізіңіз. Ешкімге айтпаңыз.`,
+      text: `✅ Нөмір расталды!\n\nJUZ40 ${PURPOSE_TEXT[v.purpose] || PURPOSE_TEXT.register}: <b>${code}</b>\n\nКодты сайтқа енгізіңіз. Ешкімге айтпаңыз.`,
       parse_mode: 'HTML',
       reply_markup: { remove_keyboard: true }
     });
@@ -252,10 +252,38 @@ const startTelegramBot = async () => {
   }
 };
 
-// Тіркелу кодын жіберу
+const PURPOSE_TEXT = {
+  register: 'тіркелу коды',
+  reset: 'құпиясөзді қалпына келтіру коды'
+};
+
+// Растау кодын тексеру (тіркелу және құпиясөзді қалпына келтіру үшін ортақ)
+const checkCode = async (phone, code, purpose) => {
+  const verification = await pool.query(`
+    SELECT id, code_hash, attempts, expires_at < NOW() AS expired, used
+    FROM phone_verifications WHERE phone = $1 AND purpose = $2
+    ORDER BY created_at DESC LIMIT 1
+  `, [phone, purpose]);
+  const v = verification.rows[0];
+
+  if (!v || v.used) return { error: 'Алдымен код алыңыз' };
+  if (v.expired) return { error: 'Кодтың мерзімі өтті. Жаңа код алыңыз' };
+  if (v.attempts >= MAX_ATTEMPTS) return { error: 'Тым көп қате әрекет. Жаңа код алыңыз' };
+
+  const expected = Buffer.from(v.code_hash, 'hex');
+  const actual = Buffer.from(hashCode(phone, String(code).trim()), 'hex');
+  if (!crypto.timingSafeEqual(expected, actual)) {
+    await pool.query('UPDATE phone_verifications SET attempts = attempts + 1 WHERE id = $1', [v.id]);
+    return { error: `Код қате. Қалған әрекет: ${MAX_ATTEMPTS - v.attempts - 1}` };
+  }
+  return { id: v.id };
+};
+
+// Растау кодын жіберу: purpose = 'register' (тіркелу) немесе 'reset' (құпиясөзді қалпына келтіру)
 app.post('/api/auth/send-code', async (req, res) => {
   try {
     const phone = normalizePhone(req.body.phone);
+    const purpose = req.body.purpose === 'reset' ? 'reset' : 'register';
     if (!phone) {
       return res.status(400).json({ error: 'Телефон нөмірі қате. Мысалы: +7 707 123 45 67' });
     }
@@ -264,8 +292,11 @@ app.post('/api/auth/send-code', async (req, res) => {
       'SELECT id FROM students WHERE phone = $1 OR student_number = $1',
       [phone]
     );
-    if (existing.rows.length > 0) {
+    if (purpose === 'register' && existing.rows.length > 0) {
       return res.status(400).json({ error: 'Бұл нөмір бұрын тіркелген. Кіріңіз' });
+    }
+    if (purpose === 'reset' && existing.rows.length === 0) {
+      return res.status(400).json({ error: 'Бұл нөмірмен тіркелген қолданушы жоқ' });
     }
 
     const recent = await pool.query(`
@@ -292,9 +323,9 @@ app.post('/api/auth/send-code', async (req, res) => {
     if (telegramEnabled()) {
       const tgToken = crypto.randomBytes(16).toString('hex');
       await pool.query(
-        `INSERT INTO phone_verifications (phone, code_hash, expires_at, channel, tg_token)
-         VALUES ($1, $2, NOW() + INTERVAL '${CODE_TTL_MIN} minutes', 'telegram', $3)`,
-        [phone, hashCode(phone, crypto.randomBytes(16).toString('hex')), tgToken]
+        `INSERT INTO phone_verifications (phone, code_hash, expires_at, channel, tg_token, purpose)
+         VALUES ($1, $2, NOW() + INTERVAL '${CODE_TTL_MIN} minutes', 'telegram', $3, $4)`,
+        [phone, hashCode(phone, crypto.randomBytes(16).toString('hex')), tgToken, purpose]
       );
       const username = await getBotUsername();
       return res.json({
@@ -306,13 +337,13 @@ app.post('/api/auth/send-code', async (req, res) => {
     }
 
     await pool.query(
-      `INSERT INTO phone_verifications (phone, code_hash, expires_at)
-       VALUES ($1, $2, NOW() + INTERVAL '${CODE_TTL_MIN} minutes')`,
-      [phone, hashCode(phone, code)]
+      `INSERT INTO phone_verifications (phone, code_hash, expires_at, purpose)
+       VALUES ($1, $2, NOW() + INTERVAL '${CODE_TTL_MIN} minutes', $3)`,
+      [phone, hashCode(phone, code), purpose]
     );
 
     if (smsEnabled()) {
-      await sendSms(phone, `JUZ40: тіркелу коды ${code}. Кодты ешкімге айтпаңыз.`);
+      await sendSms(phone, `JUZ40: ${PURPOSE_TEXT[purpose]} ${code}. Кодты ешкімге айтпаңыз.`);
       return res.json({ message: 'Код жіберілді', resend_after: RESEND_SECONDS });
     }
 
@@ -338,30 +369,9 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ error: 'Пароль кемінде 6 таңбадан тұруы керек' });
     }
 
-    // Соңғы жіберілген кодты тексеру
-    const verification = await pool.query(`
-      SELECT id, code_hash, attempts, expires_at < NOW() AS expired, used
-      FROM phone_verifications WHERE phone = $1
-      ORDER BY created_at DESC LIMIT 1
-    `, [phone]);
-    const v = verification.rows[0];
-
-    if (!v || v.used) {
-      return res.status(400).json({ error: 'Алдымен код алыңыз' });
-    }
-    if (v.expired) {
-      return res.status(400).json({ error: 'Кодтың мерзімі өтті. Жаңа код алыңыз' });
-    }
-    if (v.attempts >= MAX_ATTEMPTS) {
-      return res.status(400).json({ error: 'Тым көп қате әрекет. Жаңа код алыңыз' });
-    }
-
-    const expected = Buffer.from(v.code_hash, 'hex');
-    const actual = Buffer.from(hashCode(phone, String(code).trim()), 'hex');
-    if (!crypto.timingSafeEqual(expected, actual)) {
-      await pool.query('UPDATE phone_verifications SET attempts = attempts + 1 WHERE id = $1', [v.id]);
-      const left = MAX_ATTEMPTS - v.attempts - 1;
-      return res.status(400).json({ error: `Код қате. Қалған әрекет: ${left}` });
+    const v = await checkCode(phone, code, 'register');
+    if (v.error) {
+      return res.status(400).json({ error: v.error });
     }
 
     const existing = await pool.query(
@@ -388,6 +398,42 @@ app.post('/api/auth/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Тіркеу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Құпиясөзді қалпына келтіру (Telegram / SMS кодымен)
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { password, code } = req.body;
+    const phone = normalizePhone(req.body.phone);
+
+    if (!phone || !password || !code) {
+      return res.status(400).json({ error: 'Барлық өрістерді толтырыңыз' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Пароль кемінде 6 таңбадан тұруы керек' });
+    }
+
+    const v = await checkCode(phone, code, 'reset');
+    if (v.error) {
+      return res.status(400).json({ error: v.error });
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+    const result = await pool.query(
+      `UPDATE students SET password_hash = $1, phone_verified = TRUE
+       WHERE phone = $2 OR student_number = $2 RETURNING id`,
+      [password_hash, phone]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Қолданушы табылмады' });
+    }
+    await pool.query('UPDATE phone_verifications SET used = TRUE WHERE id = $1', [v.id]);
+
+    res.json({ message: 'Құпиясөз жаңартылды' });
+  } catch (error) {
+    console.error('Құпиясөзді қалпына келтіру қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
@@ -952,6 +998,31 @@ app.patch('/api/admin/users/:id/role', verifyToken, requireRole('admin'), async 
   }
 });
 
+// Админ уақытша құпиясөз жасайды (Telegram арқылы қалпына келтіре алмайтындар үшін)
+app.post('/api/admin/users/:id/reset-password', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    // Шатастыратын таңбаларсыз (0/O, 1/l/I)
+    const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
+    const tempPassword = Array.from({ length: 8 }, () => alphabet[crypto.randomInt(alphabet.length)]).join('');
+    const password_hash = await bcrypt.hash(tempPassword, 10);
+
+    const result = await pool.query(
+      `UPDATE students SET password_hash = $1
+       WHERE id = $2 AND student_number <> 'admin' AND COALESCE(role, 'student') <> 'admin'
+       RETURNING id, name, student_number`,
+      [password_hash, req.params.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Қолданушы табылмады' });
+    }
+
+    res.json({ ...result.rows[0], temp_password: tempPassword });
+  } catch (error) {
+    console.error('Уақытша құпиясөз қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
 // ===== КУРАТОР =====
 
 // Куратордың оқушылары
@@ -1218,6 +1289,7 @@ const runMigrations = async () => {
 
     ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_data BYTEA;
     ALTER TABLE materials ADD COLUMN IF NOT EXISTS file_mime VARCHAR(100);
+    ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS purpose VARCHAR(10) NOT NULL DEFAULT 'register';
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS channel VARCHAR(10) NOT NULL DEFAULT 'sms';
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS tg_token VARCHAR(64) UNIQUE;
     ALTER TABLE phone_verifications ADD COLUMN IF NOT EXISTS tg_chat_id BIGINT;

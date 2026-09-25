@@ -182,6 +182,39 @@
 .role-curator { background: var(--brand-soft); color: var(--brand); }
 .role-student { background: #eef7ee; color: #3a8a3a; }
 
+/* Уақытша құпиясөз */
+.user-row {
+  flex-wrap: wrap;
+}
+
+.temp-password {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--accent-soft);
+  border: 1px solid #f5dcb3;
+  border-radius: 10px;
+  font-size: 14px;
+  animation: fadeUp 0.3s var(--ease) both;
+}
+
+.temp-password code {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: var(--brand-dark);
+}
+
+.temp-password .muted {
+  flex: 1 1 260px;
+}
+
 /* ===== Куратор панелі ===== */
 .curator-layout {
   display: grid;

@@ -17,6 +17,7 @@ export default function UsersManager() {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState(null);
+  const [tempPassword, setTempPassword] = useState(null);
 
   const token = localStorage.getItem('token');
   const headers = { Authorization: `Bearer ${token}` };
@@ -52,6 +53,31 @@ export default function UsersManager() {
       alert(error.response?.data?.error || 'Рөл өзгерту сәтсіз');
     } finally {
       setSavingId(null);
+    }
+  };
+
+  const resetPassword = async (user) => {
+    if (!window.confirm(`${user.name} үшін жаңа уақытша құпиясөз жасайсыз ба? Ескі құпиясөзі жұмыс істемей қалады.`)) {
+      return;
+    }
+    setSavingId(user.id);
+    try {
+      const response = await axios.post(`${API}/api/admin/users/${user.id}/reset-password`, {}, { headers });
+      setTempPassword({ id: user.id, value: response.data.temp_password, copied: false });
+    } catch (error) {
+      console.error('Құпиясөзді қалпына келтіру қатесі:', error);
+      alert(error.response?.data?.error || 'Құпиясөзді қалпына келтіру сәтсіз');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const copyTempPassword = async () => {
+    try {
+      await navigator.clipboard.writeText(tempPassword.value);
+      setTempPassword({ ...tempPassword, copied: true });
+    } catch {
+      // Көшіру мүмкін болмаса, құпиясөз экранда көрініп тұр
     }
   };
 
@@ -114,6 +140,16 @@ export default function UsersManager() {
               )}
             </div>
             <span className={`role-badge role-${user.role}`}>{ROLE_LABELS[user.role]}</span>
+            {user.role !== 'admin' && (
+              <button
+                className="small-btn"
+                disabled={savingId === user.id}
+                onClick={() => resetPassword(user)}
+                title="Уақытша құпиясөз жасау"
+              >
+                🔑 Құпиясөз
+              </button>
+            )}
             {user.role === 'student' && (
               <button
                 className="small-btn primary"
@@ -131,6 +167,17 @@ export default function UsersManager() {
               >
                 Куратордан алу
               </button>
+            )}
+            {tempPassword?.id === user.id && (
+              <div className="temp-password">
+                <span>Уақытша құпиясөз:</span>
+                <code>{tempPassword.value}</code>
+                <button className="small-btn" onClick={copyTempPassword}>
+                  {tempPassword.copied ? '✓ Көшірілді' : 'Көшіру'}
+                </button>
+                <span className="muted">Оқушыға беріңіз, ол осы құпиясөзбен кіреді. Бұл терезе жабылғаннан кейін құпиясөз қайта көрсетілмейді.</span>
+                <button className="icon-btn" onClick={() => setTempPassword(null)} aria-label="Жабу">✕</button>
+              </div>
             )}
           </div>
         ))}
