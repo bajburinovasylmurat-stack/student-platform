@@ -47,7 +47,12 @@ export default function AdminPanel() {
       setMaterialDesc('');
     } catch (error) {
       console.error('Материал қосу қатесі:', error);
-      alert('Материал қосу сәтсіз');
+      // Себебін көрсету: сервер хабары, HTTP коды немесе желі қатесі
+      const data = error.response?.data;
+      const reason = error.response
+        ? `${data?.error || 'Сервер қатесі'}${data?.detail ? ` (${data.detail})` : ''} [${error.response.status}]`
+        : `Серверге жету мүмкін болмады: ${error.message}`;
+      alert(`Материал қосу сәтсіз.\n${reason}`);
     } finally {
       setLoading(false);
     }

@@ -596,7 +596,8 @@ app.post('/api/materials', verifyToken, requireRole('admin'), (req, res, next) =
   } catch (error) {
     await client.query('ROLLBACK').catch(() => {});
     console.error('Материал қосу қатесі:', error);
-    res.status(500).json({ error: 'Сервер қатесі' });
+    // Бұл тек админге ашық, сондықтан себебін көрсетуге болады
+    res.status(500).json({ error: 'Сервер қатесі', detail: error.message });
   } finally {
     client.release();
   }
