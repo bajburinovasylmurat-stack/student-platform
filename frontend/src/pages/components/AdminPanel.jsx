@@ -158,7 +158,7 @@ export default function AdminPanel() {
                 />
                 {materialFile && <span className="file-name">✓ {materialFile.name}</span>}
                 {materialFile && (
-                  <span className="file-size">{(materialFile.size / 1024 / 1024).toFixed(1)} МБ · ең көбі 50 МБ</span>
+                  <span className="file-size">{(materialFile.size / 1024 / 1024).toFixed(1)} МБ · ең көбі 200 МБ</span>
                 )}
               </div>
 

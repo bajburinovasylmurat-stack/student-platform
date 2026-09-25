@@ -28,7 +28,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Render тегін тарифінде диск әр deploy сайын тазаланады, сондықтан материалдар базада сақталады.
 // Файл 2 МБ-тық бөліктермен жүктеледі: бір үлкен сұраныс Render-де үзіліп қалатын
-const MAX_MATERIAL_MB = 50;
+const MAX_MATERIAL_MB = 200;
 const MATERIAL_CATEGORIES = ['practice', 'formula'];
 const CHUNK_BYTES = 2 * 1024 * 1024;
 
