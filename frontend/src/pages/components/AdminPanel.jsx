@@ -175,7 +175,7 @@ export default function AdminPanel() {
                   value={examCategory}
                   onChange={(e) => setExamCategory(e.target.value)}
                 >
-                  <option value="24_hour">24 сағаттық нұсқа</option>
+                  <option value="24_hour">12 сағаттық нұсқа</option>
                   <option value="geometry">Геометрия</option>
                   <option value="mathematics">Математика</option>
                 </select>

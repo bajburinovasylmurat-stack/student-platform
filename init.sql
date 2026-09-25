@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS materials (
 CREATE TABLE IF NOT EXISTS examinations (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
-  category VARCHAR(50) NOT NULL, -- '24_hour', 'geometry', 'mathematics'
+  category VARCHAR(50) NOT NULL, -- '24_hour' (сайтта «12 сағаттық» деп көрсетіледі), 'geometry', 'mathematics'
   youtube_url VARCHAR(500),
   thumbnail_url VARCHAR(500),
   description TEXT,

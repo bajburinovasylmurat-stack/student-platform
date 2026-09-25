@@ -16,7 +16,7 @@ export default function Examinations({ isAdmin }) {
   });
 
   const categories = {
-    '24_hour': '24 сағаттық нұсқа',
+    '24_hour': '12 сағаттық нұсқа',
     'geometry': 'Геометрия',
     'mathematics': 'Математика'
   };
@@ -88,7 +88,7 @@ export default function Examinations({ isAdmin }) {
             value={formData.category}
             onChange={(e) => setFormData({...formData, category: e.target.value})}
           >
-            <option value="24_hour">24 сағаттық нұсқа</option>
+            <option value="24_hour">12 сағаттық нұсқа</option>
             <option value="geometry">Геометрия</option>
             <option value="mathematics">Математика</option>
           </select>
