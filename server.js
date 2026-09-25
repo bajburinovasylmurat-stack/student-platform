@@ -1130,6 +1130,94 @@ app.post('/api/admin/users/:id/reset-password', verifyToken, requireRole('admin'
   }
 });
 
+// Оқушыны басқа куратордың қарауына беру (curator_id = null болса, кураторсыз қалады).
+// Куратор құрған жоспарлар оқушымен бірге жаңа кураторға өтеді
+const assignCurator = async (client, studentIds, curatorId) => {
+  await client.query('UPDATE students SET curator_id = $1 WHERE id = ANY($2::int[])', [curatorId, studentIds]);
+  if (curatorId) {
+    await client.query('UPDATE curator_plans SET curator_id = $1 WHERE student_id = ANY($2::int[])', [curatorId, studentIds]);
+  }
+};
+
+const findCurator = async (client, id) => {
+  const result = await client.query(
+    "SELECT id, name FROM students WHERE id = $1 AND role = 'curator'",
+    [id]
+  );
+  return result.rows[0];
+};
+
+// Бір оқушының куратор ауыстыру (админ)
+app.patch('/api/admin/users/:id/curator', verifyToken, requireRole('admin'), async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const curatorId = req.body.curator_id ? Number(req.body.curator_id) : null;
+    const student = await client.query(
+      "SELECT id FROM students WHERE id = $1 AND COALESCE(role, 'student') = 'student' AND student_number <> 'admin'",
+      [req.params.id]
+    );
+    if (student.rows.length === 0) {
+      return res.status(404).json({ error: 'Оқушы табылмады' });
+    }
+    if (curatorId && !(await findCurator(client, curatorId))) {
+      return res.status(400).json({ error: 'Куратор табылмады' });
+    }
+
+    await client.query('BEGIN');
+    await assignCurator(client, [Number(req.params.id)], curatorId);
+    await client.query('COMMIT');
+    res.json({ id: Number(req.params.id), curator_id: curatorId });
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Куратор ауыстыру қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  } finally {
+    client.release();
+  }
+});
+
+// Куратордың барлық оқушыларын басқа кураторға көшіру (админ)
+app.post('/api/admin/curators/:id/transfer', verifyToken, requireRole('admin'), async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const fromId = Number(req.params.id);
+    const toId = Number(req.body.to_curator_id);
+    if (!toId || toId === fromId) {
+      return res.status(400).json({ error: 'Басқа куратор таңдаңыз' });
+    }
+    if (!(await findCurator(client, fromId)) || !(await findCurator(client, toId))) {
+      return res.status(404).json({ error: 'Куратор табылмады' });
+    }
+
+    await client.query('BEGIN');
+    const students = await client.query('SELECT id FROM students WHERE curator_id = $1', [fromId]);
+    const ids = students.rows.map((r) => r.id);
+    await assignCurator(client, ids, toId);
+    await client.query('COMMIT');
+    res.json({ moved: ids.length });
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Оқушыларды көшіру қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  } finally {
+    client.release();
+  }
+});
+
+// Оқушының куратор құрған жоспарлары (админ көреді)
+app.get('/api/admin/students/:id/plans', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `${PLAN_SELECT} WHERE p.student_id = $1 GROUP BY p.id, c.name ORDER BY p.start_date DESC`,
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Оқушы жоспарларын алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
 // ===== КУРАТОР =====
 
 // Куратордың оқушылары
