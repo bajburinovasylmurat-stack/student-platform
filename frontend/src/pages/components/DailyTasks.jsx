@@ -4,6 +4,7 @@ import { formatKkDate } from '../../utils/kkDate';
 import { toDateString, parseDate } from './planUtils';
 import PlanTaskItem from './PlanTaskItem';
 import { fetchPlansForDate, createPlan, updatePlan, deletePlan, sortPlans } from './planApi';
+import { LuCalendarDays, LuListChecks } from 'react-icons/lu';
 
 // «Жоспар» бетінде бүгінгі күнге қосылғандардың бәрі осында көрінеді
 export default function DailyTasks() {
@@ -85,10 +86,10 @@ export default function DailyTasks() {
 
   return (
     <div className="daily-tasks-section">
-      <h2>✅ Бүгінгі Тапсырмалар</h2>
+      <h2><LuListChecks /> Бүгінгі Тапсырмалар</h2>
 
       <div className="today-info">
-        <h3>📅 {formatKkDate(parseDate(today), { weekday: 'long', year: true })}</h3>
+        <h3><LuCalendarDays /> {formatKkDate(parseDate(today), { weekday: 'long', year: true })}</h3>
         <div className="progress">
           <span>{completedCount} / {tasks.length} орындалды</span>
           <div className="progress-bar">

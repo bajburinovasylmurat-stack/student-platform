@@ -399,8 +399,9 @@
   animation: shake 0.45s both;
 }
 
-.auth-error::before {
-  content: '⚠';
+.auth-error svg {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .dev-notice {

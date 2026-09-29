@@ -9,8 +9,15 @@ import DailyTasks from './components/DailyTasks';
 import AdminPanel from './components/AdminPanel';
 import CuratorPanel from './components/CuratorPanel';
 import MyCuratorPlans from './components/MyCuratorPlans';
+import Tests from './components/Tests';
+import Flashcards from './components/Flashcards';
+import Leaderboard from './components/Leaderboard';
+import NotifyButton from './components/NotifyButton';
+import { AnnouncementsBar } from './components/Announcements';
+import { api } from '../api';
 import { formatKkDate, capitalize } from '../utils/kkDate';
 import { prettyPhone } from '../utils/phone';
+import { LuBookOpen, LuBrain, LuCalendarDays, LuClapperboard, LuFileQuestion, LuFlame, LuListChecks, LuSettings2, LuTarget, LuTrophy, LuUsers } from 'react-icons/lu';
 
 const ROLE_LABELS = {
   admin: 'Админ',
@@ -32,6 +39,7 @@ export default function Dashboard({ student, onLogout }) {
   const [activeTab, setActiveTab] = useState('materials');
   const [role, setRole] = useState(student.role || (student.student_number === 'admin' ? 'admin' : 'student'));
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+  const [stats, setStats] = useState(null);
   const tabRefs = useRef({});
   const isAdmin = role === 'admin';
   const isCurator = role === 'curator';
@@ -50,14 +58,22 @@ export default function Dashboard({ student, onLogout }) {
       .catch((error) => console.error('Профиль алу қатесі:', error));
   }, []);
 
+  // Серия: бөлім ауысқанда жаңарады (тапсырма орындалса бірден көрінеді)
+  useEffect(() => {
+    api.get('/api/me/stats').then(setStats).catch(() => {});
+  }, [activeTab]);
+
   const tabs = [
-    { id: 'materials', icon: '📚', label: 'Материалдар' },
-    { id: 'examinations', icon: '🎬', label: 'Нұсқа талдаулар' },
-    { id: 'plans', icon: '📅', label: 'Жоспар' },
-    { id: 'daily', icon: '✅', label: 'Бүгінгі тапсырмалар' },
-    role === 'student' && { id: 'curator-plans', icon: '🎯', label: 'Куратор жоспары' },
-    (isCurator || isAdmin) && { id: 'curator', icon: '🧑‍🏫', label: 'Менің оқушыларым' },
-    isAdmin && { id: 'admin', icon: '🛠️', label: 'Админ панелі' }
+    { id: 'materials', icon: <LuBookOpen />, label: 'Материалдар' },
+    { id: 'examinations', icon: <LuClapperboard />, label: 'Нұсқа талдаулар' },
+    { id: 'plans', icon: <LuCalendarDays />, label: 'Жоспар' },
+    { id: 'daily', icon: <LuListChecks />, label: 'Бүгінгі тапсырмалар' },
+    { id: 'tests', icon: <LuFileQuestion />, label: 'Тесттер' },
+    { id: 'cards', icon: <LuBrain />, label: 'Карточкалар' },
+    { id: 'rating', icon: <LuTrophy />, label: 'Рейтинг' },
+    role === 'student' && { id: 'curator-plans', icon: <LuTarget />, label: 'Куратор жоспары' },
+    (isCurator || isAdmin) && { id: 'curator', icon: <LuUsers />, label: 'Менің оқушыларым' },
+    isAdmin && { id: 'admin', icon: <LuSettings2 />, label: 'Админ панелі' }
   ].filter(Boolean);
 
   // Белсенді таб астындағы сырғымалы сызық
@@ -86,6 +102,7 @@ export default function Dashboard({ student, onLogout }) {
           <img src={logo} alt="JUZ40" className="header-logo" />
 
           <div className="user-chip">
+            <NotifyButton />
             <div className="avatar">{initials(student.name)}</div>
             <div className="user-meta">
               <strong>{student.name}</strong>
@@ -127,8 +144,16 @@ export default function Dashboard({ student, onLogout }) {
         <div className="welcome-inner">
           <div>
             <p className="welcome-date">{today}</p>
-            <h1>{greeting()}, {firstName}! 👋</h1>
+            <h1>{greeting()}, {firstName}!</h1>
             <p className="welcome-sub">Бүгін де бір қадам алға. Жоспарыңды орында, нәтижеңді көр.</p>
+            {stats && (
+              <div className={`streak-chip ${stats.streak >= 3 ? 'hot' : ''}`} title={`Ең ұзақ серия: ${stats.best_streak} күн`}>
+                <LuFlame className="flame" />
+                {stats.streak > 0
+                  ? <>{stats.streak} күн қатарынан!{!stats.done_today && ' Бүгін де бір тапсырма орында'}</>
+                  : 'Бүгін бір тапсырма орындап, серияны баста!'}
+              </div>
+            )}
           </div>
           <div className="welcome-art" aria-hidden="true">
             <span>∑</span><span>π</span><span>√</span>
@@ -136,12 +161,17 @@ export default function Dashboard({ student, onLogout }) {
         </div>
       </section>
 
+      <AnnouncementsBar />
+
       <main className="dashboard-content" key={activeTab}>
         {activeTab === 'materials' && <Materials isAdmin={isAdmin} />}
         {activeTab === 'examinations' && <Examinations isAdmin={isAdmin} />}
         {activeTab === 'plans' && <Plans />}
         {activeTab === 'daily' && <DailyTasks />}
         {activeTab === 'curator-plans' && <MyCuratorPlans />}
+        {activeTab === 'tests' && <Tests />}
+        {activeTab === 'cards' && <Flashcards />}
+        {activeTab === 'rating' && <Leaderboard />}
         {activeTab === 'curator' && (isCurator || isAdmin) && <CuratorPanel />}
         {activeTab === 'admin' && isAdmin && <AdminPanel />}
       </main>

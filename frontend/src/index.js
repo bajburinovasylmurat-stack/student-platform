@@ -8,3 +8,10 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+// Телефонға орнату (PWA): тек production build-те, әзірлеу кезінде кэш кедергі келтірмеуі үшін
+if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((error) => console.error('Service worker қатесі:', error));
+  });
+}

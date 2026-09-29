@@ -6,6 +6,8 @@ import {
   formatDay, formatRange, groupByDate, PLAN_TYPE_LABELS
 } from './planUtils';
 import { prettyPhone } from '../../utils/phone';
+import CuratorAnalytics from './CuratorAnalytics';
+import { LuArrowLeft, LuCheck, LuCheckCircle2, LuCircle, LuPlus, LuTrash2, LuUsers, LuX } from 'react-icons/lu';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
 
@@ -146,14 +148,15 @@ export default function CuratorPanel() {
 
   return (
     <div className="curator-panel">
-      <h2>🧑‍🏫 Куратор панелі</h2>
+      <h2><LuUsers /> Куратор панелі</h2>
+      <CuratorAnalytics refreshKey={students.length} />
 
       <div className="curator-layout">
         <aside className="curator-sidebar">
           <div className="sidebar-header">
             <h3>Менің оқушыларым ({students.length})</h3>
             <button className="small-btn primary" onClick={() => setShowAdd(!showAdd)}>
-              {showAdd ? '✕' : '+ Қосу'}
+              {showAdd ? <LuX /> : <><LuPlus /> Қосу</>}
             </button>
           </div>
 
@@ -164,7 +167,7 @@ export default function CuratorPanel() {
                 className="search-input"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="🔍 Аты немесе нөмірі"
+                placeholder="Аты немесе нөмірі"
                 autoFocus
               />
               <div className="available-list">
@@ -196,9 +199,10 @@ export default function CuratorPanel() {
                 <button
                   className="icon-btn"
                   title="Тізімнен шығару"
+                  aria-label="Тізімнен шығару"
                   onClick={(e) => { e.stopPropagation(); removeStudent(s); }}
                 >
-                  ✕
+                  <LuX />
                 </button>
               </div>
             ))}
@@ -207,7 +211,7 @@ export default function CuratorPanel() {
 
         <section className="curator-main">
           {!selected ? (
-            <p className="empty-text center">← Жоспарын көру үшін оқушыны таңдаңыз</p>
+            <p className="empty-text center"><LuArrowLeft /> Жоспарын көру үшін оқушыны таңдаңыз</p>
           ) : (
             <>
               <div className="main-header">
@@ -365,7 +369,7 @@ function PlanForm({ studentId, headers, onCreated, onCancel }) {
               <li key={i}>
                 <span className="task-date-chip">{formatDay(t.task_date)}</span>
                 <span className="grow">{t.task_title}</span>
-                <button type="button" className="icon-btn" onClick={() => setTasks(tasks.filter((_, j) => j !== i))}>✕</button>
+                <button type="button" className="icon-btn" onClick={() => setTasks(tasks.filter((_, j) => j !== i))} aria-label="Өшіру"><LuX /></button>
               </li>
             ))}
           </ul>
@@ -375,7 +379,7 @@ function PlanForm({ studentId, headers, onCreated, onCancel }) {
       <div className="form-actions">
         <button type="button" className="small-btn" onClick={onCancel}>Болдырмау</button>
         <button type="submit" className="small-btn primary" disabled={saving}>
-          {saving ? 'Сақталуда...' : `✓ Жоспарды сақтау (${tasks.length} тапсырма)`}
+          {saving ? 'Сақталуда...' : <><LuCheck /> Жоспарды сақтау ({tasks.length} тапсырма)</>}
         </button>
       </div>
     </form>
@@ -421,9 +425,9 @@ function PlanCard({ plan, onDelete, onAddTask, onDeleteTask }) {
               <div className="day-title">{formatDay(date)}</div>
               {grouped[date].map(t => (
                 <div key={t.id} className={`plan-task ${t.is_completed ? 'done' : ''}`}>
-                  <span>{t.is_completed ? '✅' : '⬜'}</span>
+                  {t.is_completed ? <LuCheckCircle2 className="task-done-icon" /> : <LuCircle className="task-open-icon" />}
                   <span className="grow">{t.task_title}</span>
-                  <button className="icon-btn" onClick={() => onDeleteTask(t.id)}>✕</button>
+                  <button className="icon-btn" onClick={() => onDeleteTask(t.id)} aria-label="Өшіру"><LuX /></button>
                 </div>
               ))}
             </div>
@@ -445,7 +449,7 @@ function PlanCard({ plan, onDelete, onAddTask, onDeleteTask }) {
             <button className="small-btn" onClick={submitTask}>+</button>
           </div>
 
-          <button className="small-btn danger" onClick={onDelete}>🗑 Жоспарды өшіру</button>
+          <button className="small-btn danger" onClick={onDelete}><LuTrash2 /> Жоспарды өшіру</button>
         </div>
       )}
     </div>

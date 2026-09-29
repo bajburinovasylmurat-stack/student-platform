@@ -3,6 +3,7 @@ import axios from 'axios';
 import './Login.css';
 import logo from '../assets/logo.png';
 import logoWhite from '../assets/logo-white.png';
+import { LuAlertCircle, LuArrowLeft, LuArrowRight, LuBookOpen, LuCheck, LuClapperboard, LuSettings, LuTarget } from 'react-icons/lu';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
 const CODE_LENGTH = 6;
@@ -32,9 +33,9 @@ const extractPhoneDigits = (value) => {
 const FLOATING_SYMBOLS = ['∑', 'π', '√x', '∫', '△', 'x²', '∞', 'sin α', '%', '÷', 'log', '≈'];
 
 const FEATURES = [
-  { icon: '📚', title: 'Материалдар', text: 'Тақырып бойынша PDF конспектілер' },
-  { icon: '🎬', title: 'Нұсқа талдаулары', text: '12 сағаттық, геометрия, математика' },
-  { icon: '🎯', title: 'Жеке куратор', text: 'Апталық және айлық жоспар' }
+  { icon: <LuBookOpen />, title: 'Материалдар', text: 'Тақырып бойынша PDF конспектілер' },
+  { icon: <LuClapperboard />, title: 'Нұсқа талдаулары', text: '12 сағаттық, геометрия, математика' },
+  { icon: <LuTarget />, title: 'Жеке куратор', text: 'Апталық және айлық жоспар' }
 ];
 
 export default function Login({ onLoginSuccess }) {
@@ -255,7 +256,7 @@ export default function Login({ onLoginSuccess }) {
           {mode === 'login' && (
             <form key="login" onSubmit={handleLogin} className="auth-form">
               <div className="auth-heading">
-                <h2>Қош келдіңіз! 👋</h2>
+                <h2>Қош келдіңіз!</h2>
                 <p>Аккаунтыңызға кіріңіз</p>
               </div>
 
@@ -294,7 +295,7 @@ export default function Login({ onLoginSuccess }) {
                 </button>
               </div>
 
-              {error && <div key={errorKey} className="auth-error">{error}</div>}
+              {error && <div key={errorKey} className="auth-error"><LuAlertCircle />{error}</div>}
 
               <button type="submit" className="auth-submit" disabled={loading}>
                 {loading ? <span className="spinner" /> : 'Кіру'}
@@ -306,7 +307,7 @@ export default function Login({ onLoginSuccess }) {
             <div className="auth-form" key={`${mode}-${step}`}>
               <div className="steps">
                 <div className={`step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'done' : ''}`}>
-                  <span>{step > 1 ? '✓' : '1'}</span> Нөмір
+                  <span>{step > 1 ? <LuCheck /> : '1'}</span> Нөмір
                 </div>
                 <div className={`step-line ${step > 1 ? 'filled' : ''}`} />
                 <div className={`step ${step >= 2 ? 'active' : ''}`}>
@@ -352,15 +353,15 @@ export default function Login({ onLoginSuccess }) {
                     />
                   </label>
 
-                  {error && <div key={errorKey} className="auth-error">{error}</div>}
+                  {error && <div key={errorKey} className="auth-error"><LuAlertCircle />{error}</div>}
 
                   <button type="submit" className="auth-submit" disabled={loading || phoneDigits.length !== 10 || (!isReset && !name.trim())}>
-                    {loading ? <span className="spinner" /> : 'Код алу →'}
+                    {loading ? <span className="spinner" /> : <>Код алу <LuArrowRight /></>}
                   </button>
                   {isReset && (
                     <div className="forgot-row center">
                       <button type="button" className="link-btn" onClick={() => switchMode('login')}>
-                        ← Кіруге оралу
+                        <LuArrowLeft /> Кіруге оралу
                       </button>
                     </div>
                   )}
@@ -387,7 +388,7 @@ export default function Login({ onLoginSuccess }) {
                     <div className="tg-box">
                       <ol>
                         <li>Төмендегі батырманы басып, ботты ашыңыз</li>
-                        <li>Ботта <b>Start</b>, содан кейін <b>«📱 Нөмірді жіберу»</b> басыңыз</li>
+                        <li>Ботта <b>Start</b>, содан кейін <b>«Нөмірді жіберу»</b> басыңыз</li>
                         <li>Бот жіберген кодты осында енгізіңіз</li>
                       </ol>
                       <a href={botUrl} target="_blank" rel="noopener noreferrer" className="tg-btn">
@@ -401,7 +402,7 @@ export default function Login({ onLoginSuccess }) {
 
                   {devMode && (
                     <div className="dev-notice">
-                      ⚙️ Тест режимі: SMS қызметі әлі қосылмаған, сондықтан код автоматты түрде қойылды.
+                      <LuSettings /> Тест режимі: SMS қызметі әлі қосылмаған, сондықтан код автоматты түрде қойылды.
                     </div>
                   )}
 
@@ -452,10 +453,10 @@ export default function Login({ onLoginSuccess }) {
                     </div>
                   </label>
 
-                  {error && <div key={errorKey} className="auth-error">{error}</div>}
+                  {error && <div key={errorKey} className="auth-error"><LuAlertCircle />{error}</div>}
 
                   <button type="submit" className="auth-submit" disabled={loading}>
-                    {loading ? <span className="spinner" /> : (isReset ? 'Құпиясөзді жаңарту ✓' : 'Тіркелу ✓')}
+                    {loading ? <span className="spinner" /> : <>{isReset ? 'Құпиясөзді жаңарту' : 'Тіркелу'} <LuCheck /></>}
                   </button>
                 </form>
               )}

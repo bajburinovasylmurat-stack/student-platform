@@ -3,6 +3,7 @@ import './App.css';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import logo from './assets/logo.png';
+import { IconContext } from 'react-icons';
 
 export default function App() {
   const [student, setStudent] = useState(null);
@@ -43,12 +44,15 @@ export default function App() {
   }
 
   return (
-    <div className="app">
-      {student ? (
-        <Dashboard student={student} onLogout={handleLogout} />
-      ) : (
-        <Login onLoginSuccess={handleLoginSuccess} />
-      )}
-    </div>
+    // Барлық иконкаға ортақ класс: мәтінмен бір деңгейде тұрады
+    <IconContext.Provider value={{ className: 'ic' }}>
+      <div className="app">
+        {student ? (
+          <Dashboard student={student} onLogout={handleLogout} />
+        ) : (
+          <Login onLoginSuccess={handleLoginSuccess} />
+        )}
+      </div>
+    </IconContext.Provider>
   );
 }

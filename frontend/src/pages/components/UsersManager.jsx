@@ -3,13 +3,14 @@ import axios from 'axios';
 import '../styles/Curator.css';
 import { prettyPhone } from '../../utils/phone';
 import { formatRange, formatDay, groupByDate, PLAN_TYPE_LABELS } from './planUtils';
+import { LuArrowRight, LuCheck, LuCheckCircle2, LuCircle, LuClipboardList, LuCopy, LuGraduationCap, LuKeyRound, LuShieldCheck, LuUserCheck, LuUsers, LuX } from 'react-icons/lu';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
 
 const ROLE_LABELS = {
-  admin: '👨‍💼 Админ',
-  curator: '🧑‍🏫 Куратор',
-  student: '🎓 Оқушы'
+  admin: <><LuShieldCheck /> Админ</>,
+  curator: <><LuUserCheck /> Куратор</>,
+  student: <><LuGraduationCap /> Оқушы</>
 };
 
 export default function UsersManager() {
@@ -191,7 +192,7 @@ export default function UsersManager() {
 
   return (
     <div className="admin-section">
-      <h3>👥 Тіркелген қолданушылар</h3>
+      <h3><LuUsers /> Тіркелген қолданушылар</h3>
 
       <div className="users-toolbar">
         <div className="role-filter">
@@ -199,10 +200,10 @@ export default function UsersManager() {
             Барлығы ({counts.all})
           </button>
           <button className={filter === 'curator' ? 'active' : ''} onClick={() => setFilter('curator')}>
-            🧑‍🏫 Кураторлар ({counts.curator})
+            <LuUserCheck /> Кураторлар ({counts.curator})
           </button>
           <button className={filter === 'student' ? 'active' : ''} onClick={() => setFilter('student')}>
-            🎓 Оқушылар ({counts.student})
+            <LuGraduationCap /> Оқушылар ({counts.student})
           </button>
         </div>
         <div className="users-search">
@@ -212,7 +213,7 @@ export default function UsersManager() {
             onChange={(e) => setCuratorFilter(e.target.value)}
             aria-label="Куратор бойынша"
           >
-            <option value="all">🧑‍🏫 Куратор бойынша: барлығы</option>
+            <option value="all">Куратор бойынша: барлығы</option>
             <option value="none">Кураторы жоқ оқушылар</option>
             {curators.map((c) => (
               <option key={c.id} value={c.id}>{c.name} ({c.students_count})</option>
@@ -223,7 +224,7 @@ export default function UsersManager() {
             className="search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="🔍 Аты, нөмірі немесе куратор"
+            placeholder="Аты, нөмірі немесе куратор"
           />
         </div>
       </div>
@@ -242,8 +243,8 @@ export default function UsersManager() {
         <div className="curator-hits">
           {matchedCurators.map((c) => (
             <button key={c.id} className="curator-hit" onClick={() => showCuratorStudents(c.id)}>
-              🧑‍🏫 <b>{c.name}</b> кураторы табылды · {c.students_count} оқушы
-              <span>Оқушыларын көрсету →</span>
+              <LuUserCheck /> <b>{c.name}</b> кураторы табылды · {c.students_count} оқушы
+              <span>Оқушыларын көрсету <LuArrowRight /></span>
             </button>
           ))}
         </div>
@@ -292,7 +293,7 @@ export default function UsersManager() {
               )}
               {user.role === 'curator' && (
                 <button className="link-btn" onClick={() => showCuratorStudents(user.id)}>
-                  Оқушылары: {user.students_count} →
+                  Оқушылары: {user.students_count} <LuArrowRight />
                 </button>
               )}
             </div>
@@ -302,7 +303,7 @@ export default function UsersManager() {
                 className={`small-btn ${user.id in openPlans ? 'active' : ''}`}
                 onClick={() => togglePlans(user)}
               >
-                📋 Жоспарлар
+                <LuClipboardList /> Жоспарлар
               </button>
             )}
             {user.role !== 'admin' && (
@@ -312,7 +313,7 @@ export default function UsersManager() {
                 onClick={() => resetPassword(user)}
                 title="Уақытша құпиясөз жасау"
               >
-                🔑 Құпиясөз
+                <LuKeyRound /> Құпиясөз
               </button>
             )}
             {user.role === 'student' && (
@@ -338,10 +339,10 @@ export default function UsersManager() {
                 <span>Уақытша құпиясөз:</span>
                 <code>{tempPassword.value}</code>
                 <button className="small-btn" onClick={copyTempPassword}>
-                  {tempPassword.copied ? '✓ Көшірілді' : 'Көшіру'}
+                  {tempPassword.copied ? <><LuCheck /> Көшірілді</> : <><LuCopy /> Көшіру</>}
                 </button>
                 <span className="muted">Оқушыға беріңіз, ол осы құпиясөзбен кіреді. Бұл терезе жабылғаннан кейін құпиясөз қайта көрсетілмейді.</span>
-                <button className="icon-btn" onClick={() => setTempPassword(null)} aria-label="Жабу">✕</button>
+                <button className="icon-btn" onClick={() => setTempPassword(null)} aria-label="Жабу"><LuX /></button>
               </div>
             )}
             {user.id in openPlans && <StudentPlans plans={openPlans[user.id]} />}
@@ -386,7 +387,7 @@ function StudentPlans({ plans }) {
                   <div className="day-title">{formatDay(date)}</div>
                   {grouped[date].map((t) => (
                     <div key={t.id} className={`plan-task ${t.is_completed ? 'done' : ''}`}>
-                      <span>{t.is_completed ? '✅' : '⬜'}</span>
+                      {t.is_completed ? <LuCheckCircle2 className="task-done-icon" /> : <LuCircle className="task-open-icon" />}
                       <span className="grow">{t.task_title}</span>
                     </div>
                   ))}

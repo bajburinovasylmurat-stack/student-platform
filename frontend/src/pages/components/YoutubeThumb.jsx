@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { youtubeId, youtubeThumbnail } from '../../utils/youtube';
 import '../styles/YoutubeThumb.css';
+import { LuAlertTriangle, LuCheck } from 'react-icons/lu';
 
 // Видео афишасы: үлкен сурет жоқ болса, hqdefault-қа ауысады (ол әр видеода бар)
 export function YoutubeThumb({ url, fallbackSrc, alt, className }) {
@@ -26,13 +27,13 @@ export function YoutubePreview({ url }) {
   const id = youtubeId(url);
 
   if (!id) {
-    return <div className="yt-preview invalid">⚠️ YouTube сілтемесі танылмады. Видеоның сілтемесін толық көшіріп қойыңыз.</div>;
+    return <div className="yt-preview invalid"><LuAlertTriangle /> YouTube сілтемесі танылмады. Видеоның сілтемесін толық көшіріп қойыңыз.</div>;
   }
 
   return (
     <div className="yt-preview" key={id}>
       <YoutubeThumb url={url} alt="Видео афишасы" className="yt-preview-img" />
-      <span className="yt-preview-ok">✓ Видео табылды, афиша осылай көрінеді</span>
+      <span className="yt-preview-ok"><LuCheck /> Видео табылды, афиша осылай көрінеді</span>
     </div>
   );
 }

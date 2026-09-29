@@ -1,0 +1,17 @@
+{
+  "name": "JUZ40 Online Edu",
+  "short_name": "JUZ40",
+  "description": "Материалдар, нұсқа талдаулары, тесттер және куратормен жеке жоспарлау",
+  "lang": "kk",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f3f7f8",
+  "theme_color": "#295b6e",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

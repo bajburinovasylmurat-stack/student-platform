@@ -2,12 +2,21 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/Examinations.css';
 import { YoutubeThumb, YoutubePreview } from './YoutubeThumb';
+import '../styles/Features.css';
+import { api } from '../../api';
+import { youtubeId } from '../../utils/youtube';
+import VideoPlayer from './VideoPlayer';
+import { LuCheck, LuClapperboard, LuPlay, LuPlus, LuX } from 'react-icons/lu';
+
+const WATCHED_PERCENT = 90; // осыдан көп көрілсе, «көрілді» деп есептеледі
 
 export default function Examinations({ isAdmin }) {
   const [examinations, setExaminations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [views, setViews] = useState({}); // видео id -> { progress, position_sec }
+  const [playing, setPlaying] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     category: '24_hour',
@@ -23,7 +32,25 @@ export default function Examinations({ isAdmin }) {
 
   useEffect(() => {
     fetchExaminations();
+    api.get('/api/my-video-views')
+      .then((rows) => setViews(Object.fromEntries(rows.map((r) => [r.exam_id, r]))))
+      .catch(() => {});
   }, []);
+
+  // Видеоны сайттың ішінде ашу (YouTube сілтемесі болмаса, жаңа бетте)
+  const openVideo = (exam) => {
+    if (!youtubeId(exam.youtube_url)) {
+      window.open(exam.youtube_url, '_blank', 'noopener');
+      return;
+    }
+    setPlaying(exam);
+  };
+
+  const handleProgress = (examId, result) =>
+    setViews((prev) => ({ ...prev, [examId]: { ...prev[examId], ...result } }));
+
+  const progressOf = (exam) => views[exam.id]?.progress || 0;
+  const watchedCount = examinations.filter((e) => progressOf(e) >= WATCHED_PERCENT).length;
 
   const fetchExaminations = async () => {
     try {
@@ -64,14 +91,14 @@ export default function Examinations({ isAdmin }) {
 
   return (
     <div className="examinations-section">
-      <h2>🎬 Нұсқа Талдаулары</h2>
+      <h2><LuClapperboard /> Нұсқа Талдаулары</h2>
 
       {isAdmin && (
         <button 
           className="add-btn" 
           onClick={() => setShowAddForm(!showAddForm)}
         >
-          {showAddForm ? '✕ Жабу' : '+ Нұсқа қосу'}
+          {showAddForm ? <><LuX /> Жабу</> : <><LuPlus /> Нұсқа қосу</>}
         </button>
       )}
 
@@ -109,6 +136,15 @@ export default function Examinations({ isAdmin }) {
         </form>
       )}
 
+      {examinations.length > 0 && (
+        <div className="cards-progress">
+          <div className="progress-track">
+            <div style={{ width: `${(watchedCount / examinations.length) * 100}%` }} />
+          </div>
+          <span>{watchedCount}/{examinations.length} видео толық көрілді</span>
+        </div>
+      )}
+
       <div className="category-filter">
         <button 
           className={selectedCategory === 'all' ? 'active' : ''} 
@@ -129,29 +165,45 @@ export default function Examinations({ isAdmin }) {
 
       <div className="examinations-grid">
         {filteredExaminations.map(exam => (
-          <div key={exam.id} className="exam-card">
-            <YoutubeThumb
-              url={exam.youtube_url}
-              fallbackSrc={exam.thumbnail_url}
-              alt={exam.title}
-              className="exam-thumbnail"
-            />
+          <div key={exam.id} className={`exam-card ${progressOf(exam) >= WATCHED_PERCENT ? 'viewed' : ''}`}>
+            <button className="thumb-button" onClick={() => openVideo(exam)} aria-label={`${exam.title} видеосын ашу`}>
+              <YoutubeThumb
+                url={exam.youtube_url}
+                fallbackSrc={exam.thumbnail_url}
+                alt={exam.title}
+                className="exam-thumbnail"
+              />
+              <span className="play-icon"><LuPlay /></span>
+              {progressOf(exam) >= WATCHED_PERCENT ? (
+                <span className="viewed-badge"><LuCheck /> Көрілді</span>
+              ) : progressOf(exam) > 0 && (
+                <span className="viewed-badge partial">{progressOf(exam)}% көрілді</span>
+              )}
+              {progressOf(exam) > 0 && (
+                <span className="thumb-progress"><span style={{ width: `${progressOf(exam)}%` }} /></span>
+              )}
+            </button>
             <h3>{exam.title}</h3>
             <p className="category">{categories[exam.category]}</p>
             {exam.description && <p className="description">{exam.description}</p>}
             {exam.youtube_url && (
-              <a 
-                href={exam.youtube_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="watch-btn"
-              >
-                🎥 Қарау
-              </a>
+              <button className="watch-btn" onClick={() => openVideo(exam)}>
+                <LuPlay /> {progressOf(exam) > 0 && progressOf(exam) < WATCHED_PERCENT ? 'Жалғастыру' : 'Қарау'}
+              </button>
             )}
           </div>
         ))}
       </div>
+
+      {playing && (
+        <VideoPlayer
+          exam={playing}
+          startAt={progressOf(playing) < WATCHED_PERCENT ? views[playing.id]?.position_sec || 0 : 0}
+          initialProgress={progressOf(playing)}
+          onProgress={handleProgress}
+          onClose={() => setPlaying(null)}
+        />
+      )}
     </div>
   );
 }

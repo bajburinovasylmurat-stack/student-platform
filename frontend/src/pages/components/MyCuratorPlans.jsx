@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/Curator.css';
 import { toDateString, formatDay, formatRange, groupByDate, PLAN_TYPE_LABELS } from './planUtils';
+import { LuTarget } from 'react-icons/lu';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
 
@@ -51,7 +52,7 @@ export default function MyCuratorPlans() {
 
   return (
     <div className="curator-panel">
-      <h2>🎯 Куратор жоспары</h2>
+      <h2><LuTarget /> Куратор жоспары</h2>
 
       <div className="role-filter">
         <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>Барлығы</button>

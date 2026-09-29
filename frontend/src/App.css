@@ -217,3 +217,96 @@ textarea {
 .react-calendar__month-view__days__day {
   font-size: 14px;
 }
+
+/* ===== Иконкалар (react-icons, Lucide) ===== */
+.ic {
+  width: 1.1em;
+  height: 1.1em;
+  flex-shrink: 0;
+  vertical-align: -0.18em;
+}
+
+button .ic,
+a .ic {
+  vertical-align: -0.2em;
+}
+
+/* Иконка мен мәтін қатар тұратын батырмалар */
+button:has(> .ic),
+a:has(> .ic) {
+  gap: 6px;
+}
+
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.small-btn,
+.download-btn,
+.watch-btn,
+.move-btn,
+.delete-btn,
+.add-btn,
+.submit-btn,
+.auth-submit,
+.tg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+h2 .ic,
+h3 .ic {
+  color: var(--brand);
+  margin-right: 4px;
+}
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.medal { width: 1.35em; height: 1.35em; }
+.medal-1 { color: #e0a526; }
+.medal-2 { color: #9aa7ad; }
+.medal-3 { color: #c07a45; }
+
+.risk-icon { color: var(--danger); }
+.ok-icon, .task-done-icon { color: var(--success); }
+.bad-icon { color: var(--danger); }
+.task-open-icon { color: #b8c6cc; }
+
+.tab-icon .ic {
+  width: 1.15em;
+  height: 1.15em;
+}
+
+.feature-icon .ic {
+  width: 22px;
+  height: 22px;
+}
+
+.notify-btn .ic {
+  width: 19px;
+  height: 19px;
+  color: var(--brand);
+}
+
+.announcement-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--accent);
+}
+
+.play-icon .ic {
+  width: 22px;
+  height: 22px;
+  margin-left: 3px;
+}
+
+.streak-chip .flame {
+  color: var(--accent);
+}

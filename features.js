@@ -92,6 +92,10 @@ export const featureMigrations = `
     viewed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (student_id, exam_id)
   );
+  -- Видеоның қай бөліктері көрілді: 100 таңбалы жол ('1' = көрілген бөлік) және тоқтаған жері
+  ALTER TABLE video_views ADD COLUMN IF NOT EXISTS watched CHAR(100) NOT NULL DEFAULT REPEAT('0', 100);
+  ALTER TABLE video_views ADD COLUMN IF NOT EXISTS progress INT NOT NULL DEFAULT 0;
+  ALTER TABLE video_views ADD COLUMN IF NOT EXISTS position_sec INT NOT NULL DEFAULT 0;
 
   -- Хабарландырулар
   CREATE TABLE IF NOT EXISTS announcements (
@@ -829,32 +833,43 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
 
   app.get('/api/my-video-views', verifyToken, async (req, res) => {
     try {
-      const result = await pool.query('SELECT exam_id FROM video_views WHERE student_id = $1', [req.student.id]);
-      res.json(result.rows.map((r) => r.exam_id));
+      const result = await pool.query(
+        'SELECT exam_id, progress, position_sec FROM video_views WHERE student_id = $1',
+        [req.student.id]
+      );
+      res.json(result.rows);
     } catch (error) {
       fail(res, 'Көрілімдер алу қатесі', error);
     }
   });
 
-  app.post('/api/examinations/:id/view', verifyToken, async (req, res) => {
+  // Көру барысы: жаңа көрілген бөліктер бұрынғыларына қосылады (OR), пайызы серверде есептеледі
+  app.post('/api/examinations/:id/progress', verifyToken, async (req, res) => {
     try {
-      await pool.query(
-        `INSERT INTO video_views (student_id, exam_id) SELECT $1, id FROM examinations WHERE id = $2
-         ON CONFLICT (student_id, exam_id) DO UPDATE SET viewed_at = NOW()`,
+      const buckets = String(req.body.watched || '');
+      if (!/^[01]{100}$/.test(buckets)) return res.status(400).json({ error: 'Дерек қате' });
+      const position = Math.max(0, Math.round(Number(req.body.position) || 0));
+
+      const current = await pool.query(
+        'SELECT watched FROM video_views WHERE student_id = $1 AND exam_id = $2',
         [req.student.id, req.params.id]
       );
-      res.json({ ok: true });
-    } catch (error) {
-      fail(res, 'Көрілім сақтау қатесі', error);
-    }
-  });
+      const before = current.rows[0]?.watched || '0'.repeat(100);
+      const merged = [...before].map((c, i) => (c === '1' || buckets[i] === '1' ? '1' : '0')).join('');
+      const progress = [...merged].filter((c) => c === '1').length;
 
-  app.delete('/api/examinations/:id/view', verifyToken, async (req, res) => {
-    try {
-      await pool.query('DELETE FROM video_views WHERE student_id = $1 AND exam_id = $2', [req.student.id, req.params.id]);
-      res.json({ ok: true });
+      const result = await pool.query(`
+        INSERT INTO video_views (student_id, exam_id, watched, progress, position_sec)
+        SELECT $1, id, $3, $4, $5 FROM examinations WHERE id = $2
+        ON CONFLICT (student_id, exam_id) DO UPDATE
+          SET watched = EXCLUDED.watched, progress = EXCLUDED.progress,
+              position_sec = EXCLUDED.position_sec, viewed_at = NOW()
+        RETURNING progress, position_sec
+      `, [req.student.id, req.params.id, merged, progress, position]);
+      if (!result.rows[0]) return res.status(404).json({ error: 'Видео табылмады' });
+      res.json(result.rows[0]);
     } catch (error) {
-      fail(res, 'Көрілім өшіру қатесі', error);
+      fail(res, 'Көру барысын сақтау қатесі', error);
     }
   });
 

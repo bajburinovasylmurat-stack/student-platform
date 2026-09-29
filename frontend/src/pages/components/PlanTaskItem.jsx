@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/PlanTaskItem.css';
+import { LuCheck, LuClock, LuHourglass, LuPencil, LuTrash2 } from 'react-icons/lu';
 
 // Жоспардың бір тапсырмасы: белгілеу, өзгерту, өшіру (Жоспар және Бүгінгі тапсырмалар беттерінде)
 export default function PlanTaskItem({ task, onToggle, onSave, onDelete, showStatus }) {
@@ -41,7 +42,7 @@ export default function PlanTaskItem({ task, onToggle, onSave, onDelete, showSta
         <div className="edit-actions">
           <button type="button" className="edit-cancel" onClick={() => setEditing(false)}>Болдырмау</button>
           <button type="submit" className="edit-save" disabled={saving}>
-            {saving ? '...' : '✓ Сақтау'}
+            {saving ? '...' : <><LuCheck /> Сақтау</>}
           </button>
         </div>
       </form>
@@ -57,17 +58,17 @@ export default function PlanTaskItem({ task, onToggle, onSave, onDelete, showSta
         className="task-checkbox"
       />
       <div className="task-content">
-        {task.task_time && <span className="task-time">🕐 {task.task_time}</span>}
+        {task.task_time && <span className="task-time"><LuClock /> {task.task_time}</span>}
         <span className="task-title">{task.task_title}</span>
       </div>
       {showStatus && (
         <span className={`task-status ${task.is_completed ? 'done' : 'pending'}`}>
-          {task.is_completed ? '✓ Орындалды' : '⏳ Орындалу керек'}
+          {task.is_completed ? <><LuCheck /> Орындалды</> : <><LuHourglass /> Орындалу керек</>}
         </span>
       )}
       <div className="task-tools">
-        <button type="button" onClick={startEdit} title="Өзгерту" aria-label="Өзгерту">✏️</button>
-        <button type="button" onClick={() => onDelete(task)} title="Өшіру" aria-label="Өшіру">🗑</button>
+        <button type="button" onClick={startEdit} title="Өзгерту" aria-label="Өзгерту"><LuPencil /></button>
+        <button type="button" onClick={() => onDelete(task)} title="Өшіру" aria-label="Өшіру"><LuTrash2 /></button>
       </div>
     </div>
   );

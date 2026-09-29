@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/Materials.css';
 import '../styles/PlanTaskItem.css';
+import { LuArrowRight, LuBookOpen, LuDownload, LuPencilLine, LuSigma, LuTrash2 } from 'react-icons/lu';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
 
 const CATEGORIES = {
-  practice: { label: 'Практика', icon: '📝', empty: 'Практика материалдары әлі қосылмаған' },
-  formula: { label: 'Формула', icon: '📐', empty: 'Формулалар әлі қосылмаған' }
+  practice: { label: 'Практика', icon: <LuPencilLine />, empty: 'Практика материалдары әлі қосылмаған' },
+  formula: { label: 'Формула', icon: <LuSigma />, empty: 'Формулалар әлі қосылмаған' }
 };
 
 export default function Materials({ isAdmin }) {
@@ -68,7 +69,7 @@ export default function Materials({ isAdmin }) {
 
   return (
     <div className="materials-section">
-      <h2>📚 Оқу Материалдары</h2>
+      <h2><LuBookOpen /> Оқу Материалдары</h2>
 
       <div className="material-tabs" role="tablist">
         {Object.entries(CATEGORIES).map(([key, c]) => (
@@ -99,7 +100,7 @@ export default function Materials({ isAdmin }) {
                   download
                   className="download-btn"
                 >
-                  ⬇️ Жүктеу
+                  <LuDownload /> Жүктеу
                 </a>
                 {isAdmin && (
                   <>
@@ -109,7 +110,7 @@ export default function Materials({ isAdmin }) {
                       disabled={busyId === material.id}
                       title={`${CATEGORIES[other].label} бөліміне ауыстыру`}
                     >
-                      → {CATEGORIES[other].icon} {CATEGORIES[other].label}
+                      <LuArrowRight /> {CATEGORIES[other].icon} {CATEGORIES[other].label}
                     </button>
                     <button
                       className="delete-btn"
@@ -117,7 +118,7 @@ export default function Materials({ isAdmin }) {
                       disabled={busyId === material.id}
                       title="Материалды өшіру"
                     >
-                      🗑
+                      <LuTrash2 />
                     </button>
                   </>
                 )}

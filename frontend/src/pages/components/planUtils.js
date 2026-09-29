@@ -1,4 +1,5 @@
 import { formatKkDate } from '../../utils/kkDate';
+import { LuCalendarRange, LuCalendarDays } from 'react-icons/lu';
 
 // Күнді жергілікті уақыт бойынша YYYY-MM-DD түрінде (toISOString UTC-ке ауыстырып, күнді жылжытады)
 export const toDateString = (date) => {
@@ -39,8 +40,8 @@ export const formatRange = (start, end) =>
   `${formatKkDate(parseDate(start))} — ${formatKkDate(parseDate(end), { year: true })}`;
 
 export const PLAN_TYPE_LABELS = {
-  weekly: '📆 Апталық',
-  monthly: '🗓️ Айлық'
+  weekly: <><LuCalendarRange /> Апталық</>,
+  monthly: <><LuCalendarDays /> Айлық</>
 };
 
 // Тапсырмаларды күн бойынша топтау

@@ -5,6 +5,10 @@ import '../styles/PlanTaskItem.css';
 import UsersManager from './UsersManager';
 import { uploadMaterial } from './materialUpload';
 import { YoutubePreview } from './YoutubeThumb';
+import AdminTests from './AdminTests';
+import AdminFlashcards from './AdminFlashcards';
+import AdminAnnouncements from './Announcements';
+import { LuBookOpen, LuBrain, LuCheck, LuClapperboard, LuFileQuestion, LuLoader2, LuMegaphone, LuPlus, LuSettings2, LuUpload, LuUsers } from 'react-icons/lu';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('materials');
@@ -90,35 +94,47 @@ export default function AdminPanel() {
 
   return (
     <div className="admin-panel">
-      <h2>🛠️ Администратор Панелі</h2>
+      <h2><LuSettings2 /> Администратор Панелі</h2>
 
       <nav className="admin-nav">
         <button 
           className={activeTab === 'materials' ? 'active' : ''} 
           onClick={() => setActiveTab('materials')}
         >
-          📚 Материалдар қосу
+          <LuBookOpen /> Материалдар қосу
         </button>
         <button 
           className={activeTab === 'exams' ? 'active' : ''} 
           onClick={() => setActiveTab('exams')}
         >
-          🎬 Нұсқалар қосу
+          <LuClapperboard /> Нұсқалар қосу
         </button>
         <button 
           className={activeTab === 'users' ? 'active' : ''} 
           onClick={() => setActiveTab('users')}
         >
-          👥 Қолданушылар
+          <LuUsers /> Қолданушылар
+        </button>
+        <button className={activeTab === 'tests' ? 'active' : ''} onClick={() => setActiveTab('tests')}>
+          <LuFileQuestion /> Тесттер
+        </button>
+        <button className={activeTab === 'cards' ? 'active' : ''} onClick={() => setActiveTab('cards')}>
+          <LuBrain /> Карточкалар
+        </button>
+        <button className={activeTab === 'news' ? 'active' : ''} onClick={() => setActiveTab('news')}>
+          <LuMegaphone /> Хабарландыру
         </button>
       </nav>
 
       <div className="admin-content">
         {activeTab === 'users' && <UsersManager />}
+        {activeTab === 'tests' && <AdminTests />}
+        {activeTab === 'cards' && <AdminFlashcards />}
+        {activeTab === 'news' && <AdminAnnouncements />}
 
         {activeTab === 'materials' && (
           <div className="admin-section">
-            <h3>📚 Материалдар қосу</h3>
+            <h3><LuBookOpen /> Материалдар қосу</h3>
             <form onSubmit={handleMaterialSubmit} className="admin-form">
               <div className="form-group">
                 <label>Материалдың атауы:</label>
@@ -134,8 +150,8 @@ export default function AdminPanel() {
               <div className="form-group">
                 <label>Бөлім:</label>
                 <select value={materialCategory} onChange={(e) => setMaterialCategory(e.target.value)}>
-                  <option value="practice">📝 Практика</option>
-                  <option value="formula">📐 Формула</option>
+                  <option value="practice">Практика</option>
+                  <option value="formula">Формула</option>
                 </select>
               </div>
 
@@ -156,14 +172,14 @@ export default function AdminPanel() {
                   onChange={(e) => setMaterialFile(e.target.files[0])}
                   required
                 />
-                {materialFile && <span className="file-name">✓ {materialFile.name}</span>}
+                {materialFile && <span className="file-name"><LuCheck /> {materialFile.name}</span>}
                 {materialFile && (
                   <span className="file-size">{(materialFile.size / 1024 / 1024).toFixed(1)} МБ · ең көбі 200 МБ</span>
                 )}
               </div>
 
               <button type="submit" disabled={loading} className="submit-btn">
-                {loading ? `⏳ Жүктелуде... ${uploadProgress ?? 0}%` : '✓ Материалды қосу'}
+                {loading ? <><LuLoader2 className="spin" /> Жүктелуде... {uploadProgress ?? 0}%</> : <><LuUpload /> Материалды қосу</>}
               </button>
               {uploadProgress !== null && (
                 <div className="upload-progress" aria-label="Жүктеу барысы">
@@ -176,7 +192,7 @@ export default function AdminPanel() {
 
         {activeTab === 'exams' && (
           <div className="admin-section">
-            <h3>🎬 Нұсқалар қосу</h3>
+            <h3><LuClapperboard /> Нұсқалар қосу</h3>
             <form onSubmit={handleExamSubmit} className="admin-form">
               <div className="form-group">
                 <label>Нұсқаның атауы:</label>
@@ -223,7 +239,7 @@ export default function AdminPanel() {
               </div>
 
               <button type="submit" disabled={loading} className="submit-btn">
-                {loading ? '⏳ Қосылуда...' : '✓ Нұсқа қосу'}
+                {loading ? <><LuLoader2 className="spin" /> Қосылуда...</> : <><LuPlus /> Нұсқа қосу</>}
               </button>
             </form>
           </div>

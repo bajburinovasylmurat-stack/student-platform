@@ -5,6 +5,7 @@ import '../styles/Plans.css';
 import { formatKkDate, calendarFormatters } from '../../utils/kkDate';
 import { toDateString } from './planUtils';
 import PlanTaskItem from './PlanTaskItem';
+import { LuCalendar, LuCalendarDays } from 'react-icons/lu';
 import {
   fetchPlansForDate, fetchPlansForMonth, createPlan, updatePlan, deletePlan, sortPlans
 } from './planApi';
@@ -99,7 +100,7 @@ export default function Plans() {
 
   return (
     <div className="plans-section">
-      <h2>📅 Жоспарлау</h2>
+      <h2><LuCalendarDays /> Жоспарлау</h2>
 
       <div className="plans-container">
         <div className="calendar-section">
@@ -115,7 +116,7 @@ export default function Plans() {
         </div>
 
         <div className="plans-detail">
-          <h3>📍 {formatKkDate(selectedDate, { weekday: 'long', year: true })}</h3>
+          <h3><LuCalendar /> {formatKkDate(selectedDate, { weekday: 'long', year: true })}</h3>
           {isToday && <p className="today-hint">Бүгінгі жоспарлар «Бүгінгі тапсырмалар» бөлімінде де көрінеді</p>}
 
           <form onSubmit={handleAddPlan} className="add-plan-form">
