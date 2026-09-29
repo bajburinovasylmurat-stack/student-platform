@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './Login.css';
-import logo from '../assets/logo.png';
-import logoWhite from '../assets/logo-white.png';
+import Logo from '../components/Logo';
 import { LuAlertCircle, LuArrowLeft, LuArrowRight, LuBookOpen, LuCheck, LuClapperboard, LuSettings, LuTarget } from 'react-icons/lu';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
@@ -219,7 +218,7 @@ export default function Login({ onLoginSuccess }) {
         </div>
 
         <div className="brand-content">
-          <img src={logoWhite} alt="JUZ40" className="brand-logo" />
+          <Logo light size="lg" className="brand-logo" />
           <h1>Біліміңді <span>жаңа деңгейге</span> көтер</h1>
           <p className="brand-subtitle">
             Материалдар, нұсқа талдаулары және жеке куратормен жоспарлау, бәрі бір жерде.
@@ -241,7 +240,7 @@ export default function Login({ onLoginSuccess }) {
 
       <main className="auth-main">
         <div className="auth-card">
-          <img src={logo} alt="JUZ40" className="auth-card-logo" />
+          <Logo size="md" className="auth-card-logo" />
 
           <div className={`auth-tabs ${mode}`}>
             <span className="auth-tabs-pill" />
@@ -463,7 +462,7 @@ export default function Login({ onLoginSuccess }) {
             </div>
           )}
 
-          <p className="auth-footer">© {new Date().getFullYear()} JUZ40 Online Edu</p>
+          <p className="auth-footer">© {new Date().getFullYear()} JUZUP · by JUZ40</p>
         </div>
       </main>
     </div>

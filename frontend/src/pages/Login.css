@@ -78,7 +78,6 @@
 }
 
 .brand-logo {
-  height: 52px;
   margin-bottom: 48px;
   animation: fadeUp 0.7s var(--ease) both;
 }
@@ -191,9 +190,9 @@
 }
 
 .auth-card-logo {
-  display: none;
-  height: 44px;
+  display: none !important;
   margin: 0 auto 32px;
+  width: max-content;
 }
 
 .auth-tabs {
@@ -617,7 +616,7 @@
   }
 
   .auth-card-logo {
-    display: block;
+    display: flex !important;
   }
 
   .auth-main {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import logo from './assets/logo.png';
+import Logo from './components/Logo';
 import { IconContext } from 'react-icons';
 
 export default function App() {
@@ -37,7 +37,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="app-loading">
-        <img src={logo} alt="JUZ40" />
+        <Logo size="lg" className="loading-logo" />
         <div className="loader-bar" />
       </div>
     );

@@ -144,7 +144,7 @@ const handleTelegramUpdate = async (update) => {
     if (!token) {
       await tg('sendMessage', {
         chat_id: chatId,
-        text: 'Сәлем! 👋 Бұл JUZ40 Online Edu платформасының боты.\nТіркелу үшін сайтта «Код алу» батырмасын басыңыз.'
+        text: 'Сәлем! 👋 Бұл JUZUP платформасының боты (by JUZ40).\nТіркелу үшін сайтта «Код алу» батырмасын басыңыз.'
       });
       return;
     }
@@ -216,7 +216,7 @@ const handleTelegramUpdate = async (update) => {
     );
     await tg('sendMessage', {
       chat_id: chatId,
-      text: `✅ Нөмір расталды!\n\nJUZ40 ${PURPOSE_TEXT[v.purpose] || PURPOSE_TEXT.register}: <b>${code}</b>\n\nКодты сайтқа енгізіңіз. Ешкімге айтпаңыз.`,
+      text: `✅ Нөмір расталды!\n\nJUZUP ${PURPOSE_TEXT[v.purpose] || PURPOSE_TEXT.register}: <b>${code}</b>\n\nКодты сайтқа енгізіңіз. Ешкімге айтпаңыз.`,
       parse_mode: 'HTML',
       reply_markup: { remove_keyboard: true }
     });
@@ -359,7 +359,7 @@ app.post('/api/auth/send-code', async (req, res) => {
     );
 
     if (smsEnabled()) {
-      await sendSms(phone, `JUZ40: ${PURPOSE_TEXT[purpose]} ${code}. Кодты ешкімге айтпаңыз.`);
+      await sendSms(phone, `JUZUP: ${PURPOSE_TEXT[purpose]} ${code}. Кодты ешкімге айтпаңыз.`);
       return res.json({ message: 'Код жіберілді', resend_after: RESEND_SECONDS });
     }
 

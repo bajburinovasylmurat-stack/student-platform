@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
-import logo from '../assets/logo.png';
+import Logo from '../components/Logo';
 import Materials from './components/Materials';
 import Examinations from './components/Examinations';
 import Plans from './components/Plans';
@@ -99,7 +99,7 @@ export default function Dashboard({ student, onLogout }) {
     <div className="dashboard">
       <header className="dashboard-header">
         <div className="header-inner">
-          <img src={logo} alt="JUZ40" className="header-logo" />
+          <Logo size="sm" className="header-logo" />
 
           <div className="user-chip">
             <NotifyButton />

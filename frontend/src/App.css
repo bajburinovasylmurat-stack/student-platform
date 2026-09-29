@@ -1,4 +1,4 @@
-/* ===== JUZ40 фирмалық шрифті ===== */
+/* ===== JUZ40 фирмалық шрифті (JUZUP платформасы) ===== */
 @font-face {
   font-family: 'Brand';
   src: url('./assets/fonts/juz-regular.woff2') format('woff2');
@@ -87,8 +87,7 @@ textarea {
   background: var(--bg);
 }
 
-.app-loading img {
-  height: 56px;
+.app-loading .loading-logo {
   animation: pulse 1.4s ease-in-out infinite;
 }
 

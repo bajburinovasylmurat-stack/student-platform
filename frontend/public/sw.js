@@ -1,6 +1,6 @@
-// JUZ40 service worker: сайтты телефонға орнатуға және интернет нашар болғанда тез ашуға.
+// JUZUP service worker: сайтты телефонға орнатуға және интернет нашар болғанда тез ашуға.
 // API сұраныстары (басқа домен) кэштелмейді — деректер әрқашан жаңа.
-const CACHE = 'juz40-v1';
+const CACHE = 'juzup-v1';
 
 self.addEventListener('install', () => self.skipWaiting());
 

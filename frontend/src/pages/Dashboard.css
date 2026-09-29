@@ -31,8 +31,7 @@
 }
 
 .header-logo {
-  height: 38px;
-  display: block;
+  flex-shrink: 0;
 }
 
 .user-chip {
@@ -304,7 +303,7 @@
   }
 
   .header-logo {
-    height: 30px;
+    font-size: 22px;
   }
 
   .user-meta,

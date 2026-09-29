@@ -1,0 +1,49 @@
+/* ===== JUZUP логотипі ===== */
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  line-height: 1;
+  font-family: var(--font);
+  color: var(--brand);
+  user-select: none;
+}
+
+.logo-name {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.logo-up {
+  color: var(--accent);
+}
+
+/* «by JUZ40» екі жағынан сызықпен, түпнұсқа логотиптегі «ONLINE — EDU» сияқты */
+.logo-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 0.26em;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.logo-sub::before,
+.logo-sub::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.logo-sm { font-size: 26px; }
+.logo-md { font-size: 32px; }
+.logo-lg { font-size: 44px; }
+
+.logo-light {
+  color: white;
+}
