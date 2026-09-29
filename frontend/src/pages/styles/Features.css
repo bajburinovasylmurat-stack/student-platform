@@ -1347,3 +1347,65 @@
 .admin-nav {
   flex-wrap: wrap;
 }
+
+/* ===== Тесттер тақырып бойынша топталған ===== */
+.test-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.test-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--brand-softer);
+  overflow: hidden;
+}
+
+.test-group summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.test-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.test-group summary:hover {
+  background: var(--brand-soft);
+}
+
+.group-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: white;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.group-count.complete {
+  background: #e6f5ee;
+  color: var(--success);
+}
+
+.group-chevron {
+  color: var(--text-muted);
+  transition: transform 0.25s var(--ease);
+}
+
+.test-group[open] .group-chevron {
+  transform: rotate(180deg);
+}
+
+.test-group .test-grid {
+  padding: 4px 16px 16px;
+}

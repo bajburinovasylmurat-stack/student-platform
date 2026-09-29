@@ -1,6 +1,11 @@
 // Қосымша мүмкіндіктер: онлайн тесттер, Telegram ескертулері, куратор аналитикасы,
 // серия (streak), рейтинг, формула карточкалары, видео көрілімдері, хабарландырулар
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const SEED_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'seed');
 
 // Қазақстан уақыты бойынша бүгінгі күн мен сағат
 const almatyNow = async (pool) => {
@@ -75,6 +80,15 @@ export const featureMigrations = `
     max_score INT
   );
   CREATE INDEX IF NOT EXISTS idx_test_attempts_student ON test_attempts(student_id, finished_at);
+  -- Тесттерді тақырып бойынша топтау және ретімен көрсету
+  ALTER TABLE tests ADD COLUMN IF NOT EXISTS topic VARCHAR(150);
+  ALTER TABLE tests ADD COLUMN IF NOT EXISTS sort_order INT NOT NULL DEFAULT 0;
+
+  -- seed/ папкасындағы мазмұн бір рет қана жүктеледі (админ өшірсе, қайта пайда болмайды)
+  CREATE TABLE IF NOT EXISTS seed_log (
+    name VARCHAR(100) PRIMARY KEY,
+    loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  );
 
   -- Формула карточкалары
   CREATE TABLE IF NOT EXISTS flashcards (
@@ -106,6 +120,54 @@ export const featureMigrations = `
     created_at TIMESTAMPTZ DEFAULT NOW()
   );
 `;
+
+// seed/*.json: дайын тесттер мен карточкалар. Әр файл бір рет жүктеледі
+export async function seedContent(pool) {
+  if (!fs.existsSync(SEED_DIR)) return;
+  const files = fs.readdirSync(SEED_DIR).filter((f) => f.endsWith('.json')).sort();
+
+  for (const file of files) {
+    const name = path.basename(file, '.json');
+    const done = await pool.query('SELECT 1 FROM seed_log WHERE name = $1', [name]);
+    if (done.rows.length) continue;
+
+    const content = JSON.parse(fs.readFileSync(path.join(SEED_DIR, file), 'utf8'));
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      for (const [order, test] of (content.tests || []).entries()) {
+        const created = await client.query(
+          `INSERT INTO tests (title, description, duration_min, is_published, topic, sort_order)
+           VALUES ($1, $2, $3, TRUE, $4, $5) RETURNING id`,
+          [test.title, test.description || null, test.duration_min, test.topic || null, order]
+        );
+        for (const [idx, q] of test.questions.entries()) {
+          await client.query(
+            `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [created.rows[0].id, idx, q.question, JSON.stringify(q.options), q.correct_index, q.points || 1]
+          );
+        }
+      }
+      for (const card of content.flashcards || []) {
+        await client.query(
+          `INSERT INTO flashcards (topic, front, back)
+           SELECT $1::varchar, $2::text, $3::text
+           WHERE NOT EXISTS (SELECT 1 FROM flashcards WHERE topic = $1::varchar AND front = $2::text)`,
+          [card.topic, card.front, card.back]
+        );
+      }
+      await client.query('INSERT INTO seed_log (name) VALUES ($1)', [name]);
+      await client.query('COMMIT');
+      console.log(`📦 Мазмұн жүктелді: ${name} (${content.tests?.length || 0} тест, ${content.flashcards?.length || 0} карточка)`);
+    } catch (error) {
+      await client.query('ROLLBACK').catch(() => {});
+      console.error(`Мазмұн жүктеу қатесі (${name}):`, error.message);
+    } finally {
+      client.release();
+    }
+  }
+}
 
 export function registerFeatures(app, { pool, verifyToken, requireRole, tg, telegramEnabled, getBotUsername }) {
   const fail = (res, label, error) => {
@@ -527,7 +589,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       const result = await pool.query(`
         SELECT t.*, (SELECT COUNT(*) FROM test_questions WHERE test_id = t.id)::int AS questions,
                (SELECT COUNT(*) FROM test_attempts WHERE test_id = t.id AND finished_at IS NOT NULL)::int AS attempts
-        FROM tests t ORDER BY t.created_at DESC
+        FROM tests t ORDER BY t.topic NULLS LAST, t.sort_order, t.created_at DESC
       `);
       res.json(result.rows);
     } catch (error) {
@@ -554,6 +616,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
     const client = await pool.connect();
     try {
       const { title, description, duration_min, is_published } = req.body;
+      const topic = req.body.topic?.trim() || null;
       if (!title?.trim()) return res.status(400).json({ error: 'Тест атауы қажет' });
       const questions = cleanQuestions(req.body.questions);
       if (is_published && questions.length === 0) {
@@ -565,9 +628,9 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       let testId = id;
       if (testId) {
         const updated = await client.query(
-          `UPDATE tests SET title = $1, description = $2, duration_min = $3, is_published = $4
+          `UPDATE tests SET title = $1, description = $2, duration_min = $3, is_published = $4, topic = $6
            WHERE id = $5 RETURNING id`,
-          [title.trim(), description || null, duration, !!is_published, testId]
+          [title.trim(), description || null, duration, !!is_published, testId, topic]
         );
         if (!updated.rows[0]) {
           await client.query('ROLLBACK');
@@ -576,8 +639,8 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
         await client.query('DELETE FROM test_questions WHERE test_id = $1', [testId]);
       } else {
         const created = await client.query(
-          `INSERT INTO tests (title, description, duration_min, is_published) VALUES ($1, $2, $3, $4) RETURNING id`,
-          [title.trim(), description || null, duration, !!is_published]
+          `INSERT INTO tests (title, description, duration_min, is_published, topic) VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+          [title.trim(), description || null, duration, !!is_published, topic]
         );
         testId = created.rows[0].id;
       }
@@ -618,7 +681,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
   app.get('/api/tests', verifyToken, async (req, res) => {
     try {
       const result = await pool.query(`
-        SELECT t.id, t.title, t.description, t.duration_min,
+        SELECT t.id, t.title, t.description, t.duration_min, t.topic,
           (SELECT COUNT(*) FROM test_questions WHERE test_id = t.id)::int AS questions,
           (SELECT COALESCE(SUM(points), 0) FROM test_questions WHERE test_id = t.id)::int AS max_score,
           (SELECT MAX(score) FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NOT NULL) AS best_score,
@@ -626,7 +689,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
           (SELECT id FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NULL
              AND started_at + (t.duration_min * INTERVAL '1 minute') + INTERVAL '${GRACE_SECONDS} seconds' > NOW()
            ORDER BY started_at DESC LIMIT 1) AS active_attempt
-        FROM tests t WHERE t.is_published ORDER BY t.created_at DESC
+        FROM tests t WHERE t.is_published ORDER BY t.topic NULLS LAST, t.sort_order, t.created_at DESC
       `, [req.student.id]);
       res.json(result.rows);
     } catch (error) {

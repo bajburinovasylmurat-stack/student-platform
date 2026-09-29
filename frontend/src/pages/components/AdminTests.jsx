@@ -53,6 +53,7 @@ export default function AdminTests() {
           {tests.map((t) => (
             <div key={t.id} className="admin-row">
               <div className="grow">
+                {t.topic && <span className="card-topic inline">{t.topic}</span>}
                 <strong>{t.title}</strong>
                 <span className="muted-text">{t.questions} сұрақ · {t.duration_min} мин · {t.attempts} рет тапсырылды</span>
               </div>
@@ -129,6 +130,10 @@ function TestEditor({ initial, onClose }) {
           <input type="number" min="1" max="300" value={test.duration_min} onChange={(e) => setField('duration_min', e.target.value)} />
         </label>
       </div>
+      <label className="field-label">
+        Тақырып (тесттер осы бойынша топталады)
+        <input value={test.topic || ''} onChange={(e) => setField('topic', e.target.value)} placeholder="мысалы: 1-ай · 1-апта · 1.1 Пайыз" />
+      </label>
       <label className="field-label">
         Сипаттама (міндетті емес)
         <textarea value={test.description || ''} onChange={(e) => setField('description', e.target.value)} rows={2} />

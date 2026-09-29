@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import '../styles/Features.css';
 import { api, errorText } from '../../api';
 import { formatKkDate } from '../../utils/kkDate';
-import { LuArrowLeft, LuArrowRight, LuCheck, LuCheckCircle2, LuCircle, LuFileQuestion, LuHelpCircle, LuPartyPopper, LuPlay, LuRotateCcw, LuTarget, LuTimer, LuTrendingUp, LuXCircle } from 'react-icons/lu';
+import { LuArrowLeft, LuArrowRight, LuCheck, LuCheckCircle2, LuChevronDown, LuCircle, LuFileQuestion, LuHelpCircle, LuPartyPopper, LuPlay, LuRotateCcw, LuTarget, LuTimer, LuTrendingUp, LuXCircle } from 'react-icons/lu';
 
 // Оқушыға арналған онлайн тесттер: тізім, тапсыру, нәтиже
 export default function Tests() {
@@ -65,26 +65,43 @@ function TestList({ onStart, onOpenResult }) {
       {tests.length === 0 ? (
         <p className="empty-state">Әзірге жарияланған тест жоқ</p>
       ) : (
-        <div className="test-grid">
-          {tests.map((test) => (
-            <div key={test.id} className="test-card">
-              <h3>{test.title}</h3>
-              {test.description && <p className="test-desc">{test.description}</p>}
-              <div className="test-meta">
-                <span><LuHelpCircle /> {test.questions} сұрақ</span>
-                <span><LuTimer /> {test.duration_min} мин</span>
-                <span><LuTarget /> {test.max_score} балл</span>
-              </div>
-              {test.attempts > 0 && (
-                <p className="test-best">
-                  Ең жақсы нәтиже: <b>{test.best_score}/{test.max_score}</b> · {test.attempts} рет тапсырдыңыз
-                </p>
-              )}
-              <button className="primary-btn" disabled={starting === test.id} onClick={() => start(test)}>
-                {starting === test.id ? '...' : test.active_attempt ? <><LuPlay /> Жалғастыру</> : test.attempts ? <><LuRotateCcw /> Қайта тапсыру</> : <><LuPlay /> Бастау</>}
-              </button>
-            </div>
-          ))}
+        <div className="test-groups">
+          {groupByTopic(tests).map(([topic, items], gi) => {
+            const done = items.filter((t) => t.attempts > 0).length;
+            const hasActive = items.some((t) => t.active_attempt);
+            return (
+              <details key={topic} className="test-group" open={gi === 0 || hasActive}>
+                <summary>
+                  <span className="grow">{topic}</span>
+                  <span className={`group-count ${done === items.length ? 'complete' : ''}`}>
+                    {done === items.length && <LuCheck />} {done}/{items.length}
+                  </span>
+                  <LuChevronDown className="group-chevron" />
+                </summary>
+                <div className="test-grid">
+                  {items.map((test) => (
+                <div key={test.id} className="test-card">
+                  <h3>{test.title}</h3>
+                  {test.description && <p className="test-desc">{test.description}</p>}
+                  <div className="test-meta">
+                    <span><LuHelpCircle /> {test.questions} сұрақ</span>
+                    <span><LuTimer /> {test.duration_min} мин</span>
+                    <span><LuTarget /> {test.max_score} балл</span>
+                  </div>
+                  {test.attempts > 0 && (
+                    <p className="test-best">
+                      Ең жақсы нәтиже: <b>{test.best_score}/{test.max_score}</b> · {test.attempts} рет тапсырдыңыз
+                    </p>
+                  )}
+                  <button className="primary-btn" disabled={starting === test.id} onClick={() => start(test)}>
+                    {starting === test.id ? '...' : test.active_attempt ? <><LuPlay /> Жалғастыру</> : test.attempts ? <><LuRotateCcw /> Қайта тапсыру</> : <><LuPlay /> Бастау</>}
+                  </button>
+                </div>
+                  ))}
+                </div>
+              </details>
+            );
+          })}
         </div>
       )}
 
@@ -106,6 +123,17 @@ function TestList({ onStart, onOpenResult }) {
     </div>
   );
 }
+
+// Тесттерді тақырып бойынша топтау (реті серверден келгендей сақталады)
+const groupByTopic = (tests) => {
+  const groups = new Map();
+  for (const t of tests) {
+    const key = t.topic || 'Басқа тесттер';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(t);
+  }
+  return [...groups];
+};
 
 const scoreClass = (score, max) => {
   const p = max ? score / max : 0;

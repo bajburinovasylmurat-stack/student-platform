@@ -8,7 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import crypto from 'crypto';
-import { registerFeatures, featureMigrations } from './features.js';
+import { registerFeatures, featureMigrations, seedContent } from './features.js';
 
 dotenv.config();
 
@@ -1549,6 +1549,7 @@ const runMigrations = async () => {
     CREATE INDEX IF NOT EXISTS idx_curator_plans_student ON curator_plans(student_id);
   `);
   await pool.query(featureMigrations);
+  await seedContent(pool);
 };
 
 // ===== СЕРВЕР ҚОСУ =====
