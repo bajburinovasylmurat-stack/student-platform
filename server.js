@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import crypto from 'crypto';
+import { registerFeatures, featureMigrations } from './features.js';
 
 dotenv.config();
 
@@ -122,6 +123,9 @@ const handleTelegramUpdate = async (update) => {
   const message = update.message;
   if (!message?.chat) return;
   const chatId = message.chat.id;
+
+  // Ескертулерді байланыстыру, /stop, /on командалары
+  if (message.text && await features.handleBotCommand(message)) return;
 
   // /start <token>: сайттан келді, нөмірді сұраймыз
   if (message.text?.startsWith('/start')) {
@@ -895,7 +899,11 @@ app.patch('/api/plans/:id', verifyToken, async (req, res) => {
          task_title = COALESCE($1, task_title),
          task_time = CASE WHEN $2::boolean THEN $3::time ELSE task_time END,
          plan_date = COALESCE($4::date, plan_date),
-         is_completed = COALESCE($5, is_completed)
+         is_completed = COALESCE($5, is_completed),
+         completed_at = CASE
+           WHEN $5::boolean IS NULL THEN completed_at
+           WHEN $5::boolean THEN COALESCE(completed_at, NOW())
+           ELSE NULL END
        WHERE id = $6 AND student_id = $7
        RETURNING ${PLAN_COLUMNS}`,
       [
@@ -970,7 +978,8 @@ app.post('/api/daily-tasks', verifyToken, async (req, res) => {
 app.patch('/api/daily-tasks/:id', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
-      `UPDATE plans SET is_completed = $1 WHERE id = $2 AND student_id = $3 RETURNING ${PLAN_COLUMNS}`,
+      `UPDATE plans SET is_completed = $1, completed_at = CASE WHEN $1 THEN COALESCE(completed_at, NOW()) END
+       WHERE id = $2 AND student_id = $3 RETURNING ${PLAN_COLUMNS}`,
       [!!req.body.is_completed, req.params.id, req.student.id]
     );
     if (result.rows.length === 0) {
@@ -1351,6 +1360,7 @@ app.post('/api/curator/plans', verifyToken, requireRole('curator', 'admin'), asy
 
     const result = await pool.query(`${PLAN_SELECT} WHERE p.id = $1 GROUP BY p.id, c.name`, [planId]);
     res.status(201).json(result.rows[0]);
+    features.notifyNewCuratorPlan(planId).catch((error) => console.error('Жоспар ескертуі қатесі:', error.message));
   } catch (error) {
     await client.query('ROLLBACK').catch(() => {});
     console.error('Жоспар құру қатесі:', error);
@@ -1439,7 +1449,8 @@ app.get('/api/my-curator-plans', verifyToken, async (req, res) => {
 app.patch('/api/curator-plan-tasks/:id', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(`
-      UPDATE curator_plan_tasks t SET is_completed = $1
+      UPDATE curator_plan_tasks t SET is_completed = $1,
+        completed_at = CASE WHEN $1 THEN COALESCE(t.completed_at, NOW()) END
       FROM curator_plans p
       WHERE t.id = $2 AND t.plan_id = p.id AND p.student_id = $3
       RETURNING t.id, t.is_completed
@@ -1453,6 +1464,10 @@ app.patch('/api/curator-plan-tasks/:id', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
+
+// ===== ҚОСЫМША МҮМКІНДІКТЕР =====
+// Тесттер, ескертулер, аналитика, рейтинг, карточкалар, видео, хабарландырулар (features.js)
+const features = registerFeatures(app, { pool, verifyToken, requireRole, tg, telegramEnabled, getBotUsername });
 
 // ===== МИГРАЦИЯ =====
 
@@ -1522,6 +1537,7 @@ const runMigrations = async () => {
     CREATE INDEX IF NOT EXISTS idx_students_curator ON students(curator_id);
     CREATE INDEX IF NOT EXISTS idx_curator_plans_student ON curator_plans(student_id);
   `);
+  await pool.query(featureMigrations);
 };
 
 // ===== СЕРВЕР ҚОСУ =====
@@ -1533,5 +1549,6 @@ runMigrations()
     app.listen(PORT, () => {
       console.log(`🚀 Сервер ${PORT} портында жүргенде`);
       startTelegramBot().catch((error) => console.error('Telegram бот қатесі:', error.message));
+      features.startScheduler();
     });
   });
