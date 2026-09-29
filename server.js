@@ -49,6 +49,17 @@ pool.on('error', (error) => console.error('PostgreSQL байланыс қате�
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production';
 
+// Сервердің тірі екенін тексеру (UptimeRobot / GitHub Actions 5 минут сайын шақырады,
+// тегін Render ұйықтап қалмауы және таңғы/кешкі ескертулер уақытында кетуі үшін)
+app.get('/api/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.json({ ok: true, time: new Date().toISOString() });
+  } catch (error) {
+    res.status(503).json({ ok: false, error: 'База қолжетімсіз' });
+  }
+});
+
 // ===== ТҮСІНІКТЕМЕ ФУНКЦИЯЛАРЫ =====
 
 // ===== SMS РАСТАУ =====

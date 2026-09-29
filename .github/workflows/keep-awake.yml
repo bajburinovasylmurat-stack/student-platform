@@ -1,0 +1,19 @@
+# Тегін Render сервері 15 минут бос тұрса ұйықтайды.
+# Бұл тапсырма оны 5 минут сайын оятып тұрады: сайт жылдам ашылады,
+# таңғы (08:00) және кешкі (20:00) Telegram ескертулері уақытында кетеді.
+name: Keep server awake
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping backend
+        run: |
+          curl --silent --show-error --fail --retry 3 --retry-delay 20 --max-time 90 \
+            https://student-platform-backend-h9zs.onrender.com/api/health
