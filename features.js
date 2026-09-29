@@ -80,6 +80,9 @@ export const featureMigrations = `
     max_score INT
   );
   CREATE INDEX IF NOT EXISTS idx_test_attempts_student ON test_attempts(student_id, finished_at);
+  -- Материал сыртқы сілтеме ретінде (Google Drive т.б.)
+  ALTER TABLE materials ADD COLUMN IF NOT EXISTS external_url TEXT;
+
   -- Тесттерді тақырып бойынша топтау және ретімен көрсету
   ALTER TABLE tests ADD COLUMN IF NOT EXISTS topic VARCHAR(150);
   ALTER TABLE tests ADD COLUMN IF NOT EXISTS sort_order INT NOT NULL DEFAULT 0;

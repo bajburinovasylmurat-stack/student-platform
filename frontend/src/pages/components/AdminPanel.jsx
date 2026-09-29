@@ -8,7 +8,7 @@ import { YoutubePreview } from './YoutubeThumb';
 import AdminTests from './AdminTests';
 import AdminFlashcards from './AdminFlashcards';
 import AdminAnnouncements from './Announcements';
-import { LuBookOpen, LuBrain, LuCheck, LuClapperboard, LuFileQuestion, LuLoader2, LuMegaphone, LuPlus, LuSettings2, LuUpload, LuUsers } from 'react-icons/lu';
+import { LuBookOpen, LuBrain, LuCheck, LuClapperboard, LuFileQuestion, LuLink, LuLoader2, LuMegaphone, LuPlus, LuSettings2, LuUpload, LuUsers } from 'react-icons/lu';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('materials');
@@ -16,6 +16,8 @@ export default function AdminPanel() {
   const [materialTitle, setMaterialTitle] = useState('');
   const [materialDesc, setMaterialDesc] = useState('');
   const [materialCategory, setMaterialCategory] = useState('practice');
+  const [materialSource, setMaterialSource] = useState('link'); // 'link' | 'file'
+  const [materialUrl, setMaterialUrl] = useState('');
   const [examTitle, setExamTitle] = useState('');
   const [examCategory, setExamCategory] = useState('24_hour');
   const [examUrl, setExamUrl] = useState('');
@@ -27,6 +29,25 @@ export default function AdminPanel() {
 
   const handleMaterialSubmit = async (e) => {
     e.preventDefault();
+    if (materialSource === 'link') {
+      setLoading(true);
+      try {
+        await axios.post(
+          'https://student-platform-backend-h9zs.onrender.com/api/materials/link',
+          { title: materialTitle, description: materialDesc, category: materialCategory, url: materialUrl },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        alert('Материал сәтті қосылды!');
+        setMaterialTitle('');
+        setMaterialDesc('');
+        setMaterialUrl('');
+      } catch (error) {
+        alert(`Материал қосу сәтсіз.\n${error.response?.data?.error || error.message}`);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     if (!materialFile || !materialTitle) {
       alert('Файл және атаудын енгізіңіз');
       return;
@@ -165,6 +186,33 @@ export default function AdminPanel() {
               </div>
 
               <div className="form-group">
+                <label>Қалай қосасыз?</label>
+                <div className="source-toggle">
+                  <button type="button" className={materialSource === 'link' ? 'active' : ''} onClick={() => setMaterialSource('link')}>
+                    <LuLink /> Google Drive сілтемесі
+                  </button>
+                  <button type="button" className={materialSource === 'file' ? 'active' : ''} onClick={() => setMaterialSource('file')}>
+                    <LuUpload /> Файл жүктеу (25 МБ-қа дейін)
+                  </button>
+                </div>
+              </div>
+
+              {materialSource === 'link' ? (
+              <div className="form-group">
+                <label>Файлдың сілтемесі:</label>
+                <input
+                  type="url"
+                  value={materialUrl}
+                  onChange={(e) => setMaterialUrl(e.target.value)}
+                  placeholder="https://drive.google.com/file/d/…"
+                  required
+                />
+                <span className="file-size">
+                  Google Drive-та файлды тінтуірдің оң жағымен басып, «Бөлісу» → «Сілтемесі бар кез келген адам» таңдаңыз да, сілтемені көшіріңіз
+                </span>
+              </div>
+              ) : (
+              <div className="form-group">
                 <label>PDF файлын таңдау:</label>
                 <input
                   type="file"
@@ -174,12 +222,13 @@ export default function AdminPanel() {
                 />
                 {materialFile && <span className="file-name"><LuCheck /> {materialFile.name}</span>}
                 {materialFile && (
-                  <span className="file-size">{(materialFile.size / 1024 / 1024).toFixed(1)} МБ · ең көбі 200 МБ</span>
+                  <span className="file-size">{(materialFile.size / 1024 / 1024).toFixed(1)} МБ · ең көбі 25 МБ, үлкенін сілтемемен қосыңыз</span>
                 )}
               </div>
+              )}
 
               <button type="submit" disabled={loading} className="submit-btn">
-                {loading ? <><LuLoader2 className="spin" /> Жүктелуде... {uploadProgress ?? 0}%</> : <><LuUpload /> Материалды қосу</>}
+                {loading ? <><LuLoader2 className="spin" /> {materialSource === 'file' ? `Жүктелуде... ${uploadProgress ?? 0}%` : 'Қосылуда...'}</> : <><LuPlus /> Материалды қосу</>}
               </button>
               {uploadProgress !== null && (
                 <div className="upload-progress" aria-label="Жүктеу барысы">

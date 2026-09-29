@@ -29,19 +29,26 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Render тегін тарифінде диск әр deploy сайын тазаланады, сондықтан материалдар базада сақталады.
 // Файл 2 МБ-тық бөліктермен жүктеледі: бір үлкен сұраныс Render-де үзіліп қалатын
-const MAX_MATERIAL_MB = 200;
+// Тегін базада орын аз: үлкен кітаптар Google Drive сілтемесі арқылы қосылады
+const MAX_MATERIAL_MB = Number(process.env.MAX_MATERIAL_MB) || 25;
 const MATERIAL_CATEGORIES = ['practice', 'formula'];
 const CHUNK_BYTES = 2 * 1024 * 1024;
 
 // PostgreSQL қосылуы
 const { Pool } = pg;
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'student_platform',
-  password: process.env.DB_PASSWORD || 'password',
-  port: process.env.DB_PORT || 5432,
-});
+// DATABASE_URL (мысалы, Neon: postgresql://…?sslmode=require) берілсе — соны қолданамыз,
+// әйтпесе бұрынғы DB_HOST, DB_USER т.б. айнымалылар
+const pool = new Pool(
+  process.env.DATABASE_URL
+    ? { connectionString: process.env.DATABASE_URL, max: 10 }
+    : {
+        user: process.env.DB_USER || 'postgres',
+        host: process.env.DB_HOST || 'localhost',
+        database: process.env.DB_NAME || 'student_platform',
+        password: process.env.DB_PASSWORD || 'password',
+        port: process.env.DB_PORT || 5432,
+      }
+);
 
 // Бос тұрған байланыс үзілсе (база қайта іске қосылса т.б.), сервер құламауы үшін
 pool.on('error', (error) => console.error('PostgreSQL байланыс қатесі:', error.message));
@@ -564,13 +571,40 @@ const fixFileName = (name) => {
 app.get('/api/materials', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, title, description, file_path, file_name, category, created_at FROM materials
+      `SELECT id, title, description, file_path, file_name, category, external_url, created_at FROM materials
        WHERE COALESCE(status, 'ready') = 'ready' ORDER BY created_at DESC`
     );
     // Бұрын бұзылып сақталған атауларды да дұрыс көрсету
     res.json(result.rows.map((m) => ({ ...m, file_name: fixFileName(m.file_name) })));
   } catch (error) {
     console.error('Материалдар алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Материалды сыртқы сілтеме ретінде қосу (Google Drive т.б.) — базада орын алмайды
+app.post('/api/materials/link', verifyToken, requireRole('admin'), async (req, res) => {
+  try {
+    const { title, description, url } = req.body;
+    const category = MATERIAL_CATEGORIES.includes(req.body.category) ? req.body.category : 'practice';
+    let parsed;
+    try {
+      parsed = new URL(String(url).trim());
+    } catch {
+      parsed = null;
+    }
+    if (!title?.trim() || !parsed || !['http:', 'https:'].includes(parsed.protocol)) {
+      return res.status(400).json({ error: 'Атау және дұрыс сілтеме (https://…) қажет' });
+    }
+    const result = await pool.query(
+      `INSERT INTO materials (title, description, file_path, file_name, created_by, category, external_url, status)
+       VALUES ($1, $2, '', $3, $4, $5, $6, 'ready')
+       RETURNING id, title, description, file_path, file_name, category, external_url, created_at`,
+      [title.trim(), description || null, parsed.hostname, req.student.id, category, parsed.toString()]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Сілтеме қосу қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });

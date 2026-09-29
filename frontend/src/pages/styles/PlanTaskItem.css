@@ -237,3 +237,32 @@
 .material-actions {
   flex-wrap: wrap;
 }
+
+/* Материал қосу тәсілі: сілтеме немесе файл */
+.source-toggle {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: #e6eef1;
+}
+
+.source-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.source-toggle button.active {
+  background: white;
+  color: var(--brand);
+  box-shadow: var(--shadow-sm);
+}

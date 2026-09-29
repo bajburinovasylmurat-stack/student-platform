@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/Materials.css';
 import '../styles/PlanTaskItem.css';
-import { LuArrowRight, LuBookOpen, LuDownload, LuPencilLine, LuSigma, LuTrash2 } from 'react-icons/lu';
+import { LuArrowRight, LuBookOpen, LuDownload, LuExternalLink, LuPencilLine, LuSigma, LuTrash2 } from 'react-icons/lu';
 
 const API = 'https://student-platform-backend-h9zs.onrender.com';
 
@@ -95,6 +95,11 @@ export default function Materials({ isAdmin }) {
               <h3>{material.title}</h3>
               {material.description && <p className="description">{material.description}</p>}
               <div className="material-actions">
+                {material.external_url ? (
+                  <a href={material.external_url} target="_blank" rel="noopener noreferrer" className="download-btn">
+                    <LuExternalLink /> Ашу
+                  </a>
+                ) : (
                 <a
                   href={`${API}${encodeURI(material.file_path)}`}
                   download
@@ -102,6 +107,7 @@ export default function Materials({ isAdmin }) {
                 >
                   <LuDownload /> Жүктеу
                 </a>
+                )}
                 {isAdmin && (
                   <>
                     <button
