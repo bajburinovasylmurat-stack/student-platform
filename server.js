@@ -1608,6 +1608,25 @@ const runMigrations = async () => {
   await seedContent(pool);
 };
 
+// ===== САЙТ БЕТТЕРІ =====
+
+// Fly.io-да сайт пен API бір серверде: React build-ті осы жерден береміз (Vercel-де өзі береді)
+const FRONTEND_DIR = path.join(__dirname, 'frontend/build');
+if (!IS_VERCEL && fs.existsSync(FRONTEND_DIR)) {
+  app.use(express.static(FRONTEND_DIR, {
+    setHeaders: (res, filePath) => {
+      // Хэші бар файлдар өзгермейді; қалғандары (index.html, sw.js) әрдайым тексеріледі
+      res.setHeader('Cache-Control', filePath.includes(`${path.sep}static${path.sep}`)
+        ? 'public, max-age=31536000, immutable'
+        : 'no-cache');
+    }
+  }));
+  app.get(/^\/(?!api\/).*/, (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache');
+    res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
+  });
+}
+
 // ===== СЕРВЕР ҚОСУ =====
 
 // Ескертулер кестесі: Vercel Cron күніне екі рет шақырады (таңғы және кешкі терезеге)
