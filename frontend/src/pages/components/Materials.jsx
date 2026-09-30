@@ -3,8 +3,8 @@ import axios from 'axios';
 import '../styles/Materials.css';
 import '../styles/PlanTaskItem.css';
 import { LuArrowRight, LuBookOpen, LuDownload, LuExternalLink, LuPencilLine, LuSigma, LuTrash2 } from 'react-icons/lu';
+import { API } from '../../api';
 
-const API = 'https://student-platform-backend-h9zs.onrender.com';
 
 const CATEGORIES = {
   practice: { label: 'Практика', icon: <LuPencilLine />, empty: 'Практика материалдары әлі қосылмаған' },

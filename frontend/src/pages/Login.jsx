@@ -3,8 +3,8 @@ import axios from 'axios';
 import './Login.css';
 import Logo from '../components/Logo';
 import { LuAlertCircle, LuArrowLeft, LuArrowRight, LuBookOpen, LuCheck, LuClapperboard, LuSettings, LuTarget } from 'react-icons/lu';
+import { API } from '../api';
 
-const API = 'https://student-platform-backend-h9zs.onrender.com';
 const CODE_LENGTH = 6;
 
 // 10 цифр (+7-ден кейінгі) -> "+7 (707) 123 45 67"

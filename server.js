@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import crypto from 'crypto';
+import { waitUntil } from '@vercel/functions';
 import { registerFeatures, featureMigrations, seedContent } from './features.js';
 
 dotenv.config();
@@ -21,11 +22,26 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Құрылымдар
+// Vercel-де сервер тұрақты емес (serverless): әр сұраныс алдында миграция біткенін күтеміз
+const IS_VERCEL = Boolean(process.env.VERCEL);
+let migrationsReady = null;
+app.use(async (req, res, next) => {
+  try { await migrationsReady; } catch { /* қате төменде логқа жазылған */ }
+  next();
+});
+
+// Жауап кеткен соң орындалатын жұмыс: serverless-те функция оны күтіп тұруы керек
+const background = (promise, label) => {
+  const safe = promise.catch((error) => console.error(`${label}:`, error.message || error));
+  if (IS_VERCEL) waitUntil(safe);
+  return safe;
+};
+
+// Құрылымдар (Vercel-дің файл жүйесі тек оқуға арналған)
 const uploadsDir = path.join(__dirname, 'public/uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
+try {
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+} catch { /* serverless: ескі файлдар жоқ, бәрі базада */ }
 
 // Render тегін тарифінде диск әр deploy сайын тазаланады, сондықтан материалдар базада сақталады.
 // Файл 2 МБ-тық бөліктермен жүктеледі: бір үлкен сұраныс Render-де үзіліп қалатын
@@ -241,17 +257,23 @@ app.post('/api/telegram/webhook', (req, res) => {
     return res.sendStatus(401);
   }
   res.sendStatus(200);
-  handleTelegramUpdate(req.body).catch((error) => console.error('Telegram өңдеу қатесі:', error));
+  background(handleTelegramUpdate(req.body), 'Telegram өңдеу қатесі');
 });
 
-// Render-де сайттың жария адресі бар: webhook орнатамыз. Жергілікті ортада long polling
+// Сайттың жария адресі (Vercel өзі береді)
+const publicUrl = () =>
+  process.env.PUBLIC_URL ||
+  process.env.RENDER_EXTERNAL_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL && `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
+
+// Жария адрес болса webhook орнатамыз. Жергілікті ортада long polling
 const startTelegramBot = async () => {
   if (!telegramEnabled()) return;
-  const publicUrl = process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL;
+  const url = publicUrl();
 
-  if (publicUrl) {
+  if (url) {
     await tg('setWebhook', {
-      url: `${publicUrl.replace(/\/$/, '')}/api/telegram/webhook`,
+      url: `${url.replace(/\/$/, '')}/api/telegram/webhook`,
       secret_token: tgWebhookSecret(),
       allowed_updates: ['message']
     });
@@ -1405,7 +1427,7 @@ app.post('/api/curator/plans', verifyToken, requireRole('curator', 'admin'), asy
 
     const result = await pool.query(`${PLAN_SELECT} WHERE p.id = $1 GROUP BY p.id, c.name`, [planId]);
     res.status(201).json(result.rows[0]);
-    features.notifyNewCuratorPlan(planId).catch((error) => console.error('Жоспар ескертуі қатесі:', error.message));
+    background(features.notifyNewCuratorPlan(planId), 'Жоспар ескертуі қатесі');
   } catch (error) {
     await client.query('ROLLBACK').catch(() => {});
     console.error('Жоспар құру қатесі:', error);
@@ -1512,7 +1534,7 @@ app.patch('/api/curator-plan-tasks/:id', verifyToken, async (req, res) => {
 
 // ===== ҚОСЫМША МҮМКІНДІКТЕР =====
 // Тесттер, ескертулер, аналитика, рейтинг, карточкалар, видео, хабарландырулар (features.js)
-const features = registerFeatures(app, { pool, verifyToken, requireRole, tg, telegramEnabled, getBotUsername });
+const features = registerFeatures(app, { pool, verifyToken, requireRole, tg, telegramEnabled, getBotUsername, background });
 
 // ===== МИГРАЦИЯ =====
 
@@ -1588,13 +1610,40 @@ const runMigrations = async () => {
 
 // ===== СЕРВЕР ҚОСУ =====
 
-const PORT = process.env.PORT || 5000;
-runMigrations()
-  .catch((error) => console.error('Миграция қатесі:', error))
-  .finally(() => {
+// Ескертулер кестесі: Vercel Cron күніне екі рет шақырады (таңғы және кешкі терезеге)
+app.get('/api/cron/tick', async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.get('Authorization') !== `Bearer ${secret}`) return res.sendStatus(401);
+  try {
+    await features.tick();
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('Ескерту жоспарлаушысы қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+migrationsReady = runMigrations();
+migrationsReady.catch((error) => console.error('Миграция қатесі:', error));
+
+if (IS_VERCEL) {
+  // Webhook адресі өзгерген болса ғана қайта орнатамыз
+  background((async () => {
+    await migrationsReady.catch(() => {});
+    const url = publicUrl();
+    if (!telegramEnabled() || !url) return;
+    const info = await tg('getWebhookInfo');
+    if (info.url !== `${url}/api/telegram/webhook`) await startTelegramBot();
+  })(), 'Telegram бот қатесі');
+} else {
+  const PORT = process.env.PORT || 5000;
+  migrationsReady.finally(() => {
     app.listen(PORT, () => {
       console.log(`🚀 Сервер ${PORT} портында жүргенде`);
       startTelegramBot().catch((error) => console.error('Telegram бот қатесі:', error.message));
       features.startScheduler();
     });
   });
+}
+
+export default app;

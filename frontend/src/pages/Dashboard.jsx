@@ -14,7 +14,7 @@ import Flashcards from './components/Flashcards';
 import Leaderboard from './components/Leaderboard';
 import NotifyButton from './components/NotifyButton';
 import { AnnouncementsBar } from './components/Announcements';
-import { api } from '../api';
+import { API, api } from '../api';
 import { formatKkDate, capitalize } from '../utils/kkDate';
 import { prettyPhone } from '../utils/phone';
 import { LuBookOpen, LuBrain, LuCalendarDays, LuClapperboard, LuFileQuestion, LuFlame, LuListChecks, LuSettings2, LuTarget, LuTrophy, LuUsers } from 'react-icons/lu';
@@ -47,7 +47,7 @@ export default function Dashboard({ student, onLogout }) {
   // Админ рөлді кез келген уақытта өзгерте алады, сондықтан профильден жаңартамыз
   useEffect(() => {
     const token = localStorage.getItem('token');
-    axios.get('https://student-platform-backend-h9zs.onrender.com/api/profile', {
+    axios.get(`${API}/api/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(({ data }) => {

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-export const API = 'https://student-platform-backend-h9zs.onrender.com';
+// Сайт пен API бір доменде (Vercel), сондықтан адрес салыстырмалы
+export const API = process.env.REACT_APP_API_URL || '';
 
 const auth = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
 

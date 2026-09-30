@@ -8,8 +8,8 @@ import {
 import { prettyPhone } from '../../utils/phone';
 import CuratorAnalytics from './CuratorAnalytics';
 import { LuArrowLeft, LuCheck, LuCheckCircle2, LuCircle, LuPlus, LuTrash2, LuUsers, LuX } from 'react-icons/lu';
+import { API } from '../../api';
 
-const API = 'https://student-platform-backend-h9zs.onrender.com';
 
 // Жоспар аралығындағы барлық күндер
 const daysInRange = (start, end) => {

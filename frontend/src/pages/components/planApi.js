@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { API } from '../../api';
 
-const API = 'https://student-platform-backend-h9zs.onrender.com';
 
 const auth = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
 

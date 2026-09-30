@@ -9,6 +9,7 @@ import AdminTests from './AdminTests';
 import AdminFlashcards from './AdminFlashcards';
 import AdminAnnouncements from './Announcements';
 import { LuBookOpen, LuBrain, LuCheck, LuClapperboard, LuFileQuestion, LuLink, LuLoader2, LuMegaphone, LuPlus, LuSettings2, LuUpload, LuUsers } from 'react-icons/lu';
+import { API } from '../../api';
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('materials');
@@ -33,7 +34,7 @@ export default function AdminPanel() {
       setLoading(true);
       try {
         await axios.post(
-          'https://student-platform-backend-h9zs.onrender.com/api/materials/link',
+          `${API}/api/materials/link`,
           { title: materialTitle, description: materialDesc, category: materialCategory, url: materialUrl },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -92,7 +93,7 @@ export default function AdminPanel() {
     setLoading(true);
     try {
       await axios.post(
-        'https://student-platform-backend-h9zs.onrender.com/api/examinations',
+        `${API}/api/examinations`,
         {
           title: examTitle,
           category: examCategory,

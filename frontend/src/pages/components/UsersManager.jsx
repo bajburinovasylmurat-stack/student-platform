@@ -4,8 +4,8 @@ import '../styles/Curator.css';
 import { prettyPhone } from '../../utils/phone';
 import { formatRange, formatDay, groupByDate, PLAN_TYPE_LABELS } from './planUtils';
 import { LuArrowRight, LuCheck, LuCheckCircle2, LuCircle, LuClipboardList, LuCopy, LuGraduationCap, LuKeyRound, LuShieldCheck, LuUserCheck, LuUsers, LuX } from 'react-icons/lu';
+import { API } from '../../api';
 
-const API = 'https://student-platform-backend-h9zs.onrender.com';
 
 const ROLE_LABELS = {
   admin: <><LuShieldCheck /> Админ</>,

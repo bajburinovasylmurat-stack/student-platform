@@ -172,7 +172,7 @@ export async function seedContent(pool) {
   }
 }
 
-export function registerFeatures(app, { pool, verifyToken, requireRole, tg, telegramEnabled, getBotUsername }) {
+export function registerFeatures(app, { pool, verifyToken, requireRole, tg, telegramEnabled, getBotUsername, background }) {
   const fail = (res, label, error) => {
     console.error(`${label}:`, error);
     res.status(500).json({ error: 'Сервер қатесі' });
@@ -968,9 +968,11 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
         );
         const html = `📢 <b>${escapeHtml(title.trim())}</b>${body?.trim() ? `\n\n${escapeHtml(body.trim())}` : ''}`;
         // Жауапты күттірмеу үшін фонда жібереміз
-        notifyMany(recipients.rows.map((r) => ({ studentId: r.id, html })))
-          .then((sent) => console.log(`📢 Хабарландыру Telegram-ға: ${sent}`))
-          .catch((error) => console.error('Хабарландыру жіберу қатесі:', error.message));
+        background(
+          notifyMany(recipients.rows.map((r) => ({ studentId: r.id, html })))
+            .then((sent) => console.log(`📢 Хабарландыру Telegram-ға: ${sent}`)),
+          'Хабарландыру жіберу қатесі'
+        );
         telegram = recipients.rows.length;
       }
       res.status(201).json({ ...result.rows[0], telegram_recipients: telegram });
@@ -988,5 +990,5 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
     }
   });
 
-  return { handleBotCommand, startScheduler, notifyNewCuratorPlan, sendMorning, sendEvening };
+  return { handleBotCommand, startScheduler, tick, notifyNewCuratorPlan, sendMorning, sendEvening };
 }

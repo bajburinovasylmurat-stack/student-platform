@@ -3,8 +3,8 @@ import axios from 'axios';
 import '../styles/Curator.css';
 import { toDateString, formatDay, formatRange, groupByDate, PLAN_TYPE_LABELS } from './planUtils';
 import { LuTarget } from 'react-icons/lu';
+import { API } from '../../api';
 
-const API = 'https://student-platform-backend-h9zs.onrender.com';
 
 export default function MyCuratorPlans() {
   const [plans, setPlans] = useState([]);

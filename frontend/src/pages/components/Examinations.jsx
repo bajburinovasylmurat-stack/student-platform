@@ -3,7 +3,7 @@ import axios from 'axios';
 import '../styles/Examinations.css';
 import { YoutubeThumb, YoutubePreview } from './YoutubeThumb';
 import '../styles/Features.css';
-import { api } from '../../api';
+import { API, api } from '../../api';
 import { youtubeId } from '../../utils/youtube';
 import VideoPlayer from './VideoPlayer';
 import { LuCheck, LuClapperboard, LuPlay, LuPlus, LuX } from 'react-icons/lu';
@@ -54,7 +54,7 @@ export default function Examinations({ isAdmin }) {
 
   const fetchExaminations = async () => {
     try {
-      const response = await axios.get('https://student-platform-backend-h9zs.onrender.com/api/examinations');
+      const response = await axios.get(`${API}/api/examinations`);
       setExaminations(response.data);
     } catch (error) {
       console.error('Нұсқалар алу қатесі:', error);
@@ -68,7 +68,7 @@ export default function Examinations({ isAdmin }) {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        'https://student-platform-backend-h9zs.onrender.com/api/examinations',
+        `${API}/api/examinations`,
         {
           ...formData,
         },

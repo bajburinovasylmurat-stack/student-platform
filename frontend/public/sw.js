@@ -1,6 +1,6 @@
 // JUZUP service worker: сайтты телефонға орнатуға және интернет нашар болғанда тез ашуға.
-// API сұраныстары (басқа домен) кэштелмейді — деректер әрқашан жаңа.
-const CACHE = 'juzup-v1';
+// API сұраныстары (/api/) кэштелмейді — деректер әрқашан жаңа.
+const CACHE = 'juzup-v2';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -16,6 +16,7 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/api/')) return;
 
   // Бет: алдымен желі (жаңа нұсқа бірден келеді), интернет жоқ болса — кэштегісі
   if (request.mode === 'navigate') {

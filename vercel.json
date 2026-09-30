@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "",
+  "outputDirectory": "frontend/build",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "seed/**",
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/cron/tick", "schedule": "5 3 * * *" },
+    { "path": "/api/cron/tick", "schedule": "5 15 * * *" }
+  ]
+}

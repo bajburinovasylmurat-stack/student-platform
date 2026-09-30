@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { API } from '../../api';
 
-const API = 'https://student-platform-backend-h9zs.onrender.com';
 const PARALLEL = 3; // бір уақытта жіберілетін бөлік саны
 
 // Материалды 2 МБ-тық бөліктермен жүктеу: бір үлкен сұраныс Render-де үзіліп қалатын.
