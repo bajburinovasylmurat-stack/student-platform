@@ -26,13 +26,14 @@ export default function Tests() {
   }
   return (
     <TestList
+      onMistakes={(result) => setView({ name: 'mistakes', result })}
       onStart={(session) => setView({ name: 'take', session })}
       onOpenResult={(result) => setView({ name: 'result', result })}
     />
   );
 }
 
-function TestList({ onStart, onOpenResult }) {
+function TestList({ onStart, onOpenResult, onMistakes }) {
   const [tests, setTests] = useState(null);
   const [history, setHistory] = useState([]);
   const [starting, setStarting] = useState(null);
@@ -64,6 +65,17 @@ function TestList({ onStart, onOpenResult }) {
       onOpenResult(await api.get(`/api/attempts/${attemptId}`));
     } catch (error) {
       alert(errorText(error, 'Нәтижені ашу сәтсіз'));
+    }
+  };
+
+  // Соңғы тапсырудағы қате есептерді бірден ашу
+  const openMistakes = async (test) => {
+    setStarting(`m${test.id}`);
+    try {
+      onMistakes(await api.get(`/api/attempts/${test.last_attempt}`));
+    } catch (error) {
+      alert(errorText(error, 'Қатемен жұмысты ашу сәтсіз'));
+      setStarting(null);
     }
   };
 
@@ -124,6 +136,11 @@ function TestList({ onStart, onOpenResult }) {
                   <button className="primary-btn" disabled={starting === test.id} onClick={() => start(test)}>
                     {starting === test.id ? '...' : test.active_attempt ? <><LuPlay /> Жалғастыру</> : test.attempts ? <><LuRotateCcw /> Қайта тапсыру</> : <><LuPlay /> Бастау</>}
                   </button>
+                  {test.last_attempt && test.has_mistakes && (
+                    <button className={`secondary-btn mistakes-btn ${test.mistakes_done ? 'done' : ''}`} disabled={starting === `m${test.id}`} onClick={() => openMistakes(test)}>
+                      {starting === `m${test.id}` ? '...' : test.mistakes_done ? <><LuCheck /> Қатемен жұмыс жасалды</> : <><LuTarget /> Қатемен жұмыс</>}
+                    </button>
+                  )}
                 </div>
                   ))}
                 </div>

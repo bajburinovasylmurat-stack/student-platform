@@ -740,6 +740,12 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
           (SELECT COALESCE(SUM(points), 0) FROM test_questions WHERE test_id = t.id)::int AS max_score,
           (SELECT MAX(score) FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NOT NULL) AS best_score,
           (SELECT COUNT(*) FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NOT NULL)::int AS attempts,
+          (SELECT id FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NOT NULL
+           ORDER BY finished_at DESC LIMIT 1) AS last_attempt,
+          (SELECT (score < max_score) FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NOT NULL
+           ORDER BY finished_at DESC LIMIT 1) AS has_mistakes,
+          (SELECT mistakes_done_at IS NOT NULL FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NOT NULL
+           ORDER BY finished_at DESC LIMIT 1) AS mistakes_done,
           (SELECT id FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NULL
              AND started_at + (t.duration_min * INTERVAL '1 minute') + INTERVAL '${GRACE_SECONDS} seconds' > NOW()
            ORDER BY started_at DESC LIMIT 1) AS active_attempt

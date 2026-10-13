@@ -1699,3 +1699,18 @@
   border-color: #d93025;
   color: #fff;
 }
+
+.test-card .mistakes-btn {
+  margin-top: 8px;
+  width: 100%;
+  justify-content: center;
+  border-color: var(--accent);
+  color: #9a5b00;
+  background: rgba(242, 165, 65, 0.14);
+}
+
+.test-card .mistakes-btn.done {
+  border-color: rgba(46, 160, 67, 0.5);
+  color: #1a7f37;
+  background: rgba(46, 160, 67, 0.08);
+}
