@@ -19,7 +19,7 @@ def multi(text, options, correct, image=None, guessed=False):
 
 
 def match(stem, pairs, options, image=None, guessed=False):
-    """Сәйкестендіру: әр жол бөлек сұрақ болып енеді (ҰБТ-дағыдай әрқайсысы 1 балл)."""
-    if guessed:
-        GUESSED.append(stem[:60])
-    return [q(f'{stem}\n\n{"АӘ"[i]}) {sub}', options, correct, image) for i, (sub, correct) in enumerate(pairs)]
+    """Сәйкестендіру: бір сұрақ, әр жолға ортақ тізімнен жауап таңдалады (ҰБТ-дағыдай жол сайын 1 балл)."""
+    item = q(stem, options, pairs[0][1], image, points=len(pairs), guessed=guessed)
+    item['match_rows'] = [{'text': text, 'correct_index': correct} for text, correct in pairs]
+    return [item]

@@ -88,7 +88,9 @@ function TestEditor({ initial, onClose }) {
     const multi = q.correct_indexes
       ? q.correct_indexes.filter((i) => i !== oi).map((i) => (i > oi ? i - 1 : i))
       : null;
-    setQuestion(qi, { options, correct_index: multi?.length ? multi[0] : correct, correct_indexes: multi?.length ? multi : null });
+    // Сәйкестендіру жолдарының дұрыс жауабы да жылжиды
+    const rows = q.match_rows?.map((r) => ({ ...r, correct_index: r.correct_index === oi ? 0 : r.correct_index > oi ? r.correct_index - 1 : r.correct_index }));
+    setQuestion(qi, { options, correct_index: multi?.length ? multi[0] : correct, correct_indexes: multi?.length ? multi : null, ...(rows ? { match_rows: rows } : {}) });
   };
   // Бірнеше дұрыс жауапты сұрақ: белгіні қосу/алу (кемінде біреуі қалады)
   const toggleCorrect = (qi, oi) => {
@@ -184,20 +186,44 @@ function TestEditor({ initial, onClose }) {
             onChange={(e) => setQuestion(qi, { solution_url: e.target.value })}
             placeholder="Шығарылу жолы: YouTube сілтемесі (міндетті емес), мысалы https://youtu.be/ID?t=120"
           />
+          {q.match_rows && (
+            <div className="match-editor">
+              <p className="hint-text">Сәйкестендіру есебі: әр жолдың мәтіні мен дұрыс жауабы (нұсқалар төменде, ортақ)</p>
+              {q.match_rows.map((row, ri) => (
+                <div key={ri} className="option-editor">
+                  <span className="option-letter">{String.fromCharCode(65 + ri)}</span>
+                  <input
+                    value={row.text}
+                    onChange={(e) => setQuestion(qi, { match_rows: q.match_rows.map((r, i) => (i === ri ? { ...r, text: e.target.value } : r)) })}
+                    placeholder="Жолдың мәтіні"
+                  />
+                  <select
+                    value={row.correct_index}
+                    onChange={(e) => setQuestion(qi, { match_rows: q.match_rows.map((r, i) => (i === ri ? { ...r, correct_index: Number(e.target.value) } : r)) })}
+                    aria-label="Дұрыс жауап"
+                  >
+                    {q.options.map((o, oi) => <option key={oi} value={oi}>{String.fromCharCode(65 + oi)}: {o}</option>)}
+                  </select>
+                </div>
+              ))}
+            </div>
+          )}
+          {!q.match_rows && <>
           <label className="hint-text multi-toggle">
             <input type="checkbox" checked={Boolean(q.correct_indexes)} onChange={(e) => setMulti(qi, e.target.checked)} />
             Бірнеше дұрыс жауап (ҰБТ форматы)
           </label>
           <p className="hint-text">Дұрыс {q.correct_indexes ? 'жауаптарды' : 'жауаптың алдындағы шеңберді'} белгілеңіз. Формула: $x^2$</p>
+          </>}
           {q.options.map((option, oi) => (
             <div key={oi} className={`option-editor ${(q.correct_indexes ? q.correct_indexes.includes(oi) : q.correct_index === oi) ? 'correct' : ''}`}>
-              <input
+              {!q.match_rows && <input
                 type={q.correct_indexes ? 'checkbox' : 'radio'}
                 name={`correct-${qi}`}
                 checked={q.correct_indexes ? q.correct_indexes.includes(oi) : q.correct_index === oi}
                 onChange={() => (q.correct_indexes ? toggleCorrect(qi, oi) : setQuestion(qi, { correct_index: oi }))}
                 aria-label="Дұрыс жауап"
-              />
+              />}
               <span className="option-letter">{String.fromCharCode(65 + oi)}</span>
               <input value={option} onChange={(e) => setOption(qi, oi, e.target.value)} placeholder={`${String.fromCharCode(65 + oi)} нұсқасы`} />
               {q.options.length > 2 && <button onClick={() => removeOption(qi, oi)} title="Нұсқаны өшіру" aria-label="Нұсқаны өшіру"><LuX /></button>}

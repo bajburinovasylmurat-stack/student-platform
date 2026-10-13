@@ -20,7 +20,7 @@ SOURCES = {
 }
 
 VIDEOS = {1: 'jzG4_u5LPis', 2: 'm1ASzrjfPGI', 3: 'x0eDUj7ldjI', 4: 'ag2M8IyLcHE'}
-# Әр есептің видеода талдана бастайтын секунды (файлдағы есептер ретімен; сәйкестендірудің екі жолына бір уақыт)
+# Әр есептің видеода талдана бастайтын секунды (файлдағы есептер ретімен)
 STARTS = {
     1: [665, 770, 975, 1125, 1325, 1395, 1445, 1520, 1635, 1840, 1965, 2075, 2240, 2305, 2470, 2570, 2635, 2795, 3045, 3140,
         3330, 3655, 3835, 3980, 4185, 4615, 4700, 4765, 4870, 5022, 5100, 5160, 5295, 5355, 5460, 5925, 6000, 6150, 6510, 6745],
@@ -38,12 +38,12 @@ for n, source in SOURCES.items():
     starts = iter(STARTS[n])
     seconds = None
     for item in questions:
-        if '\n\nӘ) ' not in item['question']:  # сәйкестендірудің екінші жолы алдыңғысымен бір видеода
-            seconds = next(starts)
+        seconds = next(starts)
         item['solution_url'] = f'https://www.youtube.com/watch?v={VIDEOS[n]}&t={seconds}s'
         correct = item.get('correct_indexes', [item['correct_index']])
         assert len(set(item['options'])) == len(item['options']), (n, item['question'][:40], 'қайталанған нұсқа')
         assert all(0 <= c < len(item['options']) for c in correct), (n, item['question'][:40])
+        assert all(0 <= r['correct_index'] < len(item['options']) for r in item.get('match_rows', [])), (n, item['question'][:40])
         assert item['question'].count('$') % 2 == 0 and all(o.count('$') % 2 == 0 for o in item['options']), (n, item['question'][:40])
         if item.get('image'):
             assert os.path.exists(os.path.join(HERE, '..', '..', 'frontend', 'public', item['image'].lstrip('/'))), item['image']

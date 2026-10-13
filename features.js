@@ -83,6 +83,8 @@ export const featureMigrations = `
   -- Бірнеше дұрыс жауабы бар сұрақтар (ҰБТ форматы) және сұраққа сурет
   ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS correct_indexes JSONB;
   ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS image TEXT;
+  -- Сәйкестендіру есебі (ҰБТ): [{text, correct_index}] жолдары, жауап нұсқалары ортақ
+  ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS match_rows JSONB;
   -- Есептің шығарылу жолы (YouTube, дәл сол есептің уақытынан): нәтижені қарағанда көрсетіледі
   ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS solution_url TEXT;
   -- Материал сыртқы сілтеме ретінде (Google Drive т.б.)
@@ -135,7 +137,16 @@ const multiCorrect = (q) => (Array.isArray(q.correct_indexes) && q.correct_index
   : null);
 
 // ҰБТ ережесі: бәрі дұрыс — толық балл; бір қате (артық не кем) — бір балл кем; одан көп — 0
+const matchRows = (q) => (Array.isArray(q.match_rows) && q.match_rows.length ? q.match_rows : null);
+
 const gradeQuestion = (q, chosen) => {
+  // Сәйкестендіру: әр дұрыс жол үшін балл (ҰБТ-да жол сайын 1 балл)
+  const rows = matchRows(q);
+  if (rows) {
+    if (!Array.isArray(chosen)) return 0;
+    const right = rows.filter((row, i) => chosen[i] === row.correct_index).length;
+    return Math.round((right * q.points) / rows.length);
+  }
   const multi = multiCorrect(q);
   if (!multi) return chosen === q.correct_index ? q.points : 0;
   if (!Array.isArray(chosen) || chosen.length === 0) return 0;
@@ -167,11 +178,12 @@ export async function seedContent(pool) {
         );
         for (const [idx, q] of test.questions.entries()) {
           await client.query(
-            `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image, solution_url)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+            `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image, solution_url, match_rows)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
             [created.rows[0].id, idx, q.question, JSON.stringify(q.options),
               multiCorrect(q) ? multiCorrect(q)[0] : q.correct_index, q.points || 1,
-              multiCorrect(q) ? JSON.stringify(multiCorrect(q)) : null, q.image || null, q.solution_url || null]
+              multiCorrect(q) ? JSON.stringify(multiCorrect(q)) : null, q.image || null, q.solution_url || null,
+              matchRows(q) ? JSON.stringify(matchRows(q)) : null]
           );
         }
       }
@@ -603,15 +615,19 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
     (Array.isArray(questions) ? questions : [])
       .map((q) => {
         const options = (Array.isArray(q.options) ? q.options : []).map((o) => String(o ?? '').trim());
-        const multi = multiCorrect(q)?.filter((i) => Number.isInteger(i) && i >= 0 && i < options.length);
+        const rows = (matchRows(q) || [])
+          .map((row) => ({ text: String(row.text || '').trim(), correct_index: Number(row.correct_index) }))
+          .filter((row) => row.text && Number.isInteger(row.correct_index) && row.correct_index >= 0 && row.correct_index < options.length);
+        const multi = rows.length ? null : multiCorrect(q)?.filter((i) => Number.isInteger(i) && i >= 0 && i < options.length);
         return {
           question: String(q.question || '').trim(),
           options,
+          match_rows: rows.length ? rows : null,
           correct_indexes: multi?.length ? multi : null,
-          correct_index: multi?.length ? multi[0] : Number(q.correct_index),
+          correct_index: rows.length ? rows[0].correct_index : multi?.length ? multi[0] : Number(q.correct_index),
           image: typeof q.image === 'string' && q.image.startsWith('/') ? q.image : null,
           solution_url: /^https:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(q.solution_url || '') ? q.solution_url.trim() : null,
-          points: Math.max(1, Number(q.points) || 1)
+          points: Math.max(rows.length || 1, Number(q.points) || 1)
         };
       })
       .filter((q) => q.question && q.options.length >= 2 && q.options.every(Boolean) &&
@@ -635,7 +651,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       const test = await pool.query('SELECT * FROM tests WHERE id = $1', [req.params.id]);
       if (!test.rows[0]) return res.status(404).json({ error: 'Тест табылмады' });
       const questions = await pool.query(
-        'SELECT id, question, options, correct_index, correct_indexes, image, solution_url, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
+        'SELECT id, question, options, correct_index, correct_indexes, match_rows, image, solution_url, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
         [req.params.id]
       );
       res.json({ ...test.rows[0], questions: questions.rows });
@@ -679,10 +695,11 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       }
       for (const [idx, q] of questions.entries()) {
         await client.query(
-          `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image, solution_url)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image, solution_url, match_rows)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
           [testId, idx, q.question, JSON.stringify(q.options), q.correct_index, q.points,
-            q.correct_indexes ? JSON.stringify(q.correct_indexes) : null, q.image, q.solution_url]
+            q.correct_indexes ? JSON.stringify(q.correct_indexes) : null, q.image, q.solution_url,
+            q.match_rows ? JSON.stringify(q.match_rows) : null]
         );
       }
       await client.query('COMMIT');
@@ -733,7 +750,8 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
 
   const attemptPayload = async (attempt, test) => {
     const questions = await pool.query(
-      `SELECT id, question, options, points, image, (correct_indexes IS NOT NULL) AS multi
+      `SELECT id, question, options, points, image, (correct_indexes IS NOT NULL) AS multi,
+              (SELECT jsonb_agg(r->'text') FROM jsonb_array_elements(match_rows) r) AS match_rows
        FROM test_questions WHERE test_id = $1 ORDER BY idx, id`,
       [test.id]
     );
@@ -795,7 +813,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
     const a = attempt.rows[0];
     if (!a) return null;
     const questions = await pool.query(
-      'SELECT id, question, options, correct_index, correct_indexes, image, solution_url, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
+      'SELECT id, question, options, correct_index, correct_indexes, match_rows, image, solution_url, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
       [a.test_id]
     );
     const answers = a.answers || {};
@@ -835,7 +853,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
         const answers = Date.now() <= deadline && req.body.answers ? req.body.answers : (a.answers || {});
 
         const questions = await pool.query(
-          'SELECT id, correct_index, correct_indexes, points FROM test_questions WHERE test_id = $1',
+          'SELECT id, correct_index, correct_indexes, match_rows, points FROM test_questions WHERE test_id = $1',
           [a.test_id]
         );
         let score = 0;
@@ -844,7 +862,10 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
         for (const q of questions.rows) {
           max += q.points;
           const chosen = answers[q.id];
-          if (Number.isInteger(chosen)) clean[q.id] = chosen;
+          if (matchRows(q)) {
+            const picked = q.match_rows.map((_, i) => (Array.isArray(chosen) && Number.isInteger(chosen[i]) ? chosen[i] : null));
+            if (picked.some((v) => v !== null)) clean[q.id] = picked;
+          } else if (Number.isInteger(chosen)) clean[q.id] = chosen;
           else if (Array.isArray(chosen) && chosen.every(Number.isInteger) && chosen.length) {
             clean[q.id] = [...new Set(chosen)].sort((x, y) => x - y);
           }

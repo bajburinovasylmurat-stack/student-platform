@@ -27,6 +27,7 @@ function TestList({ onStart, onOpenResult }) {
   const [tests, setTests] = useState(null);
   const [history, setHistory] = useState([]);
   const [starting, setStarting] = useState(null);
+  const [tab, setTab] = useState('topics');
 
   useEffect(() => {
     Promise.all([api.get('/api/tests'), api.get('/api/my-test-history')])
@@ -59,15 +60,32 @@ function TestList({ onStart, onOpenResult }) {
 
   if (!tests) return <div className="loading">Жүктелуде...</div>;
 
+  // ҰТО нұсқалары бөлек қойындыда: толық форматтағы сынақ тесттер
+  const utoTests = tests.filter(isUto);
+  const topicTests = tests.filter((t) => !isUto(t));
+  const hasTabs = utoTests.length > 0 && topicTests.length > 0;
+  const shown = !hasTabs ? tests : tab === 'uto' ? utoTests : topicTests;
+
   return (
     <div className="feature-page">
       <h2><LuFileQuestion /> Онлайн тесттер</h2>
+
+      {hasTabs && (
+        <div className="test-tabs" role="tablist">
+          <button role="tab" aria-selected={tab === 'topics'} className={tab === 'topics' ? 'active' : ''} onClick={() => setTab('topics')}>
+            Тақырыптық тесттер <span>{topicTests.length}</span>
+          </button>
+          <button role="tab" aria-selected={tab === 'uto'} className={tab === 'uto' ? 'active' : ''} onClick={() => setTab('uto')}>
+            ҰТО <span>{utoTests.length}</span>
+          </button>
+        </div>
+      )}
 
       {tests.length === 0 ? (
         <p className="empty-state">Әзірге жарияланған тест жоқ</p>
       ) : (
         <div className="test-groups">
-          {groupByTopic(tests).map(([topic, items], gi) => {
+          {groupByTopic(shown).map(([topic, items], gi) => {
             const done = items.filter((t) => t.attempts > 0).length;
             const hasActive = items.some((t) => t.active_attempt);
             return (
@@ -124,6 +142,8 @@ function TestList({ onStart, onOpenResult }) {
     </div>
   );
 }
+
+const isUto = (test) => (test.topic || '').startsWith('ҰТО');
 
 // Тесттерді тақырып бойынша топтау (реті серверден келгендей сақталады)
 const groupByTopic = (tests) => {
@@ -233,6 +253,20 @@ function TakeTest({ session, onFinish }) {
     }, 600);
   };
 
+  // Сәйкестендіру есебі: әр жолға ортақ тізімнен бір жауап
+  const chooseMatch = (question, rowIndex, value) => {
+    const current = Array.isArray(answersRef.current[question.id]) ? answersRef.current[question.id] : [];
+    const picked = question.match_rows.map((_, i) => (i === rowIndex ? value : current[i] ?? null));
+    const next = { ...answersRef.current };
+    if (picked.some((v) => v !== null)) next[question.id] = picked; else delete next[question.id];
+    answersRef.current = next;
+    setAnswers(next);
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      api.put(`/api/attempts/${session.attempt_id}/answers`, { answers: answersRef.current }).catch(() => {});
+    }, 600);
+  };
+
   const q = session.questions[index];
   const minutes = Math.floor(left / 60000);
   const seconds = Math.floor((left % 60000) / 1000);
@@ -268,6 +302,22 @@ function TakeTest({ session, onFinish }) {
         {q.multi && <p className="multi-hint">Бір немесе бірнеше дұрыс жауап (үшеуден артық емес)</p>}
         <p className="question-text"><MathText text={q.question} /></p>
         {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
+        {q.match_rows ? (
+          <div className="match-table">
+            {q.match_rows.map((row, ri) => {
+              const value = (answers[q.id] || [])[ri] ?? null;
+              return (
+                <div key={ri} className="match-row">
+                  <div className="match-text">
+                    <span className="option-letter">{String.fromCharCode(65 + ri)}</span>
+                    <span><MathText text={row} /></span>
+                  </div>
+                  <MatchSelect options={q.options} value={value} onChange={(v) => chooseMatch(q, ri, v)} />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
         <div className="options">
           {q.options.map((option, i) => {
             const chosen = q.multi ? (answers[q.id] || []).includes(i) : answers[q.id] === i;
@@ -285,6 +335,7 @@ function TakeTest({ session, onFinish }) {
             );
           })}
         </div>
+        )}
       </div>
 
       <div className="take-nav">
@@ -326,10 +377,34 @@ function TestResult({ result, onBack }) {
           <div key={q.id} className={`review-item ${q.is_correct ? 'correct' : 'wrong'}`}>
             <div className="question-num">
               {i + 1}-сұрақ {q.is_correct ? <LuCheckCircle2 className="ok-icon" /> : q.chosen === null ? <><LuCircle /> Жауап жоқ</> : <LuXCircle className="bad-icon" />}
-              {q.correct_indexes && <span className="muted-text"> · {q.earned}/{q.points} балл</span>}
+              {(q.correct_indexes || q.match_rows) && <span className="muted-text"> · {q.earned}/{q.points} балл</span>}
             </div>
             <p className="question-text"><MathText text={q.question} /></p>
             {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
+            {q.match_rows ? (
+              <div className="match-table">
+                {q.match_rows.map((row, ri) => {
+                  const picked = Array.isArray(q.chosen) ? q.chosen[ri] ?? null : null;
+                  const ok = picked === row.correct_index;
+                  return (
+                    <div key={ri} className={`match-row static ${ok ? 'right' : 'wrong'}`}>
+                      <div className="match-text">
+                        <span className="option-letter">{String.fromCharCode(65 + ri)}</span>
+                        <span><MathText text={row.text} /></span>
+                      </div>
+                      <div className="match-answer">
+                        {!ok && (
+                          <span className="match-picked">
+                            {picked === null ? 'Жауап жоқ' : <MathText text={q.options[picked]} />}
+                          </span>
+                        )}
+                        <span className="match-correct"><LuCheck /> <MathText text={q.options[row.correct_index]} /></span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
             <div className="options">
               {q.options.map((option, oi) => {
                 const right = q.correct_indexes ? q.correct_indexes.includes(oi) : oi === q.correct_index;
@@ -343,6 +418,7 @@ function TestResult({ result, onBack }) {
                 );
               })}
             </div>
+            )}
             {q.solution_url && (
               <a className={`solution-link ${q.is_correct ? '' : 'needed'}`} href={q.solution_url} target="_blank" rel="noopener noreferrer">
                 <LuPlay /> Шығарылу жолын көру (YouTube)
@@ -351,6 +427,44 @@ function TestResult({ result, onBack }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// Сәйкестендірудегі ашылмалы тізім: <select> формуланы көрсете алмайды, сондықтан өз тізіміміз
+function MatchSelect({ options, value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e) => { if (!boxRef.current?.contains(e.target)) setOpen(false); };
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className={`match-select ${open ? 'open' : ''}`} ref={boxRef}>
+      <button type="button" className={value === null ? 'empty' : ''} aria-haspopup="listbox" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <span>{value === null ? 'Жауапты таңдаңыз' : <MathText text={options[value]} />}</span>
+        <LuChevronDown />
+      </button>
+      {open && (
+        <ul role="listbox">
+          {options.map((option, i) => (
+            <li key={i} role="option" aria-selected={value === i}>
+              <button type="button" className={value === i ? 'chosen' : ''} onClick={() => { onChange(value === i ? null : i); setOpen(false); }}>
+                <MathText text={option} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

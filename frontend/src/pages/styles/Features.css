@@ -1492,3 +1492,167 @@
   border-radius: 8px;
   font-size: 0.85rem;
 }
+
+/* Тесттер / ҰТО қойындылары */
+.test-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background: rgba(41, 91, 110, 0.08);
+}
+
+.test-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--brand);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.test-tabs button span {
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  background: rgba(41, 91, 110, 0.12);
+}
+
+.test-tabs button.active {
+  background: var(--brand);
+  color: #fff;
+}
+
+.test-tabs button.active span {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Сәйкестендіру есебі (ҰБТ форматы) */
+.match-table {
+  border: 1px solid rgba(41, 91, 110, 0.25);
+  border-radius: 10px;
+}
+
+.match-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.match-row + .match-row {
+  border-top: 1px solid rgba(41, 91, 110, 0.18);
+}
+
+.match-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.match-select {
+  position: relative;
+  min-width: 0;
+}
+
+.match-select > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid rgba(41, 91, 110, 0.3);
+  border-radius: 8px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.match-select > button.empty > span {
+  opacity: 0.55;
+}
+
+.match-select.open > button,
+.match-select > button:focus-visible {
+  border-color: var(--brand);
+  outline: 2px solid rgba(41, 91, 110, 0.2);
+}
+
+.match-select ul {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid rgba(41, 91, 110, 0.25);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.14);
+}
+
+.match-select li button {
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.match-select li button:hover,
+.match-select li button.chosen {
+  background: rgba(41, 91, 110, 0.1);
+}
+
+.match-row.static.right {
+  background: rgba(46, 160, 67, 0.08);
+}
+
+.match-row.static.wrong {
+  background: rgba(217, 48, 37, 0.06);
+}
+
+.match-answer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+
+.match-picked {
+  color: #d93025;
+  text-decoration: line-through;
+}
+
+.match-correct {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1a7f37;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .match-row {
+    grid-template-columns: 1fr;
+  }
+}

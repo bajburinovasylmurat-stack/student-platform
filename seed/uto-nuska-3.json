@@ -356,7 +356,7 @@
      "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5105s"
     },
     {
-     "question": "$x_1$ және $x_2$ сандары $f(x)=\\dfrac{x^3}{3}-\\dfrac{x^2}{2}-2x+4$ функциясының кризистік (сындық) нүктелері екені белгілі болса, онда өрнектерді олардың мәндерімен сәйкестендіріңіз\n\nА) $x_1^2+x_2^2$",
+     "question": "$x_1$ және $x_2$ сандары $f(x)=\\dfrac{x^3}{3}-\\dfrac{x^2}{2}-2x+4$ функциясының кризистік (сындық) нүктелері екені белгілі болса, онда өрнектерді олардың мәндерімен сәйкестендіріңіз",
      "options": [
       "3",
       "5",
@@ -364,23 +364,21 @@
       "9"
      ],
      "correct_index": 1,
-     "points": 1,
-     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5145s"
-    },
-    {
-     "question": "$x_1$ және $x_2$ сандары $f(x)=\\dfrac{x^3}{3}-\\dfrac{x^2}{2}-2x+4$ функциясының кризистік (сындық) нүктелері екені белгілі болса, онда өрнектерді олардың мәндерімен сәйкестендіріңіз\n\nӘ) $x_1^3+x_2^3$",
-     "options": [
-      "3",
-      "5",
-      "7",
-      "9"
+     "points": 2,
+     "match_rows": [
+      {
+       "text": "$x_1^2+x_2^2$",
+       "correct_index": 1
+      },
+      {
+       "text": "$x_1^3+x_2^3$",
+       "correct_index": 2
+      }
      ],
-     "correct_index": 2,
-     "points": 1,
      "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5145s"
     },
     {
-     "question": "$ABC$ үшбұрышында $A$, $B$ төбелеріндегі сыртқы бұрыштары сәйкесінше $140^\\circ$ және $100^\\circ$ болса, $A$ және $C$ ішкі бұрыштарын сәйкес мәндерімен сәйкестендіріңіз\n\nА) $\\angle C$",
+     "question": "$ABC$ үшбұрышында $A$, $B$ төбелеріндегі сыртқы бұрыштары сәйкесінше $140^\\circ$ және $100^\\circ$ болса, $A$ және $C$ ішкі бұрыштарын сәйкес мәндерімен сәйкестендіріңіз",
      "options": [
       "40 градус",
       "60 градус",
@@ -388,23 +386,21 @@
       "100 градус"
      ],
      "correct_index": 1,
-     "points": 1,
-     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5235s"
-    },
-    {
-     "question": "$ABC$ үшбұрышында $A$, $B$ төбелеріндегі сыртқы бұрыштары сәйкесінше $140^\\circ$ және $100^\\circ$ болса, $A$ және $C$ ішкі бұрыштарын сәйкес мәндерімен сәйкестендіріңіз\n\nӘ) $\\angle A$",
-     "options": [
-      "40 градус",
-      "60 градус",
-      "80 градус",
-      "100 градус"
+     "points": 2,
+     "match_rows": [
+      {
+       "text": "$\\angle C$",
+       "correct_index": 1
+      },
+      {
+       "text": "$\\angle A$",
+       "correct_index": 0
+      }
      ],
-     "correct_index": 0,
-     "points": 1,
      "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5235s"
     },
     {
-     "question": "$a=9\\dfrac16:\\left(4\\dfrac13-8\\right)+24\\cdot\\dfrac38$ екені белгілі. Сәйкестендіріңіз\n\nА) $a$",
+     "question": "$a=9\\dfrac16:\\left(4\\dfrac13-8\\right)+24\\cdot\\dfrac38$ екені белгілі. Сәйкестендіріңіз",
      "options": [
       "5,5",
       "6,5",
@@ -412,23 +408,21 @@
       "8,5"
      ],
      "correct_index": 1,
-     "points": 1,
-     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5395s"
-    },
-    {
-     "question": "$a=9\\dfrac16:\\left(4\\dfrac13-8\\right)+24\\cdot\\dfrac38$ екені белгілі. Сәйкестендіріңіз\n\nӘ) $a+1$",
-     "options": [
-      "5,5",
-      "6,5",
-      "7,5",
-      "8,5"
+     "points": 2,
+     "match_rows": [
+      {
+       "text": "$a$",
+       "correct_index": 1
+      },
+      {
+       "text": "$a+1$",
+       "correct_index": 2
+      }
      ],
-     "correct_index": 2,
-     "points": 1,
      "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5395s"
     },
     {
-     "question": "$x_1$ және $x_2$ сандары $\\dfrac{60}{x}+\\dfrac{60}{x+3}=30$ теңдеуінің түбірлері екені белгілі. Сәйкестендіріңіз\n\nА) $x_1^2+x_2^2$",
+     "question": "$x_1$ және $x_2$ сандары $\\dfrac{60}{x}+\\dfrac{60}{x+3}=30$ теңдеуінің түбірлері екені белгілі. Сәйкестендіріңіз",
      "options": [
       "7",
       "13",
@@ -436,23 +430,21 @@
       "35"
      ],
      "correct_index": 1,
-     "points": 1,
-     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5510s"
-    },
-    {
-     "question": "$x_1$ және $x_2$ сандары $\\dfrac{60}{x}+\\dfrac{60}{x+3}=30$ теңдеуінің түбірлері екені белгілі. Сәйкестендіріңіз\n\nӘ) $x_1^3+x_2^3$",
-     "options": [
-      "7",
-      "13",
-      "19",
-      "35"
+     "points": 2,
+     "match_rows": [
+      {
+       "text": "$x_1^2+x_2^2$",
+       "correct_index": 1
+      },
+      {
+       "text": "$x_1^3+x_2^3$",
+       "correct_index": 2
+      }
      ],
-     "correct_index": 2,
-     "points": 1,
      "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5510s"
     },
     {
-     "question": "6-ға бөлгенде 1 қалдық қалатын екі таңбалы сандар тізбегінің қосындысы мен 15-ші мүшесінің мәндерін сәйкестендіріңіз\n\nА) $a_{15}$",
+     "question": "6-ға бөлгенде 1 қалдық қалатын екі таңбалы сандар тізбегінің қосындысы мен 15-ші мүшесінің мәндерін сәйкестендіріңіз",
      "options": [
       "97",
       "107",
@@ -460,19 +452,17 @@
       "875"
      ],
      "correct_index": 0,
-     "points": 1,
-     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5715s"
-    },
-    {
-     "question": "6-ға бөлгенде 1 қалдық қалатын екі таңбалы сандар тізбегінің қосындысы мен 15-ші мүшесінің мәндерін сәйкестендіріңіз\n\nӘ) $S_n$",
-     "options": [
-      "97",
-      "107",
-      "825",
-      "875"
+     "points": 2,
+     "match_rows": [
+      {
+       "text": "$a_{15}$",
+       "correct_index": 0
+      },
+      {
+       "text": "$S_n$",
+       "correct_index": 2
+      }
      ],
-     "correct_index": 2,
-     "points": 1,
      "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5715s"
     },
     {
