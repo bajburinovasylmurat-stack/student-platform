@@ -26,9 +26,9 @@
 
 .yt-preview.invalid {
   font-size: 13px;
-  color: #a1462a;
-  background: #fdf1ec;
-  border: 1px solid #f5d5c7;
+  color: var(--danger-text);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
   padding: 10px 12px;
   border-radius: 8px;
 }

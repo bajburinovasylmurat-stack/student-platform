@@ -13,6 +13,7 @@ import Tests from './components/Tests';
 import Flashcards from './components/Flashcards';
 import Leaderboard from './components/Leaderboard';
 import NotifyButton from './components/NotifyButton';
+import ThemeToggle from '../components/ThemeToggle';
 import { AnnouncementsBar } from './components/Announcements';
 import { API, api, errorText } from '../api';
 import { formatKkDate, capitalize } from '../utils/kkDate';
@@ -132,6 +133,7 @@ export default function Dashboard({ student, onLogout, onProfileUpdate }) {
           <Logo size="sm" className="header-logo" />
 
           <div className="user-chip">
+            <ThemeToggle />
             <NotifyButton />
             <button type="button" className="profile-btn" onClick={openNameEditor} title="Аты-жөнін өзгерту">
               <span className="avatar">{initials(student.name)}</span>

@@ -4,7 +4,7 @@
 .plans-section h2,
 .daily-tasks-section h2,
 .admin-panel h2 {
-  color: #333;
+  color: var(--text);
   margin-bottom: 24px;
   font-size: 24px;
   border-bottom: 3px solid var(--brand);
@@ -21,8 +21,8 @@
 
 .material-card,
 .exam-card {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 20px;
   transition: all 0.3s;
@@ -39,7 +39,7 @@
 .material-card h3,
 .exam-card h3 {
   margin-top: 0;
-  color: #333;
+  color: var(--text);
   font-size: 18px;
 }
 
@@ -60,13 +60,13 @@
 }
 
 .description {
-  color: #666;
+  color: var(--text-soft);
   font-size: 14px;
   margin: 12px 0;
 }
 
 .file-name {
-  color: #999;
+  color: var(--text-muted);
   font-size: 12px;
   display: block;
   margin: 12px 0;
@@ -92,7 +92,7 @@
 .watch-btn:hover,
 .add-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(41, 91, 110, 0.4);
+  box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.4);
 }
 
 .add-btn {
@@ -105,7 +105,7 @@
 .no-plans,
 .no-tasks {
   text-align: center;
-  color: #999;
+  color: var(--text-muted);
   padding: 40px 20px;
   font-size: 16px;
 }
@@ -119,8 +119,8 @@
 
 .category-filter button {
   padding: 8px 16px;
-  border: 2px solid #e0e0e0;
-  background: white;
+  border: 2px solid var(--border);
+  background: var(--card);
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.3s;
@@ -144,7 +144,7 @@
 .add-plan-form,
 .add-task-form,
 .admin-form {
-  background: #f9f9f9;
+  background: var(--surface);
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -160,7 +160,7 @@
 .admin-form textarea,
 .admin-form select {
   padding: 10px 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -186,7 +186,7 @@
 .form-group label {
   margin-bottom: 6px;
   font-weight: 600;
-  color: #555;
+  color: var(--text-soft);
   font-size: 14px;
 }
 
@@ -209,7 +209,7 @@
 .add-task-form button:hover:not(:disabled),
 .admin-form button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(41, 91, 110, 0.4);
+  box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.4);
 }
 
 .add-form button:disabled,
@@ -236,21 +236,21 @@
 }
 
 .calendar-section {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 20px;
 }
 
 .plans-detail {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 20px;
 }
 
 .plans-detail h3 {
-  color: #333;
+  color: var(--text);
   margin-top: 0;
   margin-bottom: 20px;
 }
@@ -266,7 +266,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 6px;
   margin-bottom: 10px;
   transition: all 0.3s;
@@ -274,13 +274,13 @@
 
 .plan-item:hover,
 .task-item:hover {
-  background: #f9f9f9;
+  background: var(--surface);
   border-color: var(--brand);
 }
 
 .plan-item.completed,
 .task-item.completed {
-  background: #f0f7ff;
+  background: var(--brand-soft);
   opacity: 0.7;
 }
 
@@ -302,14 +302,14 @@
 
 .plan-time,
 .task-time {
-  color: #999;
+  color: var(--text-muted);
   font-size: 12px;
   font-weight: 600;
 }
 
 .plan-title,
 .task-title {
-  color: #333;
+  color: var(--text);
   font-size: 16px;
   font-weight: 500;
 }
@@ -322,13 +322,13 @@
 }
 
 .task-status.done {
-  background: #d4edda;
-  color: #155724;
+  background: var(--ok-bg);
+  color: var(--ok-text);
 }
 
 .task-status.pending {
-  background: #fff3cd;
-  color: #856404;
+  background: var(--warn-bg);
+  color: var(--warn-text);
 }
 
 /* ===== DAILY TASKS ===== */
@@ -368,7 +368,7 @@
 
 .progress-fill {
   height: 100%;
-  background: white;
+  background: var(--card);
   transition: width 0.3s;
 }
 
@@ -381,7 +381,7 @@
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid var(--border);
 }
 
 .admin-nav button {
@@ -389,7 +389,7 @@
   border: none;
   background: none;
   cursor: pointer;
-  color: #666;
+  color: var(--text-soft);
   font-weight: 600;
   border-bottom: 3px solid transparent;
   transition: all 0.3s;
@@ -405,14 +405,14 @@
 }
 
 .admin-section {
-  background: #f9f9f9;
+  background: var(--surface);
   padding: 24px;
   border-radius: 8px;
 }
 
 .admin-section h3 {
   margin-top: 0;
-  color: #333;
+  color: var(--text);
   margin-bottom: 20px;
 }
 
@@ -431,7 +431,7 @@
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(41, 91, 110, 0.4);
+  box-shadow: 0 4px 12px rgba(var(--brand-rgb), 0.4);
 }
 
 /* ===== RESPONSIVE ===== */
