@@ -1656,3 +1656,46 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Қатемен жұмыс */
+.mistake-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(242, 165, 65, 0.5);
+  background: rgba(242, 165, 65, 0.12);
+}
+
+.mistake-banner.done {
+  border-color: rgba(46, 160, 67, 0.4);
+  background: rgba(46, 160, 67, 0.08);
+}
+
+.mistake-banner strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mistake-banner p {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.question-dots button.fixed {
+  background: #2ea043;
+  border-color: #2ea043;
+  color: #fff;
+}
+
+.question-dots button.still-wrong {
+  background: #d93025;
+  border-color: #d93025;
+  color: #fff;
+}

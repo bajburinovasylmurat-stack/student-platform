@@ -13,7 +13,16 @@ export default function Tests() {
     return <TakeTest session={view.session} onFinish={(result) => setView({ name: 'result', result })} />;
   }
   if (view.name === 'result') {
-    return <TestResult result={view.result} onBack={() => setView({ name: 'list' })} />;
+    return (
+      <TestResult
+        result={view.result}
+        onBack={() => setView({ name: 'list' })}
+        onMistakes={() => setView({ name: 'mistakes', result: view.result })}
+      />
+    );
+  }
+  if (view.name === 'mistakes') {
+    return <MistakeWork result={view.result} onDone={(result) => setView({ name: 'result', result })} />;
   }
   return (
     <TestList
@@ -353,8 +362,9 @@ function TakeTest({ session, onFinish }) {
   );
 }
 
-function TestResult({ result, onBack }) {
+function TestResult({ result, onBack, onMistakes }) {
   const percent = result.max_score ? Math.round((result.score / result.max_score) * 100) : 0;
+  const wrong = result.questions.filter((q) => !q.is_correct).length;
 
   return (
     <div className="feature-page">
@@ -372,6 +382,22 @@ function TestResult({ result, onBack }) {
         </div>
       </div>
 
+      {wrong > 0 && (
+        <div className={`mistake-banner ${result.mistakes_done_at ? 'done' : ''}`}>
+          <div>
+            <strong><LuTarget /> Қатемен жұмыс</strong>
+            <p>
+              {result.mistakes_done_at
+                ? `Орындалды: ${result.mistakes_fixed}/${wrong} есеп түзетілді. Қайта жасауға болады.`
+                : `${wrong} есептен қате кетті. Соларды қайта шығарып, талдауын қара.`}
+            </p>
+          </div>
+          <button className="primary-btn" onClick={onMistakes}>
+            {result.mistakes_done_at ? <><LuRotateCcw /> Қайта жасау</> : <><LuPlay /> Бастау</>}
+          </button>
+        </div>
+      )}
+
       <div className="review-list">
         {result.questions.map((q, i) => (
           <div key={q.id} className={`review-item ${q.is_correct ? 'correct' : 'wrong'}`}>
@@ -379,55 +405,222 @@ function TestResult({ result, onBack }) {
               {i + 1}-сұрақ {q.is_correct ? <LuCheckCircle2 className="ok-icon" /> : q.chosen === null ? <><LuCircle /> Жауап жоқ</> : <LuXCircle className="bad-icon" />}
               {(q.correct_indexes || q.match_rows) && <span className="muted-text"> · {q.earned}/{q.points} балл</span>}
             </div>
-            <p className="question-text"><MathText text={q.question} /></p>
-            {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
-            {q.match_rows ? (
-              <div className="match-table">
-                {q.match_rows.map((row, ri) => {
-                  const picked = Array.isArray(q.chosen) ? q.chosen[ri] ?? null : null;
-                  const ok = picked === row.correct_index;
-                  return (
-                    <div key={ri} className={`match-row static ${ok ? 'right' : 'wrong'}`}>
-                      <div className="match-text">
-                        <span className="option-letter">{String.fromCharCode(65 + ri)}</span>
-                        <span><MathText text={row.text} /></span>
-                      </div>
-                      <div className="match-answer">
-                        {!ok && (
-                          <span className="match-picked">
-                            {picked === null ? 'Жауап жоқ' : <MathText text={q.options[picked]} />}
-                          </span>
-                        )}
-                        <span className="match-correct"><LuCheck /> <MathText text={q.options[row.correct_index]} /></span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-            <div className="options">
-              {q.options.map((option, oi) => {
-                const right = q.correct_indexes ? q.correct_indexes.includes(oi) : oi === q.correct_index;
-                const picked = Array.isArray(q.chosen) ? q.chosen.includes(oi) : oi === q.chosen;
-                return (
-                  <div key={oi} className={`option static ${right ? 'right' : ''} ${picked && !right ? 'chosen-wrong' : ''}`}>
-                    <span className="option-letter">{String.fromCharCode(65 + oi)}</span>
-                    <span><MathText text={option} /></span>
-                    {picked && <span className="picked-mark">сіздің жауабыңыз</span>}
-                  </div>
-                );
-              })}
-            </div>
-            )}
-            {q.solution_url && (
-              <a className={`solution-link ${q.is_correct ? '' : 'needed'}`} href={q.solution_url} target="_blank" rel="noopener noreferrer">
-                <LuPlay /> Шығарылу жолын көру (YouTube)
-              </a>
-            )}
+            <ReviewBody q={q} chosen={q.chosen} solved={q.is_correct} />
           </div>
         ))}
       </div>
     </div>
+  );
+}
+
+// Жауаптың толық дұрыстығы (қатемен жұмыста бет ішінде тексеріледі)
+const isRight = (q, chosen) => {
+  if (q.match_rows) return Array.isArray(chosen) && q.match_rows.every((row, i) => chosen[i] === row.correct_index);
+  if (q.correct_indexes) {
+    return Array.isArray(chosen) && chosen.length === q.correct_indexes.length && q.correct_indexes.every((i) => chosen.includes(i));
+  }
+  return chosen === q.correct_index;
+};
+
+// Қатемен жұмыс: тестте қате кеткен есептерді уақытсыз қайта шығару, әр жауап бірден тексеріледі
+function MistakeWork({ result, onDone }) {
+  const [questions] = useState(() => result.questions
+    .map((q, i) => ({ ...q, number: i + 1 }))
+    .filter((q) => !q.is_correct));
+  const [index, setIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [checked, setChecked] = useState({});
+  const [finished, setFinished] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const q = questions[index];
+  const chosen = answers[q.id];
+  const fixed = questions.filter((item) => checked[item.id] && isRight(item, answers[item.id])).length;
+  const allChecked = questions.every((item) => checked[item.id]);
+
+  const setAnswer = (value) => setAnswers({ ...answers, [q.id]: value });
+  const toggle = (i) => {
+    if (!q.correct_indexes) return setAnswer(i);
+    const current = Array.isArray(chosen) ? chosen : [];
+    const next = current.includes(i) ? current.filter((v) => v !== i) : [...current, i].sort((a, b) => a - b);
+    if (next.length <= 3) setAnswer(next.length ? next : undefined);
+    return undefined;
+  };
+  const setRow = (ri, value) => {
+    const current = Array.isArray(chosen) ? chosen : [];
+    const picked = q.match_rows.map((_, i) => (i === ri ? value : current[i] ?? null));
+    setAnswer(picked.some((v) => v !== null) ? picked : undefined);
+  };
+
+  const finish = async () => {
+    setSaving(true);
+    try {
+      const saved = await api.post(`/api/attempts/${result.attempt_id}/mistakes`, { fixed, total: questions.length });
+      setFinished({ ...result, ...saved });
+    } catch (error) {
+      alert(errorText(error, 'Сақтау сәтсіз. Қайта басыңыз'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (finished) {
+    return (
+      <div className="feature-page">
+        <div className={`result-hero ${scoreClass(fixed, questions.length)}`}>
+          <div className="result-circle" style={{ '--p': Math.round((fixed / questions.length) * 100) }}>
+            <span>{fixed}/{questions.length}</span>
+          </div>
+          <div>
+            <h2>Қатемен жұмыс аяқталды</h2>
+            <p>{fixed === questions.length ? 'Барлық қате түзетілді!' : `${questions.length - fixed} есеп әлі де қате. Талдауын қарап, қайта жасап көр.`}</p>
+          </div>
+        </div>
+        <button className="primary-btn" onClick={() => onDone(finished)}><LuArrowLeft /> Нәтижеге оралу</button>
+      </div>
+    );
+  }
+
+  const isChecked = Boolean(checked[q.id]);
+  const right = isChecked && isRight(q, chosen);
+
+  return (
+    <div className="feature-page take-test">
+      <div className="take-header">
+        <div>
+          <h2>Қатемен жұмыс</h2>
+          <span className="muted-text">{result.title} · {fixed}/{questions.length} түзетілді</span>
+        </div>
+        <button className="secondary-btn" onClick={() => onDone(result)}><LuArrowLeft /> Нәтижеге</button>
+      </div>
+
+      <div className="question-dots">
+        {questions.map((item, i) => (
+          <button
+            key={item.id}
+            className={`${i === index ? 'current' : ''} ${checked[item.id] ? (isRight(item, answers[item.id]) ? 'fixed' : 'still-wrong') : ''}`}
+            onClick={() => setIndex(i)}
+            aria-label={`${item.number}-сұрақ`}
+          >
+            {item.number}
+          </button>
+        ))}
+      </div>
+
+      <div className={`question-card ${isChecked ? (right ? 'review-item correct' : 'review-item wrong') : ''}`} key={q.id}>
+        <div className="question-num">
+          {q.number}-сұрақ {isChecked && (right ? <><LuCheckCircle2 className="ok-icon" /> Дұрыс!</> : <><LuXCircle className="bad-icon" /> Әлі қате</>)}
+        </div>
+        {isChecked ? (
+          <ReviewBody q={q} chosen={chosen ?? null} solved={right} />
+        ) : (
+          <>
+            {q.correct_indexes && <p className="multi-hint">Бір немесе бірнеше дұрыс жауап (үшеуден артық емес)</p>}
+            <p className="question-text"><MathText text={q.question} /></p>
+            {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
+            {q.match_rows ? (
+              <div className="match-table">
+                {q.match_rows.map((row, ri) => (
+                  <div key={ri} className="match-row">
+                    <div className="match-text">
+                      <span className="option-letter">{String.fromCharCode(65 + ri)}</span>
+                      <span><MathText text={row.text} /></span>
+                    </div>
+                    <MatchSelect options={q.options} value={(chosen || [])[ri] ?? null} onChange={(v) => setRow(ri, v)} />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="options">
+                {q.options.map((option, i) => {
+                  const picked = q.correct_indexes ? (chosen || []).includes(i) : chosen === i;
+                  return (
+                    <label key={i} className={`option ${picked ? 'chosen' : ''}`}>
+                      <input type={q.correct_indexes ? 'checkbox' : 'radio'} name={`m${q.id}`} checked={picked} onChange={() => toggle(i)} />
+                      <span className="option-letter">{String.fromCharCode(65 + i)}</span>
+                      <span><MathText text={option} /></span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="take-nav">
+        <button className="secondary-btn" disabled={index === 0} onClick={() => setIndex(index - 1)}><LuArrowLeft /> Алдыңғы</button>
+        {!isChecked ? (
+          <button className="primary-btn" disabled={chosen === undefined} onClick={() => setChecked({ ...checked, [q.id]: true })}>
+            <LuCheck /> Тексеру
+          </button>
+        ) : !right ? (
+          <button className="secondary-btn" onClick={() => { setChecked({ ...checked, [q.id]: false }); setAnswer(undefined); }}>
+            <LuRotateCcw /> Қайта шығару
+          </button>
+        ) : <span />}
+        {index < questions.length - 1 ? (
+          <button className="secondary-btn" onClick={() => setIndex(index + 1)}>Келесі <LuArrowRight /></button>
+        ) : (
+          <button className="primary-btn" disabled={!allChecked || saving} onClick={finish} title={allChecked ? '' : 'Алдымен барлық есепті тексеріңіз'}>
+            {saving ? '...' : <><LuCheck /> Аяқтау</>}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Сұрақтың талдауы: шарты, дұрыс жауап, оқушының таңдағаны және шығарылу жолы
+function ReviewBody({ q, chosen, solved }) {
+  return (
+    <>
+    <p className="question-text"><MathText text={q.question} /></p>
+    {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
+    {q.match_rows ? (
+      <div className="match-table">
+        {q.match_rows.map((row, ri) => {
+          const picked = Array.isArray(chosen) ? chosen[ri] ?? null : null;
+          const ok = picked === row.correct_index;
+          return (
+            <div key={ri} className={`match-row static ${ok ? 'right' : 'wrong'}`}>
+              <div className="match-text">
+                <span className="option-letter">{String.fromCharCode(65 + ri)}</span>
+                <span><MathText text={row.text} /></span>
+              </div>
+              <div className="match-answer">
+                {!ok && (
+                  <span className="match-picked">
+                    {picked === null ? 'Жауап жоқ' : <MathText text={q.options[picked]} />}
+                  </span>
+                )}
+                <span className="match-correct"><LuCheck /> <MathText text={q.options[row.correct_index]} /></span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+    <div className="options">
+      {q.options.map((option, oi) => {
+        const right = q.correct_indexes ? q.correct_indexes.includes(oi) : oi === q.correct_index;
+        const picked = Array.isArray(chosen) ? chosen.includes(oi) : oi === chosen;
+        return (
+          <div key={oi} className={`option static ${right ? 'right' : ''} ${picked && !right ? 'chosen-wrong' : ''}`}>
+            <span className="option-letter">{String.fromCharCode(65 + oi)}</span>
+            <span><MathText text={option} /></span>
+            {picked && <span className="picked-mark">сіздің жауабыңыз</span>}
+          </div>
+        );
+      })}
+    </div>
+    )}
+    {q.solution_url && (
+      <a className={`solution-link ${solved ? '' : 'needed'}`} href={q.solution_url} target="_blank" rel="noopener noreferrer">
+        <LuPlay /> Шығарылу жолын көру (YouTube)
+      </a>
+    )}
+    </>
   );
 }
 

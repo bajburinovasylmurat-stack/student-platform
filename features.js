@@ -87,6 +87,9 @@ export const featureMigrations = `
   ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS match_rows JSONB;
   -- Есептің шығарылу жолы (YouTube, дәл сол есептің уақытынан): нәтижені қарағанда көрсетіледі
   ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS solution_url TEXT;
+  -- Қатемен жұмыс: тесттен кейін қате есептерді қайта шығарғаны
+  ALTER TABLE test_attempts ADD COLUMN IF NOT EXISTS mistakes_done_at TIMESTAMPTZ;
+  ALTER TABLE test_attempts ADD COLUMN IF NOT EXISTS mistakes_fixed INT;
   -- Материал сыртқы сілтеме ретінде (Google Drive т.б.)
   ALTER TABLE materials ADD COLUMN IF NOT EXISTS external_url TEXT;
 
@@ -825,6 +828,8 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       max_score: a.max_score,
       started_at: a.started_at,
       finished_at: a.finished_at,
+      mistakes_done_at: a.mistakes_done_at,
+      mistakes_fixed: a.mistakes_fixed,
       questions: questions.rows.map((q) => {
         const earned = gradeQuestion(q, answers[q.id]);
         return {
@@ -890,6 +895,23 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       res.json(result);
     } catch (error) {
       fail(res, 'Нәтиже алу қатесі', error);
+    }
+  });
+
+  // Қатемен жұмыс аяқталды: нешеуі түзетілгенін сақтаймыз (ең жақсы нәтиже қалады)
+  app.post('/api/attempts/:id/mistakes', verifyToken, async (req, res) => {
+    try {
+      const fixed = Math.max(0, Math.floor(Number(req.body.fixed)) || 0);
+      const result = await pool.query(
+        `UPDATE test_attempts SET mistakes_done_at = NOW(), mistakes_fixed = GREATEST(COALESCE(mistakes_fixed, 0), $1::int)
+         WHERE id = $2 AND student_id = $3 AND finished_at IS NOT NULL
+         RETURNING mistakes_done_at, mistakes_fixed`,
+        [fixed, req.params.id, req.student.id]
+      );
+      if (!result.rows[0]) return res.status(404).json({ error: 'Әрекет табылмады' });
+      res.json(result.rows[0]);
+    } catch (error) {
+      fail(res, 'Қатемен жұмыс сақтау қатесі', error);
     }
   });
 
