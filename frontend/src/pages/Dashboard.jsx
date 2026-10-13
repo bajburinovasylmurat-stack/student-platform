@@ -14,10 +14,10 @@ import Flashcards from './components/Flashcards';
 import Leaderboard from './components/Leaderboard';
 import NotifyButton from './components/NotifyButton';
 import { AnnouncementsBar } from './components/Announcements';
-import { API, api } from '../api';
+import { API, api, errorText } from '../api';
 import { formatKkDate, capitalize } from '../utils/kkDate';
 import { prettyPhone } from '../utils/phone';
-import { LuBookOpen, LuBrain, LuCalendarDays, LuClapperboard, LuFileQuestion, LuFlame, LuListChecks, LuSettings2, LuTarget, LuTrophy, LuUsers } from 'react-icons/lu';
+import { LuBookOpen, LuBrain, LuCalendarDays, LuClapperboard, LuFileQuestion, LuFlame, LuListChecks, LuPencil, LuSettings2, LuTarget, LuTrophy, LuUsers } from 'react-icons/lu';
 
 const ROLE_LABELS = {
   admin: 'Админ',
@@ -35,11 +35,15 @@ const greeting = () => {
   return 'Қайырлы кеш';
 };
 
-export default function Dashboard({ student, onLogout }) {
+export default function Dashboard({ student, onLogout, onProfileUpdate }) {
   const [activeTab, setActiveTab] = useState('materials');
   const [role, setRole] = useState(student.role || (student.student_number === 'admin' ? 'admin' : 'student'));
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
   const [stats, setStats] = useState(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [savingName, setSavingName] = useState(false);
   const tabRefs = useRef({});
   const isAdmin = role === 'admin';
   const isCurator = role === 'curator';
@@ -53,7 +57,8 @@ export default function Dashboard({ student, onLogout }) {
       .then(({ data }) => {
         const freshRole = data.student_number === 'admin' ? 'admin' : (data.role || 'student');
         setRole(freshRole);
-        localStorage.setItem('student', JSON.stringify({ ...student, role: freshRole }));
+        // Аты-жөні басқа құрылғыда өзгертілген болуы мүмкін, сондықтан оны да жаңартамыз
+        onProfileUpdate({ role: freshRole, name: data.name });
       })
       .catch((error) => console.error('Профиль алу қатесі:', error));
   }, []);
@@ -92,6 +97,31 @@ export default function Dashboard({ student, onLogout }) {
     tabRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   };
 
+  const openNameEditor = () => {
+    setNameDraft(student.name || '');
+    setNameError('');
+    setEditingName(true);
+  };
+
+  const saveName = async (e) => {
+    e.preventDefault();
+    const name = nameDraft.trim().replace(/\s+/g, ' ');
+    if (name.length < 2) {
+      setNameError('Аты-жөніңізді толық жазыңыз');
+      return;
+    }
+    setSavingName(true);
+    try {
+      const data = await api.patch('/api/profile', { name });
+      onProfileUpdate({ name: data.name });
+      setEditingName(false);
+    } catch (error) {
+      setNameError(errorText(error, 'Сақтау мүмкін болмады. Қайталап көріңіз'));
+    } finally {
+      setSavingName(false);
+    }
+  };
+
   const firstName = student.name?.split(' ')[0] || '';
   const today = capitalize(formatKkDate(new Date(), { weekday: 'long' }));
 
@@ -103,14 +133,16 @@ export default function Dashboard({ student, onLogout }) {
 
           <div className="user-chip">
             <NotifyButton />
-            <div className="avatar">{initials(student.name)}</div>
-            <div className="user-meta">
-              <strong>{student.name}</strong>
-              <span>
-                <span className={`role-dot role-${role}`} />
-                {ROLE_LABELS[role]} · {prettyPhone(student.phone || student.student_number)}
+            <button type="button" className="profile-btn" onClick={openNameEditor} title="Аты-жөнін өзгерту">
+              <span className="avatar">{initials(student.name)}</span>
+              <span className="user-meta">
+                <strong>{student.name}<LuPencil className="edit-ic" /></strong>
+                <span>
+                  <span className={`role-dot role-${role}`} />
+                  {ROLE_LABELS[role]} · {prettyPhone(student.phone || student.student_number)}
+                </span>
               </span>
-            </div>
+            </button>
             <button onClick={onLogout} className="logout-btn" title="Шығу">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -139,6 +171,31 @@ export default function Dashboard({ student, onLogout }) {
           </div>
         </nav>
       </header>
+
+      {editingName && (
+        <div className="name-modal" onClick={() => !savingName && setEditingName(false)}>
+          <form className="name-box" onSubmit={saveName} onClick={(e) => e.stopPropagation()}>
+            <h3>Аты-жөнін өзгерту</h3>
+            <p>Куратор мен рейтингте осы атпен көрінесіз.</p>
+            <input
+              value={nameDraft}
+              onChange={(e) => { setNameDraft(e.target.value); setNameError(''); }}
+              onKeyDown={(e) => e.key === 'Escape' && setEditingName(false)}
+              placeholder="Мысалы: Байбуринов Асылмұрат"
+              maxLength={100}
+              autoFocus
+              onFocus={(e) => e.target.select()}
+            />
+            {nameError && <div className="name-error">{nameError}</div>}
+            <div className="name-actions">
+              <button type="button" className="ghost" onClick={() => setEditingName(false)} disabled={savingName}>Болдырмау</button>
+              <button type="submit" disabled={savingName || nameDraft.trim() === (student.name || '')}>
+                {savingName ? 'Сақталуда…' : 'Сақтау'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <section className="welcome">
         <div className="welcome-inner">

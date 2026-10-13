@@ -28,6 +28,15 @@ export default function App() {
     setStudent(studentData);
   };
 
+  // Профиль өзгергенде (мысалы аты-жөні) күйді де, сақталған көшірмені де жаңартамыз
+  const handleProfileUpdate = (changes) => {
+    setStudent((prev) => {
+      const next = { ...prev, ...changes };
+      localStorage.setItem('student', JSON.stringify(next));
+      return next;
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('student');
@@ -48,7 +57,7 @@ export default function App() {
     <IconContext.Provider value={{ className: 'ic' }}>
       <div className="app">
         {student ? (
-          <Dashboard student={student} onLogout={handleLogout} />
+          <Dashboard student={student} onLogout={handleLogout} onProfileUpdate={handleProfileUpdate} />
         ) : (
           <Login onLoginSuccess={handleLoginSuccess} />
         )}

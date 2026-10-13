@@ -1409,3 +1409,47 @@
 .test-group .test-grid {
   padding: 4px 16px 16px;
 }
+
+/* ҰТО есептері: формула, сурет, бірнеше жауап */
+.question-text .katex,
+.option .katex {
+  font-size: 1.12em;
+}
+
+.question-image {
+  display: block;
+  max-width: min(100%, 460px);
+  max-height: 340px;
+  margin: 0 0 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(41, 91, 110, 0.15);
+  background: #fff;
+}
+
+.multi-hint {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: var(--accent-dark, #b9770e);
+  font-weight: 600;
+}
+
+.picked-mark {
+  margin-left: auto;
+  font-size: 0.75rem;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
+.multi-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.option-editor input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--brand);
+}

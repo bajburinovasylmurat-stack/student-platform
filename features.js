@@ -80,6 +80,9 @@ export const featureMigrations = `
     max_score INT
   );
   CREATE INDEX IF NOT EXISTS idx_test_attempts_student ON test_attempts(student_id, finished_at);
+  -- Бірнеше дұрыс жауабы бар сұрақтар (ҰБТ форматы) және сұраққа сурет
+  ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS correct_indexes JSONB;
+  ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS image TEXT;
   -- Материал сыртқы сілтеме ретінде (Google Drive т.б.)
   ALTER TABLE materials ADD COLUMN IF NOT EXISTS external_url TEXT;
 
@@ -124,6 +127,22 @@ export const featureMigrations = `
   );
 `;
 
+// Бірнеше дұрыс жауапты сұрақтың дұрыс нұсқалары (сұрыпталған), жай сұрақта null
+const multiCorrect = (q) => (Array.isArray(q.correct_indexes) && q.correct_indexes.length
+  ? [...new Set(q.correct_indexes.map(Number))].sort((a, b) => a - b)
+  : null);
+
+// ҰБТ ережесі: бәрі дұрыс — толық балл; бір қате (артық не кем) — бір балл кем; одан көп — 0
+const gradeQuestion = (q, chosen) => {
+  const multi = multiCorrect(q);
+  if (!multi) return chosen === q.correct_index ? q.points : 0;
+  if (!Array.isArray(chosen) || chosen.length === 0) return 0;
+  const picked = new Set(chosen);
+  const errors = multi.filter((i) => !picked.has(i)).length + chosen.filter((i) => !multi.includes(i)).length;
+  if (errors === 0) return q.points;
+  return errors === 1 ? Math.max(0, q.points - 1) : 0;
+};
+
 // seed/*.json: дайын тесттер мен карточкалар. Әр файл бір рет жүктеледі
 export async function seedContent(pool) {
   if (!fs.existsSync(SEED_DIR)) return;
@@ -146,9 +165,11 @@ export async function seedContent(pool) {
         );
         for (const [idx, q] of test.questions.entries()) {
           await client.query(
-            `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points)
-             VALUES ($1, $2, $3, $4, $5, $6)`,
-            [created.rows[0].id, idx, q.question, JSON.stringify(q.options), q.correct_index, q.points || 1]
+            `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            [created.rows[0].id, idx, q.question, JSON.stringify(q.options),
+              multiCorrect(q) ? multiCorrect(q)[0] : q.correct_index, q.points || 1,
+              multiCorrect(q) ? JSON.stringify(multiCorrect(q)) : null, q.image || null]
           );
         }
       }
@@ -578,12 +599,18 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
 
   const cleanQuestions = (questions) =>
     (Array.isArray(questions) ? questions : [])
-      .map((q) => ({
-        question: String(q.question || '').trim(),
-        options: (Array.isArray(q.options) ? q.options : []).map((o) => String(o ?? '').trim()),
-        correct_index: Number(q.correct_index),
-        points: Math.max(1, Number(q.points) || 1)
-      }))
+      .map((q) => {
+        const options = (Array.isArray(q.options) ? q.options : []).map((o) => String(o ?? '').trim());
+        const multi = multiCorrect(q)?.filter((i) => Number.isInteger(i) && i >= 0 && i < options.length);
+        return {
+          question: String(q.question || '').trim(),
+          options,
+          correct_indexes: multi?.length ? multi : null,
+          correct_index: multi?.length ? multi[0] : Number(q.correct_index),
+          image: typeof q.image === 'string' && q.image.startsWith('/') ? q.image : null,
+          points: Math.max(1, Number(q.points) || 1)
+        };
+      })
       .filter((q) => q.question && q.options.length >= 2 && q.options.every(Boolean) &&
         Number.isInteger(q.correct_index) && q.correct_index >= 0 && q.correct_index < q.options.length);
 
@@ -605,7 +632,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       const test = await pool.query('SELECT * FROM tests WHERE id = $1', [req.params.id]);
       if (!test.rows[0]) return res.status(404).json({ error: 'Тест табылмады' });
       const questions = await pool.query(
-        'SELECT id, question, options, correct_index, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
+        'SELECT id, question, options, correct_index, correct_indexes, image, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
         [req.params.id]
       );
       res.json({ ...test.rows[0], questions: questions.rows });
@@ -649,9 +676,10 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       }
       for (const [idx, q] of questions.entries()) {
         await client.query(
-          `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points)
-           VALUES ($1, $2, $3, $4, $5, $6)`,
-          [testId, idx, q.question, JSON.stringify(q.options), q.correct_index, q.points]
+          `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          [testId, idx, q.question, JSON.stringify(q.options), q.correct_index, q.points,
+            q.correct_indexes ? JSON.stringify(q.correct_indexes) : null, q.image]
         );
       }
       await client.query('COMMIT');
@@ -702,7 +730,8 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
 
   const attemptPayload = async (attempt, test) => {
     const questions = await pool.query(
-      'SELECT id, question, options, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
+      `SELECT id, question, options, points, image, (correct_indexes IS NOT NULL) AS multi
+       FROM test_questions WHERE test_id = $1 ORDER BY idx, id`,
       [test.id]
     );
     return {
@@ -763,7 +792,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
     const a = attempt.rows[0];
     if (!a) return null;
     const questions = await pool.query(
-      'SELECT id, question, options, correct_index, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
+      'SELECT id, question, options, correct_index, correct_indexes, image, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
       [a.test_id]
     );
     const answers = a.answers || {};
@@ -775,11 +804,16 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       max_score: a.max_score,
       started_at: a.started_at,
       finished_at: a.finished_at,
-      questions: questions.rows.map((q) => ({
-        ...q,
-        chosen: answers[q.id] ?? null,
-        is_correct: answers[q.id] === q.correct_index
-      }))
+      questions: questions.rows.map((q) => {
+        const earned = gradeQuestion(q, answers[q.id]);
+        return {
+          ...q,
+          correct_indexes: multiCorrect(q),
+          chosen: answers[q.id] ?? null,
+          earned,
+          is_correct: earned === q.points
+        };
+      })
     };
   };
 
@@ -798,7 +832,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
         const answers = Date.now() <= deadline && req.body.answers ? req.body.answers : (a.answers || {});
 
         const questions = await pool.query(
-          'SELECT id, correct_index, points FROM test_questions WHERE test_id = $1',
+          'SELECT id, correct_index, correct_indexes, points FROM test_questions WHERE test_id = $1',
           [a.test_id]
         );
         let score = 0;
@@ -808,7 +842,10 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
           max += q.points;
           const chosen = answers[q.id];
           if (Number.isInteger(chosen)) clean[q.id] = chosen;
-          if (chosen === q.correct_index) score += q.points;
+          else if (Array.isArray(chosen) && chosen.every(Number.isInteger) && chosen.length) {
+            clean[q.id] = [...new Set(chosen)].sort((x, y) => x - y);
+          }
+          score += gradeQuestion(q, clean[q.id]);
         }
         await pool.query(
           `UPDATE test_attempts SET finished_at = NOW(), answers = $1, score = $2, max_score = $3

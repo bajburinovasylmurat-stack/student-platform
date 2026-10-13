@@ -85,7 +85,20 @@ function TestEditor({ initial, onClose }) {
     const q = test.questions[qi];
     const options = q.options.filter((_, i) => i !== oi);
     const correct = q.correct_index === oi ? 0 : q.correct_index > oi ? q.correct_index - 1 : q.correct_index;
-    setQuestion(qi, { options, correct_index: correct });
+    const multi = q.correct_indexes
+      ? q.correct_indexes.filter((i) => i !== oi).map((i) => (i > oi ? i - 1 : i))
+      : null;
+    setQuestion(qi, { options, correct_index: multi?.length ? multi[0] : correct, correct_indexes: multi?.length ? multi : null });
+  };
+  // Бірнеше дұрыс жауапты сұрақ: белгіні қосу/алу (кемінде біреуі қалады)
+  const toggleCorrect = (qi, oi) => {
+    const current = test.questions[qi].correct_indexes;
+    const next = current.includes(oi) ? current.filter((i) => i !== oi) : [...current, oi].sort((a, b) => a - b);
+    if (next.length) setQuestion(qi, { correct_indexes: next, correct_index: next[0] });
+  };
+  const setMulti = (qi, on) => {
+    const q = test.questions[qi];
+    setQuestion(qi, { correct_indexes: on ? [q.correct_index] : null, points: on ? Math.max(2, q.points) : q.points });
   };
   const moveQuestion = (i, delta) => {
     const qs = [...test.questions];
@@ -164,14 +177,19 @@ function TestEditor({ initial, onClose }) {
             placeholder="Сұрақтың мәтіні"
             rows={2}
           />
-          <p className="hint-text">Дұрыс жауаптың алдындағы шеңберді белгілеңіз</p>
+          {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
+          <label className="hint-text multi-toggle">
+            <input type="checkbox" checked={Boolean(q.correct_indexes)} onChange={(e) => setMulti(qi, e.target.checked)} />
+            Бірнеше дұрыс жауап (ҰБТ форматы)
+          </label>
+          <p className="hint-text">Дұрыс {q.correct_indexes ? 'жауаптарды' : 'жауаптың алдындағы шеңберді'} белгілеңіз. Формула: $x^2$</p>
           {q.options.map((option, oi) => (
-            <div key={oi} className={`option-editor ${q.correct_index === oi ? 'correct' : ''}`}>
+            <div key={oi} className={`option-editor ${(q.correct_indexes ? q.correct_indexes.includes(oi) : q.correct_index === oi) ? 'correct' : ''}`}>
               <input
-                type="radio"
+                type={q.correct_indexes ? 'checkbox' : 'radio'}
                 name={`correct-${qi}`}
-                checked={q.correct_index === oi}
-                onChange={() => setQuestion(qi, { correct_index: oi })}
+                checked={q.correct_indexes ? q.correct_indexes.includes(oi) : q.correct_index === oi}
+                onChange={() => (q.correct_indexes ? toggleCorrect(qi, oi) : setQuestion(qi, { correct_index: oi }))}
                 aria-label="Дұрыс жауап"
               />
               <span className="option-letter">{String.fromCharCode(65 + oi)}</span>
@@ -179,7 +197,7 @@ function TestEditor({ initial, onClose }) {
               {q.options.length > 2 && <button onClick={() => removeOption(qi, oi)} title="Нұсқаны өшіру" aria-label="Нұсқаны өшіру"><LuX /></button>}
             </div>
           ))}
-          {q.options.length < 6 && <button className="link-back small" onClick={() => addOption(qi)}><LuPlus /> Нұсқа қосу</button>}
+          {q.options.length < 8 && <button className="link-back small" onClick={() => addOption(qi)}><LuPlus /> Нұсқа қосу</button>}
         </div>
       ))}
       <button className="secondary-btn wide" onClick={() => setTest({ ...test, questions: [...test.questions, emptyQuestion()] })}>

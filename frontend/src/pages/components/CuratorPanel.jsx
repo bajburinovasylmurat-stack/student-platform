@@ -7,6 +7,7 @@ import {
 } from './planUtils';
 import { prettyPhone } from '../../utils/phone';
 import CuratorAnalytics from './CuratorAnalytics';
+import StudentOwnPlans from './StudentOwnPlans';
 import { LuArrowLeft, LuCheck, LuCheckCircle2, LuCircle, LuPlus, LuTrash2, LuUsers, LuX } from 'react-icons/lu';
 import { API } from '../../api';
 
@@ -29,6 +30,8 @@ export default function CuratorPanel() {
   const [available, setAvailable] = useState([]);
   const [search, setSearch] = useState('');
   const [showPlanForm, setShowPlanForm] = useState(false);
+  // 'curator' — куратор құрған жоспарлар, 'own' — оқушының өз жоспары
+  const [view, setView] = useState('curator');
 
   const token = localStorage.getItem('token');
   const headers = { Authorization: `Bearer ${token}` };
@@ -216,14 +219,25 @@ export default function CuratorPanel() {
             <>
               <div className="main-header">
                 <h3>{selected.name} — жоспарлары</h3>
-                {!showPlanForm && (
+                {view === 'curator' && !showPlanForm && (
                   <button className="small-btn primary" onClick={() => setShowPlanForm(true)}>
                     + Жаңа жоспар
                   </button>
                 )}
               </div>
 
-              {showPlanForm && (
+              <div className="plan-type-toggle">
+                <button type="button" className={view === 'curator' ? 'active' : ''} onClick={() => setView('curator')}>
+                  Куратор жоспары
+                </button>
+                <button type="button" className={view === 'own' ? 'active' : ''} onClick={() => { setView('own'); setShowPlanForm(false); }}>
+                  Өз жоспары
+                </button>
+              </div>
+
+              {view === 'own' && <StudentOwnPlans studentId={selected.id} />}
+
+              {view === 'curator' && showPlanForm && (
                 <PlanForm
                   studentId={selected.id}
                   headers={headers}
@@ -232,11 +246,11 @@ export default function CuratorPanel() {
                 />
               )}
 
-              {plans.length === 0 && !showPlanForm && (
+              {view === 'curator' && plans.length === 0 && !showPlanForm && (
                 <p className="empty-text">Бұл оқушыға әлі жоспар құрылмаған</p>
               )}
 
-              {plans.map(plan => (
+              {view === 'curator' && plans.map(plan => (
                 <PlanCard
                   key={plan.id}
                   plan={plan}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import '../styles/Features.css';
 import { api, errorText } from '../../api';
 import { formatKkDate } from '../../utils/kkDate';
+import MathText from '../../components/MathText';
 import { LuArrowLeft, LuArrowRight, LuCheck, LuCheckCircle2, LuChevronDown, LuCircle, LuFileQuestion, LuHelpCircle, LuPartyPopper, LuPlay, LuRotateCcw, LuTarget, LuTimer, LuTrendingUp, LuXCircle } from 'react-icons/lu';
 
 // Оқушыға арналған онлайн тесттер: тізім, тапсыру, нәтиже
@@ -210,8 +211,20 @@ function TakeTest({ session, onFinish }) {
   }, [session.deadline, submit]);
 
   // Бетті жаңартса немесе жабылса, жауаптар серверде сақталған
-  const choose = (questionId, optionIndex) => {
-    const next = { ...answersRef.current, [questionId]: optionIndex };
+  const choose = (question, optionIndex) => {
+    const questionId = question.id;
+    const next = { ...answersRef.current };
+    if (question.multi) {
+      // Бірнеше жауап: басқанда қосылады/алынады, ең көбі үшеу (ҰБТ ережесі)
+      const current = Array.isArray(next[questionId]) ? next[questionId] : [];
+      const toggled = current.includes(optionIndex)
+        ? current.filter((i) => i !== optionIndex)
+        : [...current, optionIndex].sort((a, b) => a - b);
+      if (toggled.length > 3) return;
+      if (toggled.length) next[questionId] = toggled; else delete next[questionId];
+    } else {
+      next[questionId] = optionIndex;
+    }
     answersRef.current = next;
     setAnswers(next);
     clearTimeout(saveTimer.current);
@@ -252,20 +265,25 @@ function TakeTest({ session, onFinish }) {
 
       <div className="question-card" key={q.id}>
         <div className="question-num">{index + 1}-сұрақ · {q.points} балл</div>
-        <p className="question-text">{q.question}</p>
+        {q.multi && <p className="multi-hint">Бір немесе бірнеше дұрыс жауап (үшеуден артық емес)</p>}
+        <p className="question-text"><MathText text={q.question} /></p>
+        {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
         <div className="options">
-          {q.options.map((option, i) => (
-            <label key={i} className={`option ${answers[q.id] === i ? 'chosen' : ''}`}>
-              <input
-                type="radio"
-                name={`q${q.id}`}
-                checked={answers[q.id] === i}
-                onChange={() => choose(q.id, i)}
-              />
-              <span className="option-letter">{String.fromCharCode(65 + i)}</span>
-              <span>{option}</span>
-            </label>
-          ))}
+          {q.options.map((option, i) => {
+            const chosen = q.multi ? (answers[q.id] || []).includes(i) : answers[q.id] === i;
+            return (
+              <label key={i} className={`option ${chosen ? 'chosen' : ''}`}>
+                <input
+                  type={q.multi ? 'checkbox' : 'radio'}
+                  name={`q${q.id}`}
+                  checked={chosen}
+                  onChange={() => choose(q, i)}
+                />
+                <span className="option-letter">{String.fromCharCode(65 + i)}</span>
+                <span><MathText text={option} /></span>
+              </label>
+            );
+          })}
         </div>
       </div>
 
@@ -308,18 +326,22 @@ function TestResult({ result, onBack }) {
           <div key={q.id} className={`review-item ${q.is_correct ? 'correct' : 'wrong'}`}>
             <div className="question-num">
               {i + 1}-сұрақ {q.is_correct ? <LuCheckCircle2 className="ok-icon" /> : q.chosen === null ? <><LuCircle /> Жауап жоқ</> : <LuXCircle className="bad-icon" />}
+              {q.correct_indexes && <span className="muted-text"> · {q.earned}/{q.points} балл</span>}
             </div>
-            <p className="question-text">{q.question}</p>
+            <p className="question-text"><MathText text={q.question} /></p>
+            {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
             <div className="options">
-              {q.options.map((option, oi) => (
-                <div
-                  key={oi}
-                  className={`option static ${oi === q.correct_index ? 'right' : ''} ${oi === q.chosen && !q.is_correct ? 'chosen-wrong' : ''}`}
-                >
-                  <span className="option-letter">{String.fromCharCode(65 + oi)}</span>
-                  <span>{option}</span>
-                </div>
-              ))}
+              {q.options.map((option, oi) => {
+                const right = q.correct_indexes ? q.correct_indexes.includes(oi) : oi === q.correct_index;
+                const picked = Array.isArray(q.chosen) ? q.chosen.includes(oi) : oi === q.chosen;
+                return (
+                  <div key={oi} className={`option static ${right ? 'right' : ''} ${picked && !right ? 'chosen-wrong' : ''}`}>
+                    <span className="option-letter">{String.fromCharCode(65 + oi)}</span>
+                    <span><MathText text={option} /></span>
+                    {picked && <span className="picked-mark">сіздің жауабыңыз</span>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}

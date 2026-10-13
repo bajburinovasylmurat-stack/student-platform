@@ -5,6 +5,7 @@ import { prettyPhone } from '../../utils/phone';
 import { formatRange, formatDay, groupByDate, PLAN_TYPE_LABELS } from './planUtils';
 import { LuArrowRight, LuCheck, LuCheckCircle2, LuCircle, LuClipboardList, LuCopy, LuGraduationCap, LuKeyRound, LuShieldCheck, LuUserCheck, LuUsers, LuX } from 'react-icons/lu';
 import { API } from '../../api';
+import StudentOwnPlans from './StudentOwnPlans';
 
 
 const ROLE_LABELS = {
@@ -346,6 +347,9 @@ export default function UsersManager() {
               </div>
             )}
             {user.id in openPlans && <StudentPlans plans={openPlans[user.id]} />}
+            {user.id in openPlans && (
+              <div className="student-plans curator-panel"><StudentOwnPlans studentId={user.id} /></div>
+            )}
           </div>
         ))}
       </div>
