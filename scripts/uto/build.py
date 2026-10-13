@@ -50,7 +50,7 @@ for n, source in SOURCES.items():
     assert next(starts, None) is None, (n, 'уақыттар саны есептер санына сәйкес емес')
     test = {
         'title': f'ҰТО {n}-нұсқа',
-        'description': f'Математика · {source}. Видеодағы есептер жауап нұсқаларымен.',
+        'description': None,  # дереккөз (source) карточкада көрсетілмейді
         'duration_min': 100,
         'topic': 'ҰТО есептері',
         'questions': questions,
