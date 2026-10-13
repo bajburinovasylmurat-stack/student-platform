@@ -32,6 +32,8 @@ export const featureMigrations = `
   -- Telegram ескертулері
   ALTER TABLE students ADD COLUMN IF NOT EXISTS telegram_chat_id BIGINT;
   ALTER TABLE students ADD COLUMN IF NOT EXISTS notify_enabled BOOLEAN NOT NULL DEFAULT TRUE;
+  -- Ескертулер бәрінде әрдайым қосулы: өшіру мүмкіндігі жоқ
+  UPDATE students SET notify_enabled = TRUE WHERE NOT notify_enabled;
   -- Telegram арқылы тіркелгендердің чатын бірден байланыстырамыз
   UPDATE students s SET telegram_chat_id = v.tg_chat_id
   FROM (
@@ -230,10 +232,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       await tg('sendMessage', { chat_id: chatId, text: html, parse_mode: 'HTML', disable_web_page_preview: true });
       return true;
     } catch (error) {
-      // Оқушы ботты бұғаттаса, ескертулерді өшіреміз
-      if (/blocked|chat not found|deactivated/i.test(error.message)) {
-        await pool.query('UPDATE students SET notify_enabled = FALSE WHERE id = $1', [studentId]);
-      }
+      // Оқушы ботты бұғаттаса да ескерту өшірілмейді: бұғаттан шығарғанда қайта келе бастайды
       console.error('Telegram хабар қатесі:', error.message);
       return false;
     }
@@ -282,9 +281,10 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
 
   app.patch('/api/notifications', verifyToken, async (req, res) => {
     try {
+      // Ескертулерді өшіруге болмайды: сұраныс не жіберсе де қосулы қалады
       const result = await pool.query(
-        'UPDATE students SET notify_enabled = $1 WHERE id = $2 RETURNING notify_enabled',
-        [!!req.body.enabled, req.student.id]
+        'UPDATE students SET notify_enabled = TRUE WHERE id = $1 RETURNING notify_enabled',
+        [req.student.id]
       );
       res.json(result.rows[0]);
     } catch (error) {
@@ -324,15 +324,9 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
     }
 
     if (text === '/stop') {
-      const result = await pool.query(
-        'UPDATE students SET notify_enabled = FALSE WHERE telegram_chat_id = $1 RETURNING id',
-        [chatId]
-      );
       await tg('sendMessage', {
         chat_id: chatId,
-        text: result.rows.length
-          ? '🔕 Ескертулер өшірілді. Қайта қосу үшін: /on'
-          : 'Бұл чат ешбір аккаунтқа байланыспаған.'
+        text: '🔔 Ескертулерді өшіруге болмайды: жоспар мен маңызды хабарландырулар барлық оқушыға келеді.'
       });
       return true;
     }

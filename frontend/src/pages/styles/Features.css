@@ -1714,3 +1714,16 @@
   color: #1a7f37;
   background: rgba(46, 160, 67, 0.08);
 }
+
+.notify-on {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1a7f37;
+  background: rgba(46, 160, 67, 0.1);
+}

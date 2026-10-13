@@ -40,20 +40,8 @@ export default function NotifyButton() {
     }
   };
 
-  const toggle = async () => {
-    setBusy(true);
-    try {
-      const result = await api.patch('/api/notifications', { enabled: !status.notify_enabled });
-      setStatus({ ...status, ...result });
-    } catch (error) {
-      alert(errorText(error, 'Өзгерту сәтсіз'));
-    } finally {
-      setBusy(false);
-    }
-  };
-
   if (!status?.available) return null;
-  const active = status.linked && status.notify_enabled;
+  const active = status.linked;
 
   return (
     <div className="notify-wrap" ref={boxRef}>
@@ -82,11 +70,7 @@ export default function NotifyButton() {
               <button className="primary-btn wide" disabled={busy} onClick={link}><LuSend /> Telegram-ды қосу</button>
             </>
           ) : (
-            <label className="switch-row">
-              <span>{status.notify_enabled ? 'Қосулы' : 'Өшірулі'}</span>
-              <input type="checkbox" checked={status.notify_enabled} disabled={busy} onChange={toggle} />
-              <span className="switch" />
-            </label>
+            <p className="notify-on"><LuBell /> Қосулы — ескертулер Telegram-ға келіп тұрады</p>
           )}
         </div>
       )}
