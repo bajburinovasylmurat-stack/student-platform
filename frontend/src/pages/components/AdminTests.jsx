@@ -178,6 +178,12 @@ function TestEditor({ initial, onClose }) {
             rows={2}
           />
           {q.image && <img className="question-image" src={q.image} alt="Есептің суреті" />}
+          <input
+            className="solution-input"
+            value={q.solution_url || ''}
+            onChange={(e) => setQuestion(qi, { solution_url: e.target.value })}
+            placeholder="Шығарылу жолы: YouTube сілтемесі (міндетті емес), мысалы https://youtu.be/ID?t=120"
+          />
           <label className="hint-text multi-toggle">
             <input type="checkbox" checked={Boolean(q.correct_indexes)} onChange={(e) => setMulti(qi, e.target.checked)} />
             Бірнеше дұрыс жауап (ҰБТ форматы)

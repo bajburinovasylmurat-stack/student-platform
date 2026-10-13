@@ -343,6 +343,11 @@ function TestResult({ result, onBack }) {
                 );
               })}
             </div>
+            {q.solution_url && (
+              <a className={`solution-link ${q.is_correct ? '' : 'needed'}`} href={q.solution_url} target="_blank" rel="noopener noreferrer">
+                <LuPlay /> Шығарылу жолын көру (YouTube)
+              </a>
+            )}
           </div>
         ))}
       </div>

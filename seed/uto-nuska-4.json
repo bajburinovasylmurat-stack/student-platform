@@ -15,7 +15,8 @@
       "$2+\\sqrt2$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=525s"
     },
     {
      "question": "Егер $a<2024$ болса, $|2a-4048|-|a-2025|$ өрнегін ықшамдаңыз",
@@ -26,7 +27,8 @@
       "$a-2023$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=600s"
     },
     {
      "question": "Өрнекті ықшамдаңыз: $\\cos^2(180^\\circ-x)+\\cos^2(270^\\circ+x)$",
@@ -37,7 +39,8 @@
       "0"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=770s"
     },
     {
      "question": "Көбейткіштерге жіктеңіз: $196c^2-64d^2$",
@@ -48,7 +51,8 @@
       "$(14c+8d)(14c-8d)$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=835s"
     },
     {
      "question": "$x^2-2024x+2023=0$ теңдеуінің түбірлерінің қосындысы",
@@ -59,7 +63,8 @@
       "2023"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=885s"
     },
     {
      "question": "Теңдеулер жүйесін шешіңіз: $\\begin{cases}x-3y=-4,\\\\ xy=15\\end{cases}$",
@@ -70,7 +75,8 @@
       "$(-15;-1),\\ \\left(9;\\dfrac53\\right)$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=940s"
     },
     {
      "question": "Интегралды табыңыз: $\\displaystyle\\int\\left(x+\\dfrac{2}{3x^3}\\right)dx$",
@@ -81,7 +87,8 @@
       "$\\dfrac{x^2}{2}+\\dfrac{2}{3x^2}+C$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=1035s"
     },
     {
      "question": "Биіктігі 5 см-ге тең пирамиданың табанындағы параллелограмның қабырғалары 3 см және 4 см, ал сүйір бұрышы $30^\\circ$-қа тең. Пирамиданың көлемін табыңыз",
@@ -92,7 +99,8 @@
       "$16\\ \\text{см}^3$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=1255s"
     },
     {
      "question": "$\\begin{cases}x^2-3x+2\\le0\\\\ x\\ge0\\end{cases}$ теңсіздіктер жүйесінің шешімі",
@@ -103,7 +111,8 @@
       "$[1;2]$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=1500s"
     },
     {
      "question": "$\\sqrt x+\\sqrt[4]{x}-2=0$ теңдеуі түбірлерінің саны",
@@ -114,7 +123,8 @@
       "4"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=1580s"
     },
     {
      "question": "$f(x)=3x^4-2x^3+4x-2$ функциясының туындысы",
@@ -125,7 +135,8 @@
       "$f'(x)=12x^4+6x^2+4$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=1745s"
     },
     {
      "question": "$-3x>9$ теңсіздігінің ең үлкен бүтін шешімі",
@@ -136,7 +147,8 @@
       "$-3$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=1870s"
     },
     {
      "question": "$A(2;1)$ және $B(3;2)$ нүктелері арқылы өтетін түзудің теңдеуін жазыңыз",
@@ -147,7 +159,8 @@
       "$x+y-1=0$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=1935s"
     },
     {
      "question": "$y=x^2$ функцияның графигімен және $y=0,\\ x=-2,\\ x=2$ түзулерімен шектелген фигураның ауданын табыңыз",
@@ -158,7 +171,8 @@
       "$2\\dfrac13$ кв. бірлік"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=2085s"
     },
     {
      "question": "Пирамиданың табанына параллель жүргізілген жазықтық оның биіктігін тең екіге бөледі. Пайда болған қима ауданының пирамида табанының ауданына қатынасын табыңыз",
@@ -169,7 +183,8 @@
       "$1:5$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=2335s"
     },
     {
      "question": "Теңдеуді шешіңіз: $\\log_2(3^{2x}-2\\cdot3^x)=\\log_49$",
@@ -180,7 +195,8 @@
       "3"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=2560s"
     },
     {
      "question": "Теңдеулер жүйесін шешіңіз: $\\begin{cases}\\sqrt x+\\sqrt y=25,\\\\ \\sqrt x-\\sqrt y=13\\end{cases}$",
@@ -191,7 +207,8 @@
       "$(361;36)$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=2690s"
     },
     {
      "question": "$y=\\dfrac{x+2}{x-2}$ функциясының графигіне жүргізілген жанамалар абсцисса осімен $135^\\circ$ бұрыш жасайды. Берілген функцияның графигіне жүргізілген жанамалардың жанасу нүктелерінің координаталарын табыңыз",
@@ -202,7 +219,8 @@
       "$(0;-2);\\ (4;-3)$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=2760s"
     },
     {
      "question": "$ABC$ үшбұрышында $AB=BC=10$ см, ал $AC=8$ см-ге тең. $BH$ биіктігі мен $AK$ медианасы $T$ нүктесінде қиылысады. $AT$ ұзындығын табыңыз",
@@ -213,7 +231,8 @@
       "$\\dfrac{3\\sqrt{65}}{7}$ см"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=3325s"
     },
     {
      "question": "Геометриялық прогрессияның жалпы мүшесі $b_n=3\\cdot2^n$ берілген. Алғашқы алты мүшесінің қосындысын анықтаңыз",
@@ -224,7 +243,8 @@
       "294"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=3710s"
     },
     {
      "question": "$ABCDA_1B_1C_1D_1$ тікбұрышты параллелепипедінде $\\overrightarrow{AB}=\\vec a,\\ \\overrightarrow{AD}=\\vec b,\\ \\overrightarrow{AA_1}=\\vec c$. $K$ мен $N$ нүктелері сәйкесінше $B_1C_1$ мен $CD$ қырларының орталары. $\\overrightarrow{KN}$ векторын $\\vec a,\\vec b,\\vec c$ векторлары арқылы жіктеңіз",
@@ -235,7 +255,8 @@
       "$\\dfrac12\\vec a+\\dfrac12\\vec b+\\vec c$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=3835s"
     },
     {
      "question": "Өрнекті ықшамдаңыз: $(x+y)^3-(x-y)^3-2y(x^2+y^2)$",
@@ -246,7 +267,8 @@
       "$6x^2y$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=4300s"
     },
     {
      "question": "Теңдеудің түбірлерінің көбейтіндісін табыңыз: $2^{\\log_2^2x}+x^{\\log_2x}=1024$",
@@ -257,7 +279,8 @@
       "2"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=4485s"
     },
     {
      "question": "$\\dfrac{\\log_2(x^2+3)}{4x^2-16x}<0$ теңсіздігінің бүтін шешімдерінің қосындысын табыңыз.",
@@ -268,7 +291,8 @@
       "12"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=4680s"
     },
     {
      "question": "$y=\\dfrac{x}{\\ln x}$ функциясының өсу аралығында ең кіші бүтін санды табыңыз",
@@ -279,7 +303,8 @@
       "4"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=4825s"
     },
     {
      "question": "Иррационал сандар. Төмендегідей сандар берілген: $a=7+4\\sqrt3$, $b=7-4\\sqrt3$, $c=\\dfrac{1}{7+4\\sqrt3}$, $d=\\dfrac{1}{7-4\\sqrt3}$.\n\nӨзара тең сандарды көрсетіңіз",
@@ -290,7 +315,8 @@
       "$a=c,\\ b=d$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5145s"
     },
     {
      "question": "Иррационал сандар. Төмендегідей сандар берілген: $a=7+4\\sqrt3$, $b=7-4\\sqrt3$, $c=\\dfrac{1}{7+4\\sqrt3}$, $d=\\dfrac{1}{7-4\\sqrt3}$.\n\nҚосындысы 14 болатын сандар",
@@ -301,7 +327,8 @@
       "$c$ мен $d$, $b$ мен $c$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5280s"
     },
     {
      "question": "Иррационал сандар. Төмендегідей сандар берілген: $a=7+4\\sqrt3$, $b=7-4\\sqrt3$, $c=\\dfrac{1}{7+4\\sqrt3}$, $d=\\dfrac{1}{7-4\\sqrt3}$.\n\n$\\sqrt b$ өрнегінің мәні",
@@ -312,7 +339,8 @@
       "$2+\\sqrt3$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5425s"
     },
     {
      "question": "Иррационал сандар. Төмендегідей сандар берілген: $a=7+4\\sqrt3$, $b=7-4\\sqrt3$, $c=\\dfrac{1}{7+4\\sqrt3}$, $d=\\dfrac{1}{7-4\\sqrt3}$.\n\n$\\sqrt a$ өрнегінің мәні",
@@ -323,7 +351,8 @@
       "$2+\\sqrt3$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5445s"
     },
     {
      "question": "Иррационал сандар. Төмендегідей сандар берілген: $a=7+4\\sqrt3$, $b=7-4\\sqrt3$, $c=\\dfrac{1}{7+4\\sqrt3}$, $d=\\dfrac{1}{7-4\\sqrt3}$.\n\nЕсептеңіз: $\\left(\\sqrt c-\\sqrt d\\right)^2$",
@@ -334,7 +363,8 @@
       "9"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5510s"
     },
     {
      "question": "$y=2x^2-5x+3$ функциясы берілген. Функцияның $[0;1]$ аралығындағы ең үлкен және ең кіші мәндерін жауаптарымен сәйкестендіріңіз\n\nА) ең үлкен мәні",
@@ -345,7 +375,8 @@
       "3"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5605s"
     },
     {
      "question": "$y=2x^2-5x+3$ функциясы берілген. Функцияның $[0;1]$ аралығындағы ең үлкен және ең кіші мәндерін жауаптарымен сәйкестендіріңіз\n\nӘ) ең кіші мәні",
@@ -356,7 +387,8 @@
       "3"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5605s"
     },
     {
      "question": "Дұрыс көпбұрыштың әрбір бұрышы $144^\\circ$-қа тең. Сәйкестендіріңіз:\n\nА) Көпбұрыш қабырғаларының саны",
@@ -367,7 +399,8 @@
       "44"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5930s"
     },
     {
      "question": "Дұрыс көпбұрыштың әрбір бұрышы $144^\\circ$-қа тең. Сәйкестендіріңіз:\n\nӘ) Көпбұрыш диагональдарының саны",
@@ -378,7 +411,8 @@
       "44"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=5930s"
     },
     {
      "question": "Егер $P=\\dfrac{a^2-14a+49}{ax-7x}$ болса, онда $a=-8;\\ x=-3$ болғандағы $P^2$ және $7P$ өрнектерін мәндерімен сәйкестендіріңіз\n\nА) $7P$",
@@ -389,7 +423,8 @@
       "49"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6220s"
     },
     {
      "question": "Егер $P=\\dfrac{a^2-14a+49}{ax-7x}$ болса, онда $a=-8;\\ x=-3$ болғандағы $P^2$ және $7P$ өрнектерін мәндерімен сәйкестендіріңіз\n\nӘ) $P^2$",
@@ -400,7 +435,8 @@
       "49"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6220s"
     },
     {
      "question": "$x_1$ және $x_2$ сандары $x^4+5x^2-14=0$ теңдеуінің нақты түбірлері. Сәйкестендіріңіз\n\nА) $x_1^2-x_2^2$",
@@ -411,7 +447,8 @@
       "14"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6290s"
     },
     {
      "question": "$x_1$ және $x_2$ сандары $x^4+5x^2-14=0$ теңдеуінің нақты түбірлері. Сәйкестендіріңіз\n\nӘ) $x_1^2+x_2^2$",
@@ -422,7 +459,8 @@
       "14"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6290s"
     },
     {
      "question": "$\\{b_n\\}$ геометриялық прогрессия үшін $b_1+b_3+b_5=182,\\ b_2+b_4+b_6=546$. Төмендегі қосындыларға прогрессия мүшелерінің санын сәйкестендіріңіз\n\nА) $S_n=242$ болу үшін",
@@ -433,7 +471,8 @@
       "7"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6420s"
     },
     {
      "question": "$\\{b_n\\}$ геометриялық прогрессия үшін $b_1+b_3+b_5=182,\\ b_2+b_4+b_6=546$. Төмендегі қосындыларға прогрессия мүшелерінің санын сәйкестендіріңіз\n\nӘ) $S_n=2186$ болу үшін",
@@ -444,7 +483,8 @@
       "7"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6420s"
     },
     {
      "question": "$-1\\dfrac{3}{10}x\\cdot(-4y)$ өрнегінің коэффициенті",
@@ -462,7 +502,8 @@
       0,
       1,
       3
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6715s"
     },
     {
      "question": "0,5 және 0 мәндеріне сәйкес келетін тригонометриялық өрнек(тер)",
@@ -480,7 +521,8 @@
       1,
       4,
       5
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6850s"
     },
     {
      "question": "Сол жағы шектеусіз геометриялық прогрессияның қосындысы жазылған $x+x^2+\\dots=3{,}5-\\dfrac1x$ теңдеуінің түбірлері жатқан аралықты табыңыз",
@@ -497,7 +539,8 @@
      "correct_indexes": [
       0,
       2
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=6930s"
     },
     {
      "question": "$2^{2x+1}-5\\cdot6^x+3^{2x+1}=0$ теңдеуінің шешім(дер)і",
@@ -514,7 +557,8 @@
      "correct_indexes": [
       0,
       1
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=7160s"
     },
     {
      "question": "$ABCDA_1B_1C_1D_1$ бірлік кубындағы $AA_1$ мен $BD$ түзулерінің арақашықтығын табыңыз",
@@ -532,7 +576,8 @@
      "correct_indexes": [
       0,
       5
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=ag2M8IyLcHE&t=7345s"
     }
    ]
   }

@@ -15,7 +15,8 @@
       "$xya^3\\sqrt{y}$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=665s"
     },
     {
      "question": "Есептеңіз: $\\dfrac{63^2-37^2}{(63+37)^2}\\cdot\\left(\\dfrac{10}{6}\\right)^2$",
@@ -26,7 +27,8 @@
       "$\\dfrac{14}{19}$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=770s"
     },
     {
      "question": "$\\sin\\left(2\\arcsin\\dfrac{3}{4}\\right)$ өрнегінің мәні",
@@ -37,7 +39,8 @@
       "$\\dfrac{3\\sqrt2}{5}$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=975s"
     },
     {
      "question": "Көпмүшені көбейткіштерге жіктеңіз: $(x+2)^4-8(x+2)^2+16$",
@@ -48,7 +51,8 @@
       "$x(x+4)^3$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=1125s"
     },
     {
      "question": "Теңдеудің нақты түбірлерін табыңыз: $|x^2-3x|-10=0$",
@@ -59,7 +63,8 @@
       "$-1;\\ 6$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=1325s"
     },
     {
      "question": "$\\begin{cases}x+y=10,\\\\ \\dfrac1x+\\dfrac1y=\\dfrac{5}{12}\\end{cases}$ теңдеулер жүйесінің шешімі",
@@ -70,7 +75,8 @@
       "$(3;7),\\ (7;3)$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=1395s"
     },
     {
      "question": "$y=\\sin\\left(\\dfrac{2x}{3}+\\dfrac{\\pi}{4}\\right)$ функциясының туындысы",
@@ -81,7 +87,8 @@
       "$y'=\\dfrac23\\cos\\left(\\dfrac{2x}{3}-\\dfrac{\\pi}{4}\\right)$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=1445s"
     },
     {
      "question": "Дұрыс төртбұрышты призманың табанының ауданы $144\\ \\text{см}^2$, ал биіктігі 14 см-ге тең. Осы призманың диагоналін анықтаңыз",
@@ -92,7 +99,8 @@
       "21 см"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=1520s"
     },
     {
      "question": "Теңсіздіктер жүйесін шешіңіз: $\\begin{cases}\\log_2(3x^2-x)>2\\\\ 2x^2<32\\end{cases}$",
@@ -103,7 +111,8 @@
       "$(-\\infty;-4)\\cup(-4;7)$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=1635s"
     },
     {
      "question": "Теңдеуді шешіңіз: $\\cos2x(\\sin3x+1)=0$",
@@ -114,7 +123,8 @@
       "$\\dfrac{\\pi}{2}+\\dfrac{\\pi n}{2};\\ -\\dfrac{\\pi}{3}+\\dfrac{2\\pi k}{3};\\ n,k\\in Z$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=1840s"
     },
     {
      "question": "$y=x,\\ y=\\dfrac12x$ және $x=1$ сызықтарымен шектелген фигураның ауданын табыңыз",
@@ -125,7 +135,8 @@
       "0,75 кв.бірлік"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=1965s"
     },
     {
      "question": "$\\left(1-\\dfrac23\\cdot0{,}1\\right)x\\le\\left(\\dfrac59-6\\right)\\cdot3$ теңсіздігін қанағаттандыратын ең үлкен бүтін сан",
@@ -136,7 +147,8 @@
       "$-13$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=2075s"
     },
     {
      "question": "$\\vec m(1;-1)$ және $\\vec n(-1;2)$ векторлары берілген. Екі вектордың скаляр көбейтіндісін табыңыз",
@@ -147,7 +159,8 @@
       "$-5$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=2240s"
     },
     {
      "question": "$y=\\dfrac{x}{3}+\\dfrac{3}{x}$ функцияның экстремумдарының қосындысын табыңыз",
@@ -158,7 +171,8 @@
       "4"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=2305s"
     },
     {
      "question": "Цилиндрдің биіктігі 6 см-ге, ал табанының радиусы 4 см-ге тең. Цилиндрдің осьтік қимасының диагоналін табыңыз",
@@ -169,7 +183,8 @@
       "11 см"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=2470s"
     },
     {
      "question": "Теңдеуді шешіңіз: $\\lg x+\\lg x^2+\\lg x^3=6$",
@@ -180,7 +195,8 @@
       "10"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=2570s"
     },
     {
      "question": "$\\begin{cases}\\sin x=\\cos y,\\\\ 3\\sin x+2\\cos y=\\dfrac{5\\sqrt2}{2}\\end{cases}$ теңдеулер жүйесін шешіңіз",
@@ -191,7 +207,8 @@
       "$\\left(\\pm\\dfrac{\\pi}{6}+\\dfrac{\\pi n}{4};\\ \\dfrac{\\pi}{3}+\\dfrac{\\pi k}{2}\\right),\\ k,n\\in Z$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=2635s"
     },
     {
      "question": "$y=4x+1$ түзуіне параллель болатын, $y=-x^2-2$ функциясының графигіне жүргізілген жанама теңдеуін жазыңыз",
@@ -202,7 +219,8 @@
       "$y=4x-1$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=2795s"
     },
     {
      "question": "Үшбұрыштың қабырғалары 12 см, 14 см және 22 см. Ең үлкен қабырғасына жүргізілген медиананың ұзындығын табыңыз",
@@ -213,7 +231,8 @@
       "6 см"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=3045s"
     },
     {
      "question": "Өспелі геометриялық прогрессияның үшінші және бесінші мүшелерінің қосындысы 60-қа, ал бірінші мүшесі 3-ке тең. Осы прогрессияның сегізінші мүшесін табыңыз",
@@ -224,7 +243,8 @@
       "192"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=3140s"
     },
     {
      "question": "Бағыттаушы векторы $\\vec p(4;7;5)$ болатын түзу мен $2x-y+2z+1=0$ жазықтығының арасындағы бұрыштың синусын табыңыз",
@@ -235,7 +255,8 @@
       "$\\sin\\varphi=\\dfrac{\\sqrt{10}}{70}$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=3330s"
     },
     {
      "question": "Өрнекті ықшамдаңыз: $(3a+2)^2+(4-6a)(2+3a)+(3a-2)^2$",
@@ -246,7 +267,8 @@
       "16"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=3655s"
     },
     {
      "question": "$(x^2+x-6)(\\log_4(x^2-x-2)-1)=0$ теңдеуінің түбірлерінің қосындысын табыңыз",
@@ -257,7 +279,8 @@
       "0"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=3835s"
     },
     {
      "question": "Теңсіздікті шешіңіз: $\\sqrt{2-|x|}>x$",
@@ -268,7 +291,8 @@
       "$(-4;0)$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=3980s"
     },
     {
      "question": "Суреттегі боялған бөліктің ауданын табыңыз",
@@ -280,7 +304,8 @@
      ],
      "correct_index": 3,
      "points": 1,
-     "image": "/uto/n1-25.jpg"
+     "image": "/uto/n1-25.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=4185s"
     },
     {
      "question": "Тәтті бәліш. Цилиндр пішінді тәтті бәліштің биіктігі 10 см, диаметрі 30 см-ге тең. Тәтті бәліштің орташа тығыздығы 0,2 г/см³. Тәтті бәліштің бағасы 9 мың теңге.\n\nТәтті бәліштің көлемі ($\\pi=3$)",
@@ -292,7 +317,8 @@
      ],
      "correct_index": 0,
      "points": 1,
-     "image": "/uto/n1-cake.jpg"
+     "image": "/uto/n1-cake.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=4615s"
     },
     {
      "question": "Тәтті бәліш. Цилиндр пішінді тәтті бәліштің биіктігі 10 см, диаметрі 30 см-ге тең. Тәтті бәліштің орташа тығыздығы 0,2 г/см³. Тәтті бәліштің бағасы 9 мың теңге.\n\nТәтті бәлішті алты диаметр жүргізіп кескенде пайда болған бөліктер саны",
@@ -304,7 +330,8 @@
      ],
      "correct_index": 3,
      "points": 1,
-     "image": "/uto/n1-cake.jpg"
+     "image": "/uto/n1-cake.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=4700s"
     },
     {
      "question": "Тәтті бәліш. Цилиндр пішінді тәтті бәліштің биіктігі 10 см, диаметрі 30 см-ге тең. Тәтті бәліштің орташа тығыздығы 0,2 г/см³. Тәтті бәліштің бағасы 9 мың теңге.\n\nТәтті бәлішті орау үшін фабрика тікбұрышты параллелепипед түріндегі қораптарды шығарды. Осы қораптың көлемі қабылдай алатын ең кіші көлемді табыңыз.",
@@ -316,7 +343,8 @@
      ],
      "correct_index": 1,
      "points": 1,
-     "image": "/uto/n1-cake.jpg"
+     "image": "/uto/n1-cake.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=4765s"
     },
     {
      "question": "Тәтті бәліш. Цилиндр пішінді тәтті бәліштің биіктігі 10 см, диаметрі 30 см-ге тең. Тәтті бәліштің орташа тығыздығы 0,2 г/см³. Тәтті бәліштің бағасы 9 мың теңге.\n\nТәтті бәлішке бес диаметр жүргізіп тең мөлшердегі бөліктерге бөлінді. Тәтті бәліштің орташа тығыздығы 0,2 г/см³ болса, әрбір бөліктің массасы ($\\pi=3$)",
@@ -328,7 +356,8 @@
      ],
      "correct_index": 1,
      "points": 1,
-     "image": "/uto/n1-cake.jpg"
+     "image": "/uto/n1-cake.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=4870s"
     },
     {
      "question": "Тәтті бәліш. Цилиндр пішінді тәтті бәліштің биіктігі 10 см, диаметрі 30 см-ге тең. Тәтті бәліштің орташа тығыздығы 0,2 г/см³. Тәтті бәліштің бағасы 9 мың теңге.\n\nТәтті бәлішке тоғыз диаметр жүргізіп тең мөлшердегі бөліктерге бөлді. Осындай бес бөліктің құны",
@@ -340,7 +369,8 @@
      ],
      "correct_index": 1,
      "points": 1,
-     "image": "/uto/n1-cake.jpg"
+     "image": "/uto/n1-cake.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5022s"
     },
     {
      "question": "Суретте $y=f(x)$ функциясының графигі берілген. Сәйкестендіріңіз\n\nА) $f(2)$ мәні",
@@ -352,7 +382,8 @@
      ],
      "correct_index": 0,
      "points": 1,
-     "image": "/uto/n1-31.jpg"
+     "image": "/uto/n1-31.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5100s"
     },
     {
      "question": "Суретте $y=f(x)$ функциясының графигі берілген. Сәйкестендіріңіз\n\nӘ) $f(1)$ мәні",
@@ -364,7 +395,8 @@
      ],
      "correct_index": 1,
      "points": 1,
-     "image": "/uto/n1-31.jpg"
+     "image": "/uto/n1-31.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5100s"
     },
     {
      "question": "$ABC$ үшбұрышының $AB$ қабырғасының ортасында $M$, ал $BC$ қабырғасының ортасында $K$ нүктесі орналасқан. Егер $MB=3,\\ MK=5$ және $BK=4$ болса, онда $B$ төбесінен $AC$ қабырғасына жүргізілген $BH$ биіктігі мен $BT$ медианасын тауып, жауаптарымен сәйкестендіріңіз\n\nА) $BH$",
@@ -375,7 +407,8 @@
       "5"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5160s"
     },
     {
      "question": "$ABC$ үшбұрышының $AB$ қабырғасының ортасында $M$, ал $BC$ қабырғасының ортасында $K$ нүктесі орналасқан. Егер $MB=3,\\ MK=5$ және $BK=4$ болса, онда $B$ төбесінен $AC$ қабырғасына жүргізілген $BH$ биіктігі мен $BT$ медианасын тауып, жауаптарымен сәйкестендіріңіз\n\nӘ) $BT$",
@@ -386,7 +419,8 @@
       "5"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5160s"
     },
     {
      "question": "$x=5{,}5a+b^2;\\ y=2{,}5b^2-a$ берілген. $a=3,\\ b=-2$ болғанда төмендегі өрнектерді мәндерімен сәйкестендіріңіз\n\nА) $x-y$",
@@ -397,7 +431,8 @@
       "27,5"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5295s"
     },
     {
      "question": "$x=5{,}5a+b^2;\\ y=2{,}5b^2-a$ берілген. $a=3,\\ b=-2$ болғанда төмендегі өрнектерді мәндерімен сәйкестендіріңіз\n\nӘ) $x+y$",
@@ -408,7 +443,8 @@
       "27,5"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5295s"
     },
     {
      "question": "$x_1$ және $x_2$ сандары $2|x-4|+3|x-4|-18=|x-4|-7|x-4|+15$ теңдеуінің түбірлері екені белгілі. Өрнектерді мәндерімен сәйкестендіріңіз\n\nА) $x_1+x_2$",
@@ -419,7 +455,8 @@
       "9"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5355s"
     },
     {
      "question": "$x_1$ және $x_2$ сандары $2|x-4|+3|x-4|-18=|x-4|-7|x-4|+15$ теңдеуінің түбірлері екені белгілі. Өрнектерді мәндерімен сәйкестендіріңіз\n\nӘ) $x_1\\cdot x_2$",
@@ -430,7 +467,8 @@
       "9"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5355s"
     },
     {
      "question": "$a, b, c$ сандары өспелі арифметикалық прогрессияның алғашқы үш мүшесін құрайды және олардың қосындысы 12-ге тең. Егер осы сандарға сәйкесінше 1; 2 және 11 сандарын қоссақ, геометриялық прогрессияның алғашқы үш мүшесі шығады. Берілген үш санды тауып, төмендегі өрнектердің мәндерін сәйкестендіріңіз\n\nА) $a\\cdot b\\cdot c$",
@@ -441,7 +479,8 @@
       "31"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5460s"
     },
     {
      "question": "$a, b, c$ сандары өспелі арифметикалық прогрессияның алғашқы үш мүшесін құрайды және олардың қосындысы 12-ге тең. Егер осы сандарға сәйкесінше 1; 2 және 11 сандарын қоссақ, геометриялық прогрессияның алғашқы үш мүшесі шығады. Берілген үш санды тауып, төмендегі өрнектердің мәндерін сәйкестендіріңіз\n\nӘ) $5a+3b+2c$",
@@ -452,7 +491,8 @@
       "31"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5460s"
     },
     {
      "question": "Өрнекті ықшамдаңыз: $6x-3(x-7)$",
@@ -469,7 +509,8 @@
      "correct_indexes": [
       2,
       3
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=5925s"
     },
     {
      "question": "$\\mathrm{ctg}\\left(4\\,\\mathrm{arctg}\\dfrac{\\sqrt3}{3}+\\dfrac12\\arcsin\\dfrac{\\sqrt3}{2}\\right)$ өрнегінің мәні жатқан аралық(тар)",
@@ -487,7 +528,8 @@
       0,
       1,
       4
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=6000s"
     },
     {
      "question": "Өспелі арифметикалық прогрессия үшін $a_2\\cdot a_5=52$ және $a_2+a_3+a_4+a_5=34$ теңдіктері орындалады. Төмендегі жауапт(ард)ың ішінен осы прогрессияның мүше(лер)ін табыңыз",
@@ -505,7 +547,8 @@
       0,
       2,
       4
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=6150s"
     },
     {
      "question": "$4\\cdot9^x-7\\cdot6^x=4{,}5\\cdot4^x$ теңдеуінің шешім(дер)і жатқан аралық(тар)",
@@ -522,7 +565,8 @@
      "correct_indexes": [
       0,
       2
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=6510s"
     },
     {
      "question": "Дұрыс үшбұрышты пирамида табанының қабырғалары 1-ге, бүйір қырлары 2-ге тең. Пирамиданың табанындағы екіжақты бұрыштың тангенсінің мән(дер)і",
@@ -539,7 +583,8 @@
      "correct_indexes": [
       0,
       3
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=jzG4_u5LPis&t=6745s"
     }
    ]
   }

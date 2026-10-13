@@ -15,7 +15,8 @@
       "$\\dfrac{3+\\sqrt2}{7}$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=650s"
     },
     {
      "question": "$\\left(\\dfrac{4m^{17}n^{18}}{m^{19}n^{14}}\\right)^3$ өрнегін ықшамдаңыз",
@@ -26,7 +27,8 @@
       "$\\dfrac{64n^4}{m^2}$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=810s"
     },
     {
      "question": "$\\dfrac{0{,}5\\cos15^\\circ+0{,}5\\sqrt3\\sin15^\\circ}{\\sqrt2}$ өрнегін ықшамдаңыз",
@@ -37,7 +39,8 @@
       "0,5"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=900s"
     },
     {
      "question": "Көпмүшені көбейткіштерге жіктеңіз: $5(x-y)+c(y-x)$",
@@ -48,7 +51,8 @@
       "$(5+c)(x+y)$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1000s"
     },
     {
      "question": "$(x^2-3x)^2+2(x^2-3x)-3=0$ теңдеуінің барлық нақты түбірлерінің санын анықтаңыз",
@@ -59,7 +63,8 @@
       "4"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1045s"
     },
     {
      "question": "$\\begin{cases}x+2y=0{,}3\\\\ x=-y+0{,}5\\end{cases}$ теңдеулер жүйесін шешіңіз",
@@ -70,7 +75,8 @@
       "$(0{,}7;\\ -0{,}2)$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1160s"
     },
     {
      "question": "$f(x)=5x^3+7x^2-300x+2025$ функциясының туындысын табыңыз",
@@ -81,7 +87,8 @@
       "$f'(x)=3x^2+2x-300$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1200s"
     },
     {
      "question": "$ABCDA_1B_1C_1D_1$ кубы берілген. $AC$ және $B_1C_1$ түзулерінің арасындағы бұрышты табыңыз",
@@ -92,7 +99,8 @@
       "$45^\\circ$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1240s"
     },
     {
      "question": "$\\begin{cases}5x+3\\le3(x+1),\\\\ x^2+2x-3\\ge0\\end{cases}$ теңсіздіктер жүйесін шешіңіз",
@@ -103,7 +111,8 @@
       "$(-\\infty;-3]$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1335s"
     },
     {
      "question": "$\\sqrt{x-2}=2-x$ теңдеуінің түбірлерінің санын табыңыз",
@@ -114,7 +123,8 @@
       "$\\varnothing$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1400s"
     },
     {
      "question": "$y=x^3-2x^2+8x-2$ функциясының $[1;4]$ аралықтағы ең кіші және ең үлкен мәндерін табыңыз:",
@@ -125,7 +135,8 @@
       "5 және 25"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1495s"
     },
     {
      "question": "Төменде көрсетілген сан аралықтарының қиылысуының математикалық дұрыс жазылуын көрсетіңіз",
@@ -136,7 +147,8 @@
       "$(-6;1)\\cap[-4;+\\infty)=(-4;1)$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1615s"
     },
     {
      "question": "$A(-2;3),\\ B(2;-1)$ нүктелері арқылы өтетін түзудің теңдеуін жазыңыз",
@@ -147,7 +159,8 @@
       "$y=-4x+7$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1680s"
     },
     {
      "question": "$\\displaystyle\\int\\dfrac{x^2-16}{x+4}\\,dx$ интегралын табыңыз",
@@ -158,7 +171,8 @@
       "$\\dfrac{x^2}{2}-4x+C$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1875s"
     },
     {
      "question": "Суретте көрсетілген дұрыс төртбұрышты пирамиданың бүйір қыры мен табан жазықтығы арасындағы сызықтық бұрышын көрсетіңіз",
@@ -170,7 +184,8 @@
      ],
      "correct_index": 1,
      "points": 1,
-     "image": "/uto/n2-15.jpg"
+     "image": "/uto/n2-15.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=1935s"
     },
     {
      "question": "$x^{1+\\log_3x}=9x^2$ теңдеуін шешіңіз",
@@ -181,7 +196,8 @@
       "$1;\\ 9$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=2085s"
     },
     {
      "question": "$(x_0;y_0)$ сандар жұбы $\\begin{cases}2\\cdot4^x+3\\cdot5^y=11\\\\ 5\\cdot4^x+4\\cdot5^y=24\\end{cases}$ теңдеулер жүйесінің шешімі болса, онда $3^{x_0}+4^{y_0}$ өрнегінің мәнін табыңыз",
@@ -192,7 +208,8 @@
       "4"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=2295s"
     },
     {
      "question": "$y=\\dfrac{4x-1}{x+2},\\ x\\ne-2$ функциясының кері функциясы",
@@ -203,7 +220,8 @@
       "$y=\\dfrac{2x+1}{4+x}$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=2500s"
     },
     {
      "question": "Ромбтың биіктігі 4 см, ал кіші диагоналі $2\\sqrt5$ см болса, ауданын табыңыз.",
@@ -214,7 +232,8 @@
       "$30\\ \\text{см}^2$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=2625s"
     },
     {
      "question": "Геометриялық прогрессияның алғашқы төрт мүшесінің қосындысын табыңыз: $-4;\\ 3;\\ \\dots$",
@@ -225,7 +244,8 @@
       "$\\dfrac{16}{25}$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=2860s"
     },
     {
      "question": "Егер $|\\vec a|=2,\\ |\\vec b|=5$ және $\\angle(\\vec a,\\vec b)=120^\\circ$ болса, онда $x$-тің қандай мәнінде $\\vec p=x\\vec a-13\\vec b$ және $\\vec q=2\\vec a-\\vec b$ векторлары перпендикуляр болатынын анықтаңыз.",
@@ -236,7 +256,8 @@
       "$-25$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=3095s"
     },
     {
      "question": "$\\left(-\\dfrac{w}{z^2+zw+w^2}+\\dfrac{1}{z-w}-\\dfrac{3w^2}{z^3-w^3}\\right)\\cdot\\left(\\dfrac{z^2}{w+z}+w\\right)$ өрнегін ықшамдаңыз",
@@ -247,7 +268,8 @@
       "1"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=3400s"
     },
     {
      "question": "Суретте берілген функция графигінің формуласын жазып, $y=128$ болғандағы аргументтің мәнін анықтаңыз",
@@ -259,7 +281,8 @@
      ],
      "correct_index": 0,
      "points": 1,
-     "image": "/uto/n2-23.jpg"
+     "image": "/uto/n2-23.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=3620s"
     },
     {
      "question": "$(x-4)^{\\frac{2x-1}{x+3}}\\le1$ теңсіздігін шешіңіз",
@@ -270,7 +293,8 @@
       "$[0{,}5;5]$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4005s"
     },
     {
      "question": "Суреттегі сызықтармен шектелген әрі боялған фигураның ауданын табыңыз",
@@ -282,7 +306,8 @@
      ],
      "correct_index": 1,
      "points": 1,
-     "image": "/uto/n2-25.jpg"
+     "image": "/uto/n2-25.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4240s"
     },
     {
      "question": "Құлаққап. Санжар бағасы 34200 тг тұратын құлаққап сатып алу үшін қаңтар айынан бастап ақша жинамақшы болды. Ол бірінші айда 2200 тг, ал келесі айдан бастап әр айдың 10-ы күні алдыңғы айға қарағанда 400 тг артық салып отыруды жоспарлады.\n\nМамыр айында салғаннан кейін Санжардың барлық жинаған ақшасы",
@@ -293,7 +318,8 @@
       "16500 тг"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4510s"
     },
     {
      "question": "Құлаққап. Санжар бағасы 34200 тг тұратын құлаққап сатып алу үшін қаңтар айынан бастап ақша жинамақшы болды. Ол бірінші айда 2200 тг, ал келесі айдан бастап әр айдың 10-ы күні алдыңғы айға қарағанда 400 тг артық салып отыруды жоспарлады.\n\nҚұлаққап сатып алуға қажет ақшаны Санжардың жинап біткен айы",
@@ -304,7 +330,8 @@
       "Қазан"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4670s"
     },
     {
      "question": "Құлаққап. Санжар бағасы 34200 тг тұратын құлаққап сатып алу үшін қаңтар айынан бастап ақша жинамақшы болды. Ол бірінші айда 2200 тг, ал келесі айдан бастап әр айдың 10-ы күні алдыңғы айға қарағанда 400 тг артық салып отыруды жоспарлады.\n\nЖетінші рет салған соң Санжардың әлі қанша ақша жинау керектігін табыңыз",
@@ -315,7 +342,8 @@
       "10000 тг"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4748s"
     },
     {
      "question": "Құлаққап. Санжар бағасы 34200 тг тұратын құлаққап сатып алу үшін қаңтар айынан бастап ақша жинамақшы болды. Ол бірінші айда 2200 тг, ал келесі айдан бастап әр айдың 10-ы күні алдыңғы айға қарағанда 400 тг артық салып отыруды жоспарлады.\n\nСанжардың соңғы айда салған ақшасы",
@@ -326,7 +354,8 @@
       "5800 тг"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4805s"
     },
     {
      "question": "$f(x)=-3x^3$ функциясы берілген. Сәйкестендіріңіз\n\nА) $f(2)$ мәні",
@@ -337,7 +366,8 @@
       "24"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4820s"
     },
     {
      "question": "$f(x)=-3x^3$ функциясы берілген. Сәйкестендіріңіз\n\nӘ) $f(-2)$ мәні",
@@ -348,7 +378,8 @@
       "24"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4820s"
     },
     {
      "question": "Шеңбердің радиусы – 5 см. $O$ нүктесі – шеңбердің центрі және $m$ түзуі берілген. $O$ нүктесінен $m$ түзуіне дейінгі қашықтық $x$ болсын. Түзу мен шеңбердің өзара орналасуын сәйкестендіріңіз\n\nА) $x=5$ см болғанда",
@@ -359,7 +390,8 @@
       "Түзу мен шеңбер қиылыспайды"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4895s"
     },
     {
      "question": "Шеңбердің радиусы – 5 см. $O$ нүктесі – шеңбердің центрі және $m$ түзуі берілген. $O$ нүктесінен $m$ түзуіне дейінгі қашықтық $x$ болсын. Түзу мен шеңбердің өзара орналасуын сәйкестендіріңіз\n\nӘ) $x=3{,}5$ см болғанда",
@@ -370,7 +402,8 @@
       "Түзу мен шеңбер қиылыспайды"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=4895s"
     },
     {
      "question": "$P(x)=x^3-7x-6$ көпмүшесі берілген. Сәйкестендіріңіз\n\nА) түбірлерінің қосындысы",
@@ -381,7 +414,8 @@
       "$-9$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5060s"
     },
     {
      "question": "$P(x)=x^3-7x-6$ көпмүшесі берілген. Сәйкестендіріңіз\n\nӘ) түбірлерінің көбейтіндісі",
@@ -392,7 +426,8 @@
       "$-9$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5060s"
     },
     {
      "question": "$|3x^2+x|+c=0$ теңдеуі берілген. $c$-ның мәніне байланысты нақты түбірлерінің санын сәйкестендіріңіз\n\nА) $c>0$ болғанда",
@@ -403,7 +438,8 @@
       "төрт түбірі бар"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5285s"
     },
     {
      "question": "$|3x^2+x|+c=0$ теңдеуі берілген. $c$-ның мәніне байланысты нақты түбірлерінің санын сәйкестендіріңіз\n\nӘ) $c=-4$ болғанда",
@@ -414,7 +450,8 @@
       "төрт түбірі бар"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5285s"
     },
     {
      "question": "Суретте тең қабырғалы үшбұрыштар (шексіз көп) берілген, әрқайсысының қабырғасы алдыңғыларының орта сызығына тең етіп жасалған. Ең үлкен үшбұрыштың қабырғасы 8-ге тең. Сәйкестендіріңіз\n\nА) Барлық үшбұрыштардың периметрлерінің қосындысы",
@@ -426,7 +463,8 @@
      ],
      "correct_index": 3,
      "points": 1,
-     "image": "/uto/n2-35.jpg"
+     "image": "/uto/n2-35.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5380s"
     },
     {
      "question": "Суретте тең қабырғалы үшбұрыштар (шексіз көп) берілген, әрқайсысының қабырғасы алдыңғыларының орта сызығына тең етіп жасалған. Ең үлкен үшбұрыштың қабырғасы 8-ге тең. Сәйкестендіріңіз\n\nӘ) AB табанына параллель барлық орта сызықтардың қосындысы",
@@ -438,7 +476,8 @@
      ],
      "correct_index": 1,
      "points": 1,
-     "image": "/uto/n2-35.jpg"
+     "image": "/uto/n2-35.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5380s"
     },
     {
      "question": "Егер $a=16;\\ b=8$ болса, онда $\\dfrac34a+\\dfrac12(a+b)-\\dfrac54\\left(a+\\dfrac15b\\right)$ өрнегінің мән(дер)ін табыңыз",
@@ -454,7 +493,8 @@
      "points": 2,
      "correct_indexes": [
       5
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5570s"
     },
     {
      "question": "$\\dfrac{\\sin80^\\circ+\\sin10^\\circ}{\\cos80^\\circ+\\cos10^\\circ}$ өрнегінің мәні жататын аралықт(ард)ы табыңыз",
@@ -471,7 +511,8 @@
      "correct_indexes": [
       2,
       4
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5665s"
     },
     {
      "question": "Мүшелері оң геометриялық прогрессияда $b_1\\cdot b_3=36,\\ b_2\\cdot b_4=324$ болса, онда $S_5$ мәнінің бөлгіш(тер)ін табыңыз",
@@ -489,7 +530,8 @@
       0,
       2,
       5
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5775s"
     },
     {
      "question": "Шешімі графиктік тәсілмен көрсетілген теңдеулер жүйесі",
@@ -507,7 +549,8 @@
      "correct_indexes": [
       1,
       5
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=5990s"
     },
     {
      "question": "$CK=3,\\ KO=6,\\ KM=4$. Үлкен конустың табан радиусы мен жасаушысын және кіші конустың көлемін табыңыз ($\\pi\\approx3$)",
@@ -526,7 +569,8 @@
       2,
       4,
       5
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=m1ASzrjfPGI&t=6165s"
     }
    ]
   }

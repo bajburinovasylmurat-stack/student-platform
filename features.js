@@ -83,6 +83,8 @@ export const featureMigrations = `
   -- Бірнеше дұрыс жауабы бар сұрақтар (ҰБТ форматы) және сұраққа сурет
   ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS correct_indexes JSONB;
   ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS image TEXT;
+  -- Есептің шығарылу жолы (YouTube, дәл сол есептің уақытынан): нәтижені қарағанда көрсетіледі
+  ALTER TABLE test_questions ADD COLUMN IF NOT EXISTS solution_url TEXT;
   -- Материал сыртқы сілтеме ретінде (Google Drive т.б.)
   ALTER TABLE materials ADD COLUMN IF NOT EXISTS external_url TEXT;
 
@@ -165,11 +167,11 @@ export async function seedContent(pool) {
         );
         for (const [idx, q] of test.questions.entries()) {
           await client.query(
-            `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image, solution_url)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
             [created.rows[0].id, idx, q.question, JSON.stringify(q.options),
               multiCorrect(q) ? multiCorrect(q)[0] : q.correct_index, q.points || 1,
-              multiCorrect(q) ? JSON.stringify(multiCorrect(q)) : null, q.image || null]
+              multiCorrect(q) ? JSON.stringify(multiCorrect(q)) : null, q.image || null, q.solution_url || null]
           );
         }
       }
@@ -608,6 +610,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
           correct_indexes: multi?.length ? multi : null,
           correct_index: multi?.length ? multi[0] : Number(q.correct_index),
           image: typeof q.image === 'string' && q.image.startsWith('/') ? q.image : null,
+          solution_url: /^https:\/\/(www\.)?(youtube\.com|youtu\.be)\//.test(q.solution_url || '') ? q.solution_url.trim() : null,
           points: Math.max(1, Number(q.points) || 1)
         };
       })
@@ -632,7 +635,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       const test = await pool.query('SELECT * FROM tests WHERE id = $1', [req.params.id]);
       if (!test.rows[0]) return res.status(404).json({ error: 'Тест табылмады' });
       const questions = await pool.query(
-        'SELECT id, question, options, correct_index, correct_indexes, image, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
+        'SELECT id, question, options, correct_index, correct_indexes, image, solution_url, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
         [req.params.id]
       );
       res.json({ ...test.rows[0], questions: questions.rows });
@@ -676,10 +679,10 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       }
       for (const [idx, q] of questions.entries()) {
         await client.query(
-          `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+          `INSERT INTO test_questions (test_id, idx, question, options, correct_index, points, correct_indexes, image, solution_url)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
           [testId, idx, q.question, JSON.stringify(q.options), q.correct_index, q.points,
-            q.correct_indexes ? JSON.stringify(q.correct_indexes) : null, q.image]
+            q.correct_indexes ? JSON.stringify(q.correct_indexes) : null, q.image, q.solution_url]
         );
       }
       await client.query('COMMIT');
@@ -792,7 +795,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
     const a = attempt.rows[0];
     if (!a) return null;
     const questions = await pool.query(
-      'SELECT id, question, options, correct_index, correct_indexes, image, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
+      'SELECT id, question, options, correct_index, correct_indexes, image, solution_url, points FROM test_questions WHERE test_id = $1 ORDER BY idx, id',
       [a.test_id]
     );
     const answers = a.answers || {};

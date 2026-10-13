@@ -1453,3 +1453,42 @@
   flex: none;
   accent-color: var(--brand);
 }
+
+/* Қате есептің YouTube-тағы шығарылу жолы */
+.solution-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--brand);
+  background: rgba(41, 91, 110, 0.08);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.solution-link:hover {
+  background: rgba(41, 91, 110, 0.16);
+  transform: translateY(-1px);
+}
+
+.solution-link.needed {
+  color: #fff;
+  background: #d93025;
+}
+
+.solution-link.needed:hover {
+  background: #b3261e;
+}
+
+.solution-input {
+  width: 100%;
+  margin: 6px 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(41, 91, 110, 0.2);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}

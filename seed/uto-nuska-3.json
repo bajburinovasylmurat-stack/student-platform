@@ -15,7 +15,8 @@
       "4,5"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=275s"
     },
     {
      "question": "Егер $x=\\dfrac23,\\ y=\\dfrac14,\\ a=6$ болса, онда $576x^3y^2a^2$ өрнегінің мәні",
@@ -26,7 +27,8 @@
       "384"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=365s"
     },
     {
      "question": "Өрнектің мәнін табыңыз: $\\mathrm{arcctg}(-\\sqrt3)$",
@@ -37,7 +39,8 @@
       "$\\dfrac{5\\pi}{6}$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=450s"
     },
     {
      "question": "Көбейткіштерге жіктеңіз: $3my-2ny-9m+6n$",
@@ -48,7 +51,8 @@
       "$(2m-3n)(2y-3)$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=520s"
     },
     {
      "question": "Теңдеуді шешіңіз: $\\dfrac15x+1=3x-13$",
@@ -59,7 +63,8 @@
       "3"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=580s"
     },
     {
      "question": "Теңдеулер жүйесін шешіңіз: $\\begin{cases}x-3y=-4,\\\\ xy=15\\end{cases}$",
@@ -70,7 +75,8 @@
       "$(15;1),\\ \\left(9;-\\dfrac53\\right)$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=665s"
     },
     {
      "question": "$y=6^x+8^x$ функциясының $y'(0)$ мәнін табыңыз",
@@ -81,7 +87,8 @@
       "$\\ln24$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=795s"
     },
     {
      "question": "Тік бұрышты параллелепипедтің табан қабырғалары 6 см, 8 см және биіктігі 5 см болса, онда оның диагоналін табыңыз",
@@ -92,7 +99,8 @@
       "$5\\sqrt5$ см"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=925s"
     },
     {
      "question": "$-5\\le2x-1<17$ қос теңсіздігінің шешімі",
@@ -103,7 +111,8 @@
       "$[2;9)$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=1055s"
     },
     {
      "question": "$\\cos^2x-2\\cos x+1=0$ теңдеуін шешіңіз",
@@ -114,7 +123,8 @@
       "$\\dfrac{\\pi}{2}+2\\pi k;\\ k\\in Z$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=1110s"
     },
     {
      "question": "$y=\\sin2024x$ функциясының туындысын табыңыз",
@@ -125,7 +135,8 @@
       "$y'=2024\\cos2024x$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=1245s"
     },
     {
      "question": "$5(x-1)\\ge7-7x$ теңсіздігін шешіңіз",
@@ -136,19 +147,21 @@
       "$x\\ge1$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=1300s"
     },
     {
      "question": "Суретте берілген $\\vec a$ және $\\vec b$ векторларының скаляр көбейтіндісін табыңыз",
      "options": [
       "$-4$",
-      "4",
-      "$-16$",
-      "16"
+      "$-6$",
+      "$-3$",
+      "4"
      ],
      "correct_index": 0,
      "points": 1,
-     "image": "/uto/n3-13.jpg"
+     "image": "/uto/n3-13.jpg",
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=1345s"
     },
     {
      "question": "Функцияның анықталу облысын табыңыз: $f(x)=\\log_2(2x-7)+\\log_2(x^2+4)$",
@@ -159,7 +172,8 @@
       "$(4;+\\infty)$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=1515s"
     },
     {
      "question": "Қыры $3\\sqrt2$ см болатын кубтың көршілес екі жағының бір төбеден шығатын диагональдары арқылы қима жүргізілген. Қиманың ауданын есептеңіз",
@@ -170,7 +184,8 @@
       "$6\\sqrt3\\ \\text{см}^2$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=1620s"
     },
     {
      "question": "Теңдеуді шешіңіз: $\\left(7^{x^2-2}-49\\right)\\log_2(x^2-4x+4)=0$",
@@ -181,7 +196,8 @@
       "$-2;\\ 1;\\ 2$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=1940s"
     },
     {
      "question": "Теңдеулер жүйесін шешіңіз: $\\begin{cases}4\\sin x\\sin y=\\sqrt3,\\\\ 4\\cos x\\cos y=\\sqrt3\\end{cases}$",
@@ -192,7 +208,8 @@
       "$\\left(\\dfrac{\\pi}{3}+2\\pi n;\\ \\dfrac{\\pi}{6}+2\\pi k\\right);\\ \\left(\\dfrac{\\pi}{6}+2\\pi n;\\ \\dfrac{\\pi}{3}+2\\pi k\\right),\\ n,k\\in Z$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=2145s"
     },
     {
      "question": "Аргументтің қандай мәнінде $f(x)=x-\\sqrt{2x-1}$ функциясының мәні 2-ге тең?",
@@ -203,7 +220,8 @@
       "9"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=2870s"
     },
     {
      "question": "Теңбүйірлі трапецияның сүйір бұрышы $45^\\circ$-қа тең, биіктігі 4 см, ал табандарының бірі екіншісінен 2 есе артық. Трапецияның периметрін табыңыз",
@@ -214,7 +232,8 @@
       "$8(4+\\sqrt2)$ см"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=2940s"
     },
     {
      "question": "Геометриялық прогрессияда бірінші мүшесі 1000, еселігі $\\dfrac15$-ге тең. Алғашқы бес мүшесінің қосындысын табыңыз",
@@ -225,7 +244,8 @@
       "1248,6"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=3095s"
     },
     {
      "question": "$\\vec a=(0;-5;0)$ және $\\vec b=(0;-\\sqrt3;-1)$ векторларының арасындағы бұрышты табыңыз",
@@ -236,7 +256,8 @@
       "$60^\\circ$"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=3240s"
     },
     {
      "question": "$m$-нің қандай мәнінде $\\dfrac{m(m-11)(m+15)}{m^2-225}$ өрнегінің мәні нөлге тең болатынын табыңыз",
@@ -247,7 +268,8 @@
       "$15;\\ 0;\\ 11$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=3355s"
     },
     {
      "question": "$17\\cdot2^{\\sqrt{x^2-8x}}-8=2\\cdot4^{\\sqrt{x^2-8x}}$ теңдеуін шешіңіз",
@@ -258,7 +280,8 @@
       "$-1;\\ 4$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=3450s"
     },
     {
      "question": "Теңсіздікті шешіңіз: $\\log_{0{,}5}x-\\log_2(x-4)<\\log_{0{,}5}3$",
@@ -269,7 +292,8 @@
       "$(2+\\sqrt7;+\\infty)$"
      ],
      "correct_index": 3,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=3595s"
     },
     {
      "question": "$Ox$ осімен және $y=-x^2-x+6$ функциясының графигімен шектелген фигураның ауданы",
@@ -280,7 +304,8 @@
       "$20\\dfrac16$ кв.бірлік"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=3980s"
     },
     {
      "question": "Бизнес орталығы. Астаналық бизнес орталығы бес бөліктен тұрады. Бірінші бөлігі 1 қабаттан, екінші бөлігі 3 қабаттан, үшінші бөлігі 8 қабаттан, төртінші бөлігі 2 қабаттан және жоғары бөлігінде мұнара қойылған. Бірінші қабаттың диаметрі 90 м. Ол үшінші бөліктің диаметрінен 2 есе және төртінші бөліктің диаметрінен 3 есе артық. Әрбір қабаттың биіктігі 3 м (мұнара биіктігі 30 м).\n\nБірінші қабаттың табан ауданын табыңыз",
@@ -291,7 +316,8 @@
       "$4050\\pi\\ \\text{м}^2$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=4460s"
     },
     {
      "question": "Бизнес орталығы. Астаналық бизнес орталығы бес бөліктен тұрады. Бірінші бөлігі 1 қабаттан, екінші бөлігі 3 қабаттан, үшінші бөлігі 8 қабаттан, төртінші бөлігі 2 қабаттан және жоғары бөлігінде мұнара қойылған. Бірінші қабаттың диаметрі 90 м. Ол үшінші бөліктің диаметрінен 2 есе және төртінші бөліктің диаметрінен 3 есе артық. Әрбір қабаттың биіктігі 3 м (мұнара биіктігі 30 м).\n\nҮшінші бөліктің бүйір бетінің ауданы",
@@ -302,7 +328,8 @@
       "$2160\\pi\\ \\text{м}^2$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=4760s"
     },
     {
      "question": "Бизнес орталығы. Астаналық бизнес орталығы бес бөліктен тұрады. Бірінші бөлігі 1 қабаттан, екінші бөлігі 3 қабаттан, үшінші бөлігі 8 қабаттан, төртінші бөлігі 2 қабаттан және жоғары бөлігінде мұнара қойылған. Бірінші қабаттың диаметрі 90 м. Ол үшінші бөліктің диаметрінен 2 есе және төртінші бөліктің диаметрінен 3 есе артық. Әрбір қабаттың биіктігі 3 м (мұнара биіктігі 30 м).\n\nБизнес орталықтың 13-інші қабатының көлемін табыңыз",
@@ -313,7 +340,8 @@
       "$225\\pi\\ \\text{м}^3$"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=4940s"
     },
     {
      "question": "Бизнес орталығы. Астаналық бизнес орталығы бес бөліктен тұрады. Бірінші бөлігі 1 қабаттан, екінші бөлігі 3 қабаттан, үшінші бөлігі 8 қабаттан, төртінші бөлігі 2 қабаттан және жоғары бөлігінде мұнара қойылған. Бірінші қабаттың диаметрі 90 м. Ол үшінші бөліктің диаметрінен 2 есе және төртінші бөліктің диаметрінен 3 есе артық. Әрбір қабаттың биіктігі 3 м (мұнара биіктігі 30 м).\n\nБірінші және он төртінші қабаттардың көлемдері",
@@ -324,7 +352,8 @@
       "$2025\\pi\\ \\text{м}^3$ және $675\\pi\\ \\text{м}^3$"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5105s"
     },
     {
      "question": "$x_1$ және $x_2$ сандары $f(x)=\\dfrac{x^3}{3}-\\dfrac{x^2}{2}-2x+4$ функциясының кризистік (сындық) нүктелері екені белгілі болса, онда өрнектерді олардың мәндерімен сәйкестендіріңіз\n\nА) $x_1^2+x_2^2$",
@@ -335,7 +364,8 @@
       "9"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5145s"
     },
     {
      "question": "$x_1$ және $x_2$ сандары $f(x)=\\dfrac{x^3}{3}-\\dfrac{x^2}{2}-2x+4$ функциясының кризистік (сындық) нүктелері екені белгілі болса, онда өрнектерді олардың мәндерімен сәйкестендіріңіз\n\nӘ) $x_1^3+x_2^3$",
@@ -346,7 +376,8 @@
       "9"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5145s"
     },
     {
      "question": "$ABC$ үшбұрышында $A$, $B$ төбелеріндегі сыртқы бұрыштары сәйкесінше $140^\\circ$ және $100^\\circ$ болса, $A$ және $C$ ішкі бұрыштарын сәйкес мәндерімен сәйкестендіріңіз\n\nА) $\\angle C$",
@@ -357,7 +388,8 @@
       "100 градус"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5235s"
     },
     {
      "question": "$ABC$ үшбұрышында $A$, $B$ төбелеріндегі сыртқы бұрыштары сәйкесінше $140^\\circ$ және $100^\\circ$ болса, $A$ және $C$ ішкі бұрыштарын сәйкес мәндерімен сәйкестендіріңіз\n\nӘ) $\\angle A$",
@@ -368,7 +400,8 @@
       "100 градус"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5235s"
     },
     {
      "question": "$a=9\\dfrac16:\\left(4\\dfrac13-8\\right)+24\\cdot\\dfrac38$ екені белгілі. Сәйкестендіріңіз\n\nА) $a$",
@@ -379,7 +412,8 @@
       "8,5"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5395s"
     },
     {
      "question": "$a=9\\dfrac16:\\left(4\\dfrac13-8\\right)+24\\cdot\\dfrac38$ екені белгілі. Сәйкестендіріңіз\n\nӘ) $a+1$",
@@ -390,7 +424,8 @@
       "8,5"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5395s"
     },
     {
      "question": "$x_1$ және $x_2$ сандары $\\dfrac{60}{x}+\\dfrac{60}{x+3}=30$ теңдеуінің түбірлері екені белгілі. Сәйкестендіріңіз\n\nА) $x_1^2+x_2^2$",
@@ -401,7 +436,8 @@
       "35"
      ],
      "correct_index": 1,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5510s"
     },
     {
      "question": "$x_1$ және $x_2$ сандары $\\dfrac{60}{x}+\\dfrac{60}{x+3}=30$ теңдеуінің түбірлері екені белгілі. Сәйкестендіріңіз\n\nӘ) $x_1^3+x_2^3$",
@@ -412,7 +448,8 @@
       "35"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5510s"
     },
     {
      "question": "6-ға бөлгенде 1 қалдық қалатын екі таңбалы сандар тізбегінің қосындысы мен 15-ші мүшесінің мәндерін сәйкестендіріңіз\n\nА) $a_{15}$",
@@ -423,7 +460,8 @@
       "875"
      ],
      "correct_index": 0,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5715s"
     },
     {
      "question": "6-ға бөлгенде 1 қалдық қалатын екі таңбалы сандар тізбегінің қосындысы мен 15-ші мүшесінің мәндерін сәйкестендіріңіз\n\nӘ) $S_n$",
@@ -434,7 +472,8 @@
       "875"
      ],
      "correct_index": 2,
-     "points": 1
+     "points": 1,
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5715s"
     },
     {
      "question": "$x=2$ болғандағы $52x-28x+4x-26x$ өрнегінің мәніне тең жауаптар",
@@ -451,7 +490,8 @@
      "correct_indexes": [
       0,
       4
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5890s"
     },
     {
      "question": "Есептеңіз: $\\sin\\left(\\arccos\\dfrac12\\right)$",
@@ -468,7 +508,8 @@
      "correct_indexes": [
       1,
       5
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=5975s"
     },
     {
      "question": "Егер $\\dfrac14+\\dfrac1{16}+\\dots+\\dfrac1{4^n}+\\dots$ қатардың қосындысы $Q$-ға тең болса, онда $Q^{-4}-1$ өрнегі мәнінің жай бөлгіштерін көрсетіңіз",
@@ -485,7 +526,8 @@
      "correct_indexes": [
       1,
       4
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=6090s"
     },
     {
      "question": "$(x_0;y_0)$ сандар жұбы $\\begin{cases}\\sqrt x+\\sqrt y=13\\\\ \\sqrt[4]{x}-\\sqrt[4]{y}=1\\end{cases}$ теңдеулер жүйесінің шешімі екені белгілі. $x_0-y_0$ өрнегінің сан мәнінің жай бөлгіш(тер)і",
@@ -502,7 +544,8 @@
      "correct_indexes": [
       0,
       2
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=6265s"
     },
     {
      "question": "Төмендегі жауаптардың ішінен суретте берілген дұрыс төртбұрышты қиық пирамиданың диагоналының ұзындығына тең бола алатын(дар)ын көрсетіңіз",
@@ -520,7 +563,8 @@
      "correct_indexes": [
       1,
       3
-     ]
+     ],
+     "solution_url": "https://www.youtube.com/watch?v=x0eDUj7ldjI&t=6435s"
     }
    ]
   }
