@@ -598,13 +598,23 @@ const verifyToken = (req, res, next) => {
     return res.status(401).json({ error: 'Токен қажет' });
   }
 
+  let decoded;
   try {
-    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
-    req.student = decoded;
-    next();
+    decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
   } catch (error) {
-    res.status(401).json({ error: 'Токен жарамсыз' });
+    return res.status(401).json({ error: 'Токен жарамсыз' });
   }
+  // Өшірілген қолданушының ескі токені бірден жарамсыз болуы үшін
+  pool.query('SELECT 1 FROM students WHERE id = $1', [decoded.id])
+    .then((result) => {
+      if (!result.rows.length) return res.status(401).json({ error: 'Аккаунт табылмады' });
+      req.student = decoded;
+      next();
+    })
+    .catch((error) => {
+      console.error('Токен тексеру қатесі:', error.message);
+      res.status(500).json({ error: 'Сервер қатесі' });
+    });
 };
 
 // ===== РӨЛДЕР =====
@@ -1281,6 +1291,54 @@ app.post('/api/admin/users/:id/reset-password', verifyToken, requireRole('admin'
   } catch (error) {
     console.error('Уақытша құпиясөз қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Қолданушыны толық өшіру (админ): жоспарлары, тест нәтижелері, видео көрулері бірге өшеді (ON DELETE CASCADE)
+app.delete('/api/admin/users/:id', verifyToken, requireRole('admin'), async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id === req.student.id) {
+      return res.status(400).json({ error: 'Өзіңізді өшіре алмайсыз' });
+    }
+    await client.query('BEGIN');
+    const found = await client.query(
+      'SELECT id, name, phone, student_number, role FROM students WHERE id = $1 FOR UPDATE',
+      [id]
+    );
+    const user = found.rows[0];
+    if (!user) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Қолданушы табылмады' });
+    }
+    if (user.role === 'admin' || user.student_number === 'admin') {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'Админді өшіруге болмайды' });
+    }
+    if (user.role === 'curator') {
+      // Куратордың жоспарлары оқушыларымен бірге өшіп кетпеуі үшін алдымен оқушыларын ауыстыру керек
+      const students = await client.query('SELECT COUNT(*)::int AS n FROM students WHERE curator_id = $1', [id]);
+      if (students.rows[0].n > 0) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({
+          error: `Бұл кураторда ${students.rows[0].n} оқушы бар. Алдымен оларды басқа кураторға беріңіз`
+        });
+      }
+    }
+    // Нөмір қайта тіркеле алуы үшін растау кодтарын да тазалаймыз
+    const phones = [user.phone, user.student_number].filter(Boolean);
+    await client.query('DELETE FROM phone_verifications WHERE phone = ANY($1::text[])', [phones]);
+    await client.query('DELETE FROM students WHERE id = $1', [id]);
+    await client.query('COMMIT');
+    console.log(`🗑 Қолданушы өшірілді: #${id} (${user.role}) админ #${req.student.id}`);
+    res.json({ ok: true, id });
+  } catch (error) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('Қолданушыны өшіру қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  } finally {
+    client.release();
   }
 });
 

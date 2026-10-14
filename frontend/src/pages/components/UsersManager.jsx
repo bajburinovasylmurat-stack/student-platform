@@ -3,7 +3,7 @@ import axios from 'axios';
 import '../styles/Curator.css';
 import { prettyPhone } from '../../utils/phone';
 import { formatRange, formatDay, groupByDate, PLAN_TYPE_LABELS } from './planUtils';
-import { LuArrowRight, LuCheck, LuCheckCircle2, LuCircle, LuClipboardList, LuCopy, LuGraduationCap, LuKeyRound, LuShieldCheck, LuUserCheck, LuUsers, LuX } from 'react-icons/lu';
+import { LuArrowRight, LuCheck, LuCheckCircle2, LuCircle, LuClipboardList, LuCopy, LuGraduationCap, LuKeyRound, LuShieldCheck, LuTrash2, LuUserCheck, LuUsers, LuX } from 'react-icons/lu';
 import { API } from '../../api';
 import StudentOwnPlans from './StudentOwnPlans';
 
@@ -73,6 +73,25 @@ export default function UsersManager() {
     } catch (error) {
       console.error('Құпиясөзді қалпына келтіру қатесі:', error);
       alert(error.response?.data?.error || 'Құпиясөзді қалпына келтіру сәтсіз');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const deleteUser = async (user) => {
+    const warning = user.role === 'curator'
+      ? 'Куратордың құрған жоспарлары да өшеді.'
+      : 'Оның жоспарлары, тест нәтижелері және видео көрулері де өшеді.';
+    if (!window.confirm(`${user.name} (${prettyPhone(user.phone || user.student_number)}) аккаунтын толық өшіресіз бе?\n${warning}\nБұл әрекетті қайтару мүмкін емес.`)) {
+      return;
+    }
+    setSavingId(user.id);
+    try {
+      await axios.delete(`${API}/api/admin/users/${user.id}`, { headers });
+      setUsers((prev) => prev.filter((u) => u.id !== user.id));
+    } catch (error) {
+      console.error('Қолданушыны өшіру қатесі:', error);
+      alert(error.response?.data?.error || 'Өшіру сәтсіз');
     } finally {
       setSavingId(null);
     }
@@ -333,6 +352,17 @@ export default function UsersManager() {
                 onClick={() => changeRole(user, 'student')}
               >
                 Куратордан алу
+              </button>
+            )}
+            {user.role !== 'admin' && (
+              <button
+                className="small-btn danger"
+                disabled={savingId === user.id}
+                onClick={() => deleteUser(user)}
+                title="Аккаунтты толық өшіру"
+                aria-label={`${user.name} аккаунтын өшіру`}
+              >
+                <LuTrash2 /> Өшіру
               </button>
             )}
             {tempPassword?.id === user.id && (
