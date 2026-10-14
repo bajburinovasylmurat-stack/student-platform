@@ -109,11 +109,11 @@ export default function Flashcards() {
               <div className="flashcard-inner">
                 <div className="flashcard-face front">
                   {card.topic && <span className="card-topic">{card.topic}</span>}
-                  <div className="card-text">{card.front}</div>
+                  <div className={`card-text ${card.front.length > 60 ? 'long' : ''}`}>{card.front}</div>
                   <span className="card-hint">Аудару үшін басыңыз</span>
                 </div>
                 <div className="flashcard-face back">
-                  <div className="card-text">{card.back}</div>
+                  <div className={`card-text ${card.back.length > 60 ? 'long' : ''}`}>{card.back}</div>
                   {known.has(card.id) && <span className="card-known"><LuCheck /> Жатталған</span>}
                 </div>
               </div>
