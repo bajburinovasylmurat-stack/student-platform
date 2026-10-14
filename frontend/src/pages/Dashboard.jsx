@@ -183,7 +183,7 @@ export default function Dashboard({ student, onLogout, onProfileUpdate }) {
               value={nameDraft}
               onChange={(e) => { setNameDraft(e.target.value); setNameError(''); }}
               onKeyDown={(e) => e.key === 'Escape' && setEditingName(false)}
-              placeholder="Мысалы: Байбуринов Асылмұрат"
+              placeholder="Мысалы: Майкл Джексон"
               maxLength={100}
               autoFocus
               onFocus={(e) => e.target.select()}
