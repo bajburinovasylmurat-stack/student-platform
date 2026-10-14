@@ -933,7 +933,8 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
 
   app.get('/api/flashcards', verifyToken, async (req, res) => {
     try {
-      const result = await pool.query('SELECT id, topic, front, back FROM flashcards ORDER BY topic NULLS LAST, id');
+      const result = await pool.query(`SELECT id, topic, front, back FROM flashcards
+         ORDER BY MIN(id) OVER (PARTITION BY topic), id`);
       res.json(result.rows);
     } catch (error) {
       fail(res, 'Карточкалар алу қатесі', error);
