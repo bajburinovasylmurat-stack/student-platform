@@ -23,7 +23,7 @@ export default function Materials({ isAdmin }) {
 
   const fetchMaterials = async () => {
     try {
-      const response = await axios.get(`${API}/api/materials`);
+      const response = await axios.get(`${API}/api/materials`, authHeaders());
       setMaterials(response.data);
     } catch (error) {
       console.error('Материалдар алу қатесі:', error);

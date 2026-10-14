@@ -54,7 +54,7 @@ export default function Examinations({ isAdmin }) {
 
   const fetchExaminations = async () => {
     try {
-      const response = await axios.get(`${API}/api/examinations`);
+      const response = await axios.get(`${API}/api/examinations`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
       setExaminations(response.data);
     } catch (error) {
       console.error('Нұсқалар алу қатесі:', error);

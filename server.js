@@ -9,6 +9,8 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import crypto from 'crypto';
 import { waitUntil } from '@vercel/functions';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { registerFeatures, featureMigrations, seedContent } from './features.js';
 
 dotenv.config();
@@ -17,9 +19,63 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// CORS және орта файлдарын орнату
-app.use(cors());
-app.use(express.json());
+// ===== ҚАУІПСІЗДІК =====
+// Fly.io прокси артында: rate limit нақты IP-мен жұмыс істеуі үшін
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
+
+// Қауіпсіздік тақырыптары (CSP, HSTS, clickjacking-тен қорғау т.б.)
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'https://www.youtube.com'],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https://img.youtube.com', 'https://i.ytimg.com'],
+      fontSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+      frameSrc: ['https://www.youtube.com', 'https://www.youtube-nocookie.com'],
+      frameAncestors: ["'none'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"]
+    }
+  },
+  crossOriginEmbedderPolicy: false,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
+
+// CORS: API-ді тек өз сайтымыз шақырады (бөтен сайттар браузер арқылы сұрай алмайды)
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://juzup.fly.dev,https://juzup.kz,https://www.juzup.kz')
+  .split(',').map((o) => o.trim()).filter(Boolean);
+app.use(cors({
+  origin: (origin, callback) => callback(null, !origin || ALLOWED_ORIGINS.includes(origin) || /^http:\/\/localhost(:\d+)?$/.test(origin))
+}));
+app.use(express.json({ limit: '1mb' }));
+
+// Сұраныс жиілігін шектеу: құпиясөзді таңдап табу, SMS/код спамы және жүктемеден қорғау
+const limitError = (message) => ({ error: message });
+// Fly.io клиенттің нақты IP-ін Fly-Client-IP тақырыбында береді (прокси тізбегінде бірнеше буын бар)
+const clientIp = (req) => req.get('fly-client-ip') || req.ip;
+const limiterBase = { standardHeaders: 'draft-7', legacyHeaders: false, validate: { xForwardedForHeader: false } };
+const apiLimiter = rateLimit({ ...limiterBase, windowMs: 60 * 1000, limit: 300, keyGenerator: clientIp,
+  message: limitError('Сұраныс тым жиі. Бір минуттан кейін қайталаңыз') });
+const loginLimiter = rateLimit({ ...limiterBase, windowMs: 15 * 60 * 1000, limit: 10,
+  skipSuccessfulRequests: true,
+  // IP + логин бойынша: бір аккаунтқа бір жерден 15 минутта 10 қате әрекет
+  keyGenerator: (req) => `${clientIp(req)}|${String(req.body?.student_number || '').replace(/\D/g, '').slice(-10)}`,
+  message: limitError('Қате әрекет тым көп. 15 минуттан кейін қайталаңыз') });
+const loginIpLimiter = rateLimit({ ...limiterBase, windowMs: 15 * 60 * 1000, limit: 40, keyGenerator: clientIp,
+  skipSuccessfulRequests: true, message: limitError('Қате әрекет тым көп. 15 минуттан кейін қайталаңыз') });
+const codeLimiter = rateLimit({ ...limiterBase, windowMs: 60 * 60 * 1000, limit: 5,
+  keyGenerator: (req) => `${clientIp(req)}|${String(req.body?.phone || '').replace(/\D/g, '').slice(-10)}`,
+  message: limitError('Код тым көп сұралды. Бір сағаттан кейін қайталаңыз') });
+const authIpLimiter = rateLimit({ ...limiterBase, windowMs: 60 * 60 * 1000, limit: 30, keyGenerator: clientIp,
+  message: limitError('Сұраныс тым көп. Кейінірек қайталаңыз') });
+app.use('/api/', apiLimiter);
+app.use('/api/auth/login', loginIpLimiter, loginLimiter);
+app.use('/api/auth/send-code', authIpLimiter, codeLimiter);
+app.use(['/api/auth/register', '/api/auth/reset-password'], authIpLimiter);
 app.use(express.static('public'));
 
 // Vercel-де сервер тұрақты емес (serverless): әр сұраныс алдында миграция біткенін күтеміз
@@ -70,7 +126,11 @@ const pool = new Pool(
 pool.on('error', (error) => console.error('PostgreSQL байланыс қатесі:', error.message));
 
 // JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key-change-in-production';
+// Production-да міндетті: белгілі әдепкі кілтпен кез келген адам админ токенін жасай алар еді
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET орнатылмаған');
+}
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
 // Сервердің тірі екенін тексеру (UptimeRobot / GitHub Actions 5 минут сайын шақырады,
 // тегін Render ұйықтап қалмауы және таңғы/кешкі ескертулер уақытында кетуі үшін)
@@ -498,16 +558,11 @@ app.post('/api/auth/login', async (req, res) => {
       [student_number.trim(), normalizePhone(student_number) || '']
     );
 
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Бұл нөмірмен тіркелген қолданушы жоқ' });
-    }
-
+    // Нөмір жоқ па, пароль қате ме — бірдей жауап: тіркелген нөмірлерді анықтауға болмауы үшін
     const student = result.rows[0];
-
-    // Пароль тексеру
-    const isPasswordValid = await bcrypt.compare(password, student.password_hash);
+    const isPasswordValid = student ? await bcrypt.compare(String(password), student.password_hash) : false;
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Пароль қате' });
+      return res.status(401).json({ error: 'Телефон нөмірі немесе пароль қате' });
     }
 
     // JWT токен құру
@@ -544,7 +599,7 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
     req.student = decoded;
     next();
   } catch (error) {
@@ -590,7 +645,7 @@ const fixFileName = (name) => {
 };
 
 // Материалдар сұрау
-app.get('/api/materials', async (req, res) => {
+app.get('/api/materials', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT id, title, description, file_path, file_name, category, external_url, created_at FROM materials
@@ -659,7 +714,7 @@ app.post('/api/materials/uploads', verifyToken, requireRole('admin'), async (req
     res.status(201).json({ id, chunk_size: CHUNK_BYTES, chunks: Math.ceil(size / CHUNK_BYTES) });
   } catch (error) {
     console.error('Материал жүктеуді бастау қатесі:', error);
-    res.status(500).json({ error: 'Сервер қатесі', detail: error.message });
+    res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
 
@@ -687,7 +742,7 @@ app.put(
       res.json({ ok: true });
     } catch (error) {
       console.error('Бөлік сақтау қатесі:', error);
-      res.status(500).json({ error: 'Сервер қатесі', detail: error.message });
+      res.status(500).json({ error: 'Сервер қатесі' });
     }
   }
 );
@@ -716,7 +771,7 @@ app.post('/api/materials/uploads/:id/complete', verifyToken, requireRole('admin'
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Жүктеуді аяқтау қатесі:', error);
-    res.status(500).json({ error: 'Сервер қатесі', detail: error.message });
+    res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
 
@@ -835,7 +890,7 @@ const youtubeId = (url) => {
 const youtubeThumbnail = (id) => `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
 
 // Барлық нұсқалар (афиша сілтемеден есептеледі, сондықтан бұрын қосылғандары да түзеледі)
-app.get('/api/examinations', async (req, res) => {
+app.get('/api/examinations', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT * FROM examinations ORDER BY category, created_at DESC'
@@ -1076,6 +1131,29 @@ app.get('/api/profile', verifyToken, async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Профиль алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Қолданушы өз аты-жөнін өзгертеді
+app.patch('/api/profile', verifyToken, async (req, res) => {
+  try {
+    const name = String(req.body.name ?? '').trim().replace(/\s+/g, ' ');
+    if (name.length < 2 || name.length > 100) {
+      return res.status(400).json({ error: 'Аты-жөні 2–100 таңбадан тұруы керек' });
+    }
+
+    const result = await pool.query(
+      'UPDATE students SET name = $1 WHERE id = $2 RETURNING id, student_number, phone, name, role',
+      [name, req.student.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Профиль табылмады' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Профильді өзгерту қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
@@ -1383,6 +1461,36 @@ app.get('/api/curator/students/:id/plans', verifyToken, requireRole('curator', '
     res.json(result.rows);
   } catch (error) {
     console.error('Жоспарлар алу қатесі:', error);
+    res.status(500).json({ error: 'Сервер қатесі' });
+  }
+});
+
+// Оқушының күнтізбеде өзі құрған жоспары: куратор тек өз оқушысынікін, админ кез келгенін көреді
+app.get('/api/curator/students/:id/own-plans', verifyToken, requireRole('curator', 'admin'), async (req, res) => {
+  try {
+    const studentId = Number(req.params.id);
+    if (!Number.isInteger(studentId)) {
+      return res.status(400).json({ error: 'Оқушы табылмады' });
+    }
+
+    const owner = await pool.query('SELECT curator_id FROM students WHERE id = $1', [studentId]);
+    if (owner.rows.length === 0) {
+      return res.status(404).json({ error: 'Оқушы табылмады' });
+    }
+    if (req.role !== 'admin' && owner.rows[0].curator_id !== req.student.id) {
+      return res.status(403).json({ error: 'Бұл оқушы сіздің тізіміңізде жоқ' });
+    }
+
+    const result = await pool.query(
+      `SELECT ${PLAN_COLUMNS} FROM plans
+       WHERE student_id = $1 AND plan_date >= CURRENT_DATE - 30
+       ORDER BY plan_date DESC, task_time NULLS LAST, id
+       LIMIT 500`,
+      [studentId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Оқушының өз жоспарын алу қатесі:', error);
     res.status(500).json({ error: 'Сервер қатесі' });
   }
 });
