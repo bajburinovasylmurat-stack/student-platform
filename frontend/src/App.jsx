@@ -24,6 +24,22 @@ export default function App() {
     setLoading(false);
   }, []);
 
+  // Басқа қойындыда басқа аккаунтпен кірсе немесе шықса, бұл қойынды да соған ауысады:
+  // токен ортақ, ал экранда ескі аккаунт қалып қойса, әрекеттер «рұқсат жоқ» деп қайтарылады
+  useEffect(() => {
+    const onStorage = (event) => {
+      if (event.key !== 'token' && event.key !== 'student') return;
+      try {
+        const saved = localStorage.getItem('student');
+        setStudent(localStorage.getItem('token') && saved ? JSON.parse(saved) : null);
+      } catch {
+        setStudent(null);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const handleLoginSuccess = (studentData) => {
     setStudent(studentData);
   };
