@@ -1,0 +1,184 @@
+{
+ "remove_file_materials": [
+  103,
+  104
+ ],
+ "materials": [
+  {
+   "title": "Алгебра формула жинақ",
+   "description": "Құлахмет Нұрдәулет · MAX POWER жинағы",
+   "url": "https://juzup.onrender.com/files/algebra-formula-zhinak.pdf",
+   "category": "formula"
+  },
+  {
+   "title": "Математика формула жинақ",
+   "description": "Олжас Нұрдәулет · MAX POWER жинағы",
+   "url": "https://drive.google.com/file/d/1p7_1L01Jk4YzCVWcd3yaGcil6BJtw6GU/view?usp=sharing",
+   "category": "formula"
+  },
+  {
+   "title": "Геометрия формула жинақ",
+   "description": "ҚНН ағай · MAX POWER жинағы",
+   "url": "https://drive.google.com/file/d/1IA8NtN-JX9pRnxVjMZUViM2DlsbuEFjO/view?usp=sharing",
+   "category": "formula"
+  },
+  {
+   "title": "2-ай 1-апта қосымша есептер",
+   "description": "Жоғары дәрежелі теңдеулер, бұрыштап бөлу, Безу теоремасы, квадрат және жоғары дәрежелі теңсіздіктер · 110 есеп, жауаптарымен",
+   "url": "https://juzup.onrender.com/files/2-ai-1-apta-kosymsha-esep.pdf",
+   "category": "practice"
+  },
+  {
+   "title": "2-ай 2-апта қосымша есептер",
+   "description": "Бөлшек рационал теңдеулер мен теңсіздіктер, теңдеулер жүйесі, күрделі қос теңсіздік · A/B/C деңгей",
+   "url": "https://juzup.onrender.com/files/2-ai-2-apta-kosymsha-esep.pdf",
+   "category": "practice"
+  },
+  {
+   "title": "Қызыл кітап",
+   "description": "Математика 3-12 сынып, 12000+ есеп",
+   "url": "https://drive.google.com/file/d/1idHguwR9rvnjZoRgRLDLUPA6yb6Tw_B-/view?usp=drive_link",
+   "category": "practice"
+  },
+  {
+   "title": "Рустюмова",
+   "description": "ҰБТ-ға дайындалуға арналған тренажер",
+   "url": "https://drive.google.com/file/d/1udXGrdJeTXoC3ZPXPnKjF0qn0pzfKM2o/view?usp=sharing",
+   "category": "practice"
+  }
+ ],
+ "videos": [
+  {
+   "title": "12 САҒАТТЫҚ НҰСҚА ТАЛДАУ 2 | MАТЕМАТИКА",
+   "category": "24_hour",
+   "id": "OQZLcs94oSY",
+   "section": "12 сағаттық мега нұсқа талдау"
+  },
+  {
+   "title": "ДУО НҰСҚА ТАЛДАУ | ФИЗ - МАТ | СЛАНБЕК ЖӘНЕ ОЛЖАС АҒАЙЛАР",
+   "category": "mathematics",
+   "id": "NeqRY5R6NR4",
+   "section": "DUO нұсқа талдаулар"
+  },
+  {
+   "title": "ГЕО-МАТ DUO НҰСҚА ТАЛДАУ | БЕРЕКЕ АПАЙ | ОЛЖАС АҒАЙ",
+   "category": "mathematics",
+   "id": "ziNS7jaEGeE",
+   "section": "DUO нұсқа талдаулар"
+  },
+  {
+   "title": "ФИЗМАТ НҰСҚА ТАЛДАУ | НҰРС АҒАЙ | АЙЙ АПАЙ",
+   "category": "mathematics",
+   "id": "9eqP5GAthP0",
+   "section": "DUO нұсқа талдаулар"
+  },
+  {
+   "title": "ҰТО НҰСҚА ТАЛДАУ | ЕРСҰЛТАН АҒАЙ | МАТЕМАТИКА",
+   "category": "mathematics",
+   "id": "jzG4_u5LPis",
+   "section": "ҰТО нұсқа талдау · Ерс ағай"
+  },
+  {
+   "title": "ҰТО ЖАҢА НҰСҚА | НҰСҚА ТАЛДАУ | ЕРСҰЛТАН АҒАЙ | МАТЕМАТИКА",
+   "category": "mathematics",
+   "id": "m1ASzrjfPGI",
+   "section": "ҰТО нұсқа талдау · Ерс ағай"
+  },
+  {
+   "title": "ҚАҢТАР ҰБТҒА ДАЙЫНДЫҚ | ҰТО НҰСҚАСЫ | МАТЕМАТИКА | ЕРС АҒАЙ",
+   "category": "mathematics",
+   "id": "x0eDUj7ldjI",
+   "section": "ҰТО нұсқа талдау · Ерс ағай"
+  },
+  {
+   "title": "ЕРС АҒАЙ | ҰТО НҰСҚА ТАЛДАУЫ | МАТЕМАТИКА",
+   "category": "mathematics",
+   "id": "ag2M8IyLcHE",
+   "section": "ҰТО нұсқа талдау · Ерс ағай"
+  },
+  {
+   "title": "GEOMETRY BOOST #1 | Дәулет ағай",
+   "category": "geometry",
+   "id": "P7LudM18pDk",
+   "section": "Geometry Boost"
+  },
+  {
+   "title": "GEOMETRY BOOST #2 | Дәулет ағай",
+   "category": "geometry",
+   "id": "39ahQmKFLGo",
+   "section": "Geometry Boost"
+  },
+  {
+   "title": "ТЕГІН ЛАГЕРЬ | ТРИГОНОМЕТРИЯ БАСТАМАСЫ | ОЛЖАС АҒАЙ | ҰБТ | МАТЕМАТИКА",
+   "category": "mathematics",
+   "id": "8XqH4dCLTUY",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "ГЕОМЕТРИЯ НҰСҚА ТАЛДАУ | САЯТ АҒАЙ",
+   "category": "geometry",
+   "id": "fFBeFZdSq3c",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "НҰСҚА ТАЛДАУ | ЕРСҰЛТАН АҒАЙ | МАТЕМАТИКА",
+   "category": "mathematics",
+   "id": "RFXQpEm_tXI",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "МАТЕМАТИКА | НҰСҚА ТАЛДАУ | ДӘУЛЕТ АҒАЙ",
+   "category": "mathematics",
+   "id": "ocKsvfGOrK0",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "ГЕОМЕТРИЯ КРОКАНТ АПАЙ",
+   "category": "geometry",
+   "id": "ohs70s-fFGk",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "ҰБТ | МАТЕМАТИКА | НҰРСҰЛТАН АҒАЙ",
+   "category": "mathematics",
+   "id": "mHovrzboYGQ",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "НҰСҚА ТАЛДАУ | МАТЕМАТИКА | ЕКІ НҰРЕКЕҢМЕН",
+   "category": "mathematics",
+   "id": "ZTn8MFmJcsA",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "Шанжархан ағаймен С деңгейлі есептерді шығару",
+   "category": "mathematics",
+   "id": "Iqw-4Eev4qo",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "МАТЕМАТИКА | НҰСҚА ТАЛДАУ | ҚНН АҒАЙ",
+   "category": "mathematics",
+   "id": "-ziW1hRV89w",
+   "section": "Easy нұсқа талдаулар"
+  },
+  {
+   "title": "НҰСҚА ТАЛДАУ | ЕРС АҒАЙ МЕН КРОКАНТ АПАЙ | МАТЕМАТИКА",
+   "category": "mathematics",
+   "id": "o0raUIQWNUE",
+   "section": "Комбо нұсқа талдау"
+  },
+  {
+   "title": "ШАНЖАРХАН АҒАЙ | МАТЕМАТИКА | НҰСҚА ТАЛДАУ",
+   "category": "mathematics",
+   "id": "tTTR2Fp0KRM",
+   "section": "Нұсқа талдау · 100 есеп"
+  },
+  {
+   "title": "ҚАТЕМЕН ЖҰМЫС | МАТЕМАТИКА | ОЛЖАС АҒАЙ",
+   "category": "mathematics",
+   "id": "65HkSSUCB0k",
+   "section": "Қатемен жұмыс"
+  }
+ ]
+}

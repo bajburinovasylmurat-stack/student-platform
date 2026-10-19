@@ -16,6 +16,12 @@ const almatyNow = async (pool) => {
   return result.rows[0];
 };
 
+// Базаға бармай Алматы уақыты (UTC+5): жоспарлаушы базаны 5 минут сайын оятпауы үшін
+const almatyClock = () => {
+  const now = new Date(Date.now() + 5 * 60 * 60 * 1000);
+  return { today: now.toISOString().slice(0, 10), hour: now.getUTCHours() };
+};
+
 const escapeHtml = (text) =>
   String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -179,7 +185,7 @@ export async function seedContent(pool) {
         const created = await client.query(
           `INSERT INTO tests (title, description, duration_min, is_published, topic, sort_order)
            VALUES ($1, $2, $3, TRUE, $4, $5) RETURNING id`,
-          [test.title, test.description || null, test.duration_min, test.topic || null, order]
+          [test.title, test.description || null, test.duration_min, test.topic || null, test.sort_order ?? order]
         );
         for (const [idx, q] of test.questions.entries()) {
           await client.query(
@@ -192,6 +198,30 @@ export async function seedContent(pool) {
           );
         }
       }
+      // Ескі, базада файл ретінде сақталған кітаптар: олардың орнына Drive сілтемелері келеді
+      // (үлкен PDF-ті сервер арқылы беру трафикті тез жұмсайды)
+      for (const id of content.remove_file_materials || []) {
+        await client.query('DELETE FROM materials WHERE id = $1 AND external_url IS NULL', [id]);
+      }
+      // Сілтеме арқылы қосылатын материалдар мен видеолар (қайталанбайды: URL бойынша тексеріледі)
+      for (const m of content.materials || []) {
+        await client.query(
+          `INSERT INTO materials (title, description, file_path, file_name, created_by, category, external_url, status)
+           SELECT $1::varchar, $2::text, '', $3::varchar, (SELECT id FROM students WHERE role = 'admin' ORDER BY id LIMIT 1),
+                  $4::varchar, $5::text, 'ready'
+           WHERE NOT EXISTS (SELECT 1 FROM materials WHERE external_url = $5::text)`,
+          [m.title, m.description || null, new URL(m.url).hostname, m.category || 'practice', m.url]
+        );
+      }
+      for (const v of content.videos || []) {
+        await client.query(
+          `INSERT INTO examinations (title, category, youtube_url, thumbnail_url, description)
+           SELECT $1::varchar, $2::varchar, 'https://www.youtube.com/watch?v=' || $3::text,
+                  'https://img.youtube.com/vi/' || $3::text || '/hqdefault.jpg', $4::text
+           WHERE NOT EXISTS (SELECT 1 FROM examinations WHERE youtube_url LIKE '%' || $3::text || '%')`,
+          [v.title, v.category, v.id, v.section || null]
+        );
+      }
       for (const card of content.flashcards || []) {
         await client.query(
           `INSERT INTO flashcards (topic, front, back)
@@ -202,7 +232,7 @@ export async function seedContent(pool) {
       }
       await client.query('INSERT INTO seed_log (name) VALUES ($1)', [name]);
       await client.query('COMMIT');
-      console.log(`📦 Мазмұн жүктелді: ${name} (${content.tests?.length || 0} тест, ${content.flashcards?.length || 0} карточка)`);
+      console.log(`📦 Мазмұн жүктелді: ${name} (${content.tests?.length || 0} тест, ${content.flashcards?.length || 0} карточка, ${content.materials?.length || 0} материал, ${content.videos?.length || 0} видео)`);
     } catch (error) {
       await client.query('ROLLBACK').catch(() => {});
       console.error(`Мазмұн жүктеу қатесі (${name}):`, error.message);
@@ -410,10 +440,15 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
   // Тегін Render ұйықтап қалуы мүмкін, сондықтан уақыт терезесі кең: ояна салысымен жібереді
   const tick = async () => {
     if (!telegramEnabled()) return;
-    const { today, hour } = await almatyNow(pool);
-    if (hour >= 8 && hour < 12) await runOnce('morning', today, sendMorning);
-    if (hour >= 20 && hour < 23) await runOnce('evening', today, sendEvening);
+    // Neon тегін тарифінде есептеу уақыты шектеулі: база тек ескерту терезесінде және
+    // күніне бір рет қана шақырылады, қалған уақытта ұйықтай алады
+    const { today, hour } = almatyClock();
+    const kind = hour >= 8 && hour < 12 ? 'morning' : hour >= 20 && hour < 23 ? 'evening' : null;
+    if (!kind || sentToday.get(kind) === today) return;
+    await runOnce(kind, today, kind === 'morning' ? sendMorning : sendEvening);
+    sentToday.set(kind, today);
   };
+  const sentToday = new Map();
 
   const startScheduler = () => {
     const run = () => tick().catch((error) => console.error('Ескерту жоспарлаушысы қатесі:', error.message));

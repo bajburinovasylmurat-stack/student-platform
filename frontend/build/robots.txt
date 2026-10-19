@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://juzup.fly.dev/sitemap.xml
+Sitemap: https://juzup.onrender.com/sitemap.xml

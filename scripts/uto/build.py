@@ -53,6 +53,7 @@ for n, source in SOURCES.items():
         'description': None,  # дереккөз (source) карточкада көрсетілмейді
         'duration_min': 100,
         'topic': 'ҰТО есептері',
+        'sort_order': n,
         'questions': questions,
     }
     path = os.path.join(SEED, f'uto-nuska-{n}.json')

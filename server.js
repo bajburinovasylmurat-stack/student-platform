@@ -46,7 +46,7 @@ app.use(helmet({
 }));
 
 // CORS: API-ді тек өз сайтымыз шақырады (бөтен сайттар браузер арқылы сұрай алмайды)
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://juzup.fly.dev,https://juzup.kz,https://www.juzup.kz')
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'https://juzup.onrender.com,https://juzup.fly.dev,https://juzup.kz,https://www.juzup.kz')
   .split(',').map((o) => o.trim()).filter(Boolean);
 app.use(cors({
   origin: (origin, callback) => callback(null, !origin || ALLOWED_ORIGINS.includes(origin) || /^http:\/\/localhost(:\d+)?$/.test(origin))
@@ -55,8 +55,8 @@ app.use(express.json({ limit: '1mb' }));
 
 // Сұраныс жиілігін шектеу: құпиясөзді таңдап табу, SMS/код спамы және жүктемеден қорғау
 const limitError = (message) => ({ error: message });
-// Fly.io клиенттің нақты IP-ін Fly-Client-IP тақырыбында береді (прокси тізбегінде бірнеше буын бар)
-const clientIp = (req) => req.get('fly-client-ip') || req.ip;
+// Клиенттің нақты IP-і: Fly.io — Fly-Client-IP, Render (Cloudflare артында) — CF-Connecting-IP
+const clientIp = (req) => req.get('fly-client-ip') || req.get('cf-connecting-ip') || req.get('true-client-ip') || req.ip;
 const limiterBase = { standardHeaders: 'draft-7', legacyHeaders: false, validate: { xForwardedForHeader: false } };
 const apiLimiter = rateLimit({ ...limiterBase, windowMs: 60 * 1000, limit: 300, keyGenerator: clientIp,
   message: limitError('Сұраныс тым жиі. Бір минуттан кейін қайталаңыз') });
@@ -134,10 +134,17 @@ const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('he
 
 // Сервердің тірі екенін тексеру (UptimeRobot / GitHub Actions 5 минут сайын шақырады,
 // тегін Render ұйықтап қалмауы және таңғы/кешкі ескертулер уақытында кетуі үшін)
-app.get('/api/health', async (req, res) => {
+// Fly денсаулық тексерісі 30 секунд сайын шақырады: базаға тиіспейді (әйтпесе Neon ешқашан ұйықтамайды,
+// ал база уақытша қолжетімсіз болса, Fly сайттың өзін де өшіріп тастайды)
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
+// Базаның өзін тексеру (қолмен немесе мониторинг үшін)
+app.get('/api/health/db', async (req, res) => {
   try {
     await pool.query('SELECT 1');
-    res.json({ ok: true, time: new Date().toISOString() });
+    res.json({ ok: true });
   } catch (error) {
     res.status(503).json({ ok: false, error: 'База қолжетімсіз' });
   }
@@ -1822,7 +1829,8 @@ if (IS_VERCEL) {
   })(), 'Telegram бот қатесі');
 } else {
   const PORT = process.env.PORT || 5000;
-  migrationsReady.finally(() => {
+  // .catch: база ашылмаса да сервер құламай, тыңдай береді (finally-дің өз promise-і reject болып қалмауы үшін)
+  migrationsReady.catch(() => {}).finally(() => {
     app.listen(PORT, () => {
       console.log(`🚀 Сервер ${PORT} портында жүргенде`);
       startTelegramBot().catch((error) => console.error('Telegram бот қатесі:', error.message));

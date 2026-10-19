@@ -5,6 +5,7 @@
    "description": null,
    "duration_min": 100,
    "topic": "ҰТО есептері",
+   "sort_order": 3,
    "questions": [
     {
      "question": "$\\left(25^{\\frac34}\\right)^{\\frac23}+\\left(\\left(\\dfrac{9}{25}\\right)^{\\frac23}\\right)^{\\frac34}$ өрнегінің мәні",

@@ -5,6 +5,7 @@
    "description": null,
    "duration_min": 100,
    "topic": "ҰТО есептері",
+   "sort_order": 4,
    "questions": [
     {
      "question": "Бөлшектің бөліміндегі иррационалдықтан құтылыңыз: $\\dfrac{7}{3-\\sqrt2}$",

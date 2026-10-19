@@ -5,6 +5,7 @@
    "description": null,
    "duration_min": 100,
    "topic": "ҰТО есептері",
+   "sort_order": 1,
    "questions": [
     {
      "question": "Егер $x>0,\\ y>0,\\ a>0$ болса, $\\sqrt{0{,}36x^2y^4a^6}$ өрнегін ықшамдаңыз",

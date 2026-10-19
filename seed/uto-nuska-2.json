@@ -5,6 +5,7 @@
    "description": null,
    "duration_min": 100,
    "topic": "ҰТО есептері",
+   "sort_order": 2,
    "questions": [
     {
      "question": "$\\dfrac{\\sqrt{3+\\sqrt2}}{\\sqrt{7(3-\\sqrt2)}}$ бөлшегінің бөліміндегі иррационалдықтан құтылыңыз",

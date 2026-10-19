@@ -4,7 +4,7 @@ BEGIN;
 INSERT INTO materials (title, description, file_path, file_name, created_by, category, external_url, status)
 SELECT v.title, v.description, '', 'drive.google.com', (SELECT id FROM students WHERE role = 'admin' ORDER BY id LIMIT 1), 'formula', v.url, 'ready'
 FROM (VALUES
-  ('Алгебра формула жинақ', 'Құлахмет Нұрдәулет · MAX POWER жинағы', 'https://juzup.fly.dev/files/algebra-formula-zhinak.pdf'),
+  ('Алгебра формула жинақ', 'Құлахмет Нұрдәулет · MAX POWER жинағы', 'https://juzup.onrender.com/files/algebra-formula-zhinak.pdf'),
   ('Математика формула жинақ', 'Олжас Нұрдәулет · MAX POWER жинағы', 'https://drive.google.com/file/d/1p7_1L01Jk4YzCVWcd3yaGcil6BJtw6GU/view?usp=sharing'),
   ('Геометрия формула жинақ', 'ҚНН ағай · MAX POWER жинағы', 'https://drive.google.com/file/d/1IA8NtN-JX9pRnxVjMZUViM2DlsbuEFjO/view?usp=sharing')
 ) AS v(title, description, url)
