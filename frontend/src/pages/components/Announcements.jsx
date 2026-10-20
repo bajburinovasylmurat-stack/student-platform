@@ -51,7 +51,6 @@ export default function AdminAnnouncements() {
   const [items, setItems] = useState([]);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [telegram, setTelegram] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const load = () => api.get('/api/announcements').then(setItems).catch(() => {});
@@ -61,8 +60,8 @@ export default function AdminAnnouncements() {
     e.preventDefault();
     setSaving(true);
     try {
-      const result = await api.post('/api/announcements', { title, body, notify_telegram: telegram });
-      alert(telegram
+      const result = await api.post('/api/announcements', { title, body });
+      alert(result.telegram_recipients
         ? `Жарияланды! Telegram-ға ${result.telegram_recipients} адамға жіберілуде.`
         : 'Жарияланды!');
       setTitle('');
@@ -97,10 +96,7 @@ export default function AdminAnnouncements() {
           Мәтін (міндетті емес)
           <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} placeholder="Сағат 10:00-де, онлайн" />
         </label>
-        <label className="toggle-label">
-          <input type="checkbox" checked={telegram} onChange={(e) => setTelegram(e.target.checked)} />
-          Telegram-ға да жіберу (ескертуді қосқан барлық оқушы мен кураторға)
-        </label>
+        <p className="muted-text small">Хабарландыру Telegram-ды байланыстырған барлық оқушы мен кураторға да жіберіледі.</p>
         <div className="editor-actions">
           <button className="primary-btn" disabled={saving}>{saving ? '...' : <><LuMegaphone /> Жариялау</>}</button>
         </div>

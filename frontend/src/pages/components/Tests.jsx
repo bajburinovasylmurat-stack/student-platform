@@ -3,6 +3,7 @@ import '../styles/Features.css';
 import { api, errorText } from '../../api';
 import { formatKkDate } from '../../utils/kkDate';
 import MathText from '../../components/MathText';
+import SolutionPlayer from './SolutionPlayer';
 import { LuArrowLeft, LuArrowRight, LuCheck, LuCheckCircle2, LuChevronDown, LuCircle, LuFileQuestion, LuHelpCircle, LuPartyPopper, LuPlay, LuRotateCcw, LuTarget, LuTimer, LuTrendingUp, LuXCircle } from 'react-icons/lu';
 
 // Оқушыға арналған онлайн тесттер: тізім, тапсыру, нәтиже
@@ -590,6 +591,7 @@ function MistakeWork({ result, onDone }) {
 
 // Сұрақтың талдауы: шарты, дұрыс жауап, оқушының таңдағаны және шығарылу жолы
 function ReviewBody({ q, chosen, solved }) {
+  const [watching, setWatching] = useState(false);
   return (
     <>
     <p className="question-text"><MathText text={q.question} /></p>
@@ -633,10 +635,11 @@ function ReviewBody({ q, chosen, solved }) {
     </div>
     )}
     {q.solution_url && (
-      <a className={`solution-link ${solved ? '' : 'needed'}`} href={q.solution_url} target="_blank" rel="noopener noreferrer">
+      <button type="button" className={`solution-link ${solved ? '' : 'needed'}`} onClick={() => setWatching(true)}>
         <LuPlay /> Шығарылу жолын көру
-      </a>
+      </button>
     )}
+    {watching && <SolutionPlayer url={q.solution_url} title="Шығарылу жолы" onClose={() => setWatching(false)} />}
     </>
   );
 }
