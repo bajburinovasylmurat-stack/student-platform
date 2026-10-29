@@ -11,14 +11,13 @@ import CuratorPanel from './components/CuratorPanel';
 import MyCuratorPlans from './components/MyCuratorPlans';
 import Tests from './components/Tests';
 import Flashcards from './components/Flashcards';
-import Leaderboard from './components/Leaderboard';
 import NotifyButton from './components/NotifyButton';
 import ThemeToggle from '../components/ThemeToggle';
 import { AnnouncementsBar } from './components/Announcements';
 import { API, api, errorText } from '../api';
 import { formatKkDate, capitalize } from '../utils/kkDate';
 import { prettyPhone } from '../utils/phone';
-import { LuBookOpen, LuBrain, LuCalendarDays, LuClapperboard, LuFileQuestion, LuFlame, LuListChecks, LuPencil, LuSettings2, LuTarget, LuTrophy, LuUsers } from 'react-icons/lu';
+import { LuBookOpen, LuBrain, LuCalendarDays, LuClapperboard, LuFileQuestion, LuFlame, LuListChecks, LuPencil, LuSettings2, LuTarget, LuUsers } from 'react-icons/lu';
 
 const ROLE_LABELS = {
   admin: 'Админ',
@@ -76,7 +75,6 @@ export default function Dashboard({ student, onLogout, onProfileUpdate }) {
     { id: 'daily', icon: <LuListChecks />, label: 'Бүгінгі тапсырмалар' },
     { id: 'tests', icon: <LuFileQuestion />, label: 'Тесттер' },
     { id: 'cards', icon: <LuBrain />, label: 'Карточкалар' },
-    { id: 'rating', icon: <LuTrophy />, label: 'Рейтинг' },
     role === 'student' && { id: 'curator-plans', icon: <LuTarget />, label: 'Куратор жоспары' },
     (isCurator || isAdmin) && { id: 'curator', icon: <LuUsers />, label: 'Менің оқушыларым' },
     isAdmin && { id: 'admin', icon: <LuSettings2 />, label: 'Админ панелі' }
@@ -230,7 +228,6 @@ export default function Dashboard({ student, onLogout, onProfileUpdate }) {
         {activeTab === 'curator-plans' && <MyCuratorPlans />}
         {activeTab === 'tests' && <Tests />}
         {activeTab === 'cards' && <Flashcards />}
-        {activeTab === 'rating' && <Leaderboard />}
         {activeTab === 'curator' && (isCurator || isAdmin) && <CuratorPanel />}
         {activeTab === 'admin' && isAdmin && <AdminPanel />}
       </main>

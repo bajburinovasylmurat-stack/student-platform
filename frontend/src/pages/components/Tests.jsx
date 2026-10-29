@@ -49,7 +49,9 @@ function TestList({ onStart, onOpenResult, onMistakes }) {
   const start = async (test) => {
     const resuming = Boolean(test.active_attempt);
     if (!resuming && !window.confirm(
-      `«${test.title}» тестін бастайсыз ба?\n${test.questions} сұрақ · ${test.duration_min} минут. Таймер бірден басталады.`
+      test.duration_min > 0
+        ? `«${test.title}» тестін бастайсыз ба?\n${test.questions} сұрақ · ${test.duration_min} минут. Таймер бірден басталады.`
+        : `«${test.title}» тестін бастайсыз ба?\n${test.questions} сұрақ · уақыт шектеусіз.`
     )) return;
 
     setStarting(test.id);
@@ -126,7 +128,7 @@ function TestList({ onStart, onOpenResult, onMistakes }) {
                   {test.description && <p className="test-desc">{test.description}</p>}
                   <div className="test-meta">
                     <span><LuHelpCircle /> {test.questions} сұрақ</span>
-                    <span><LuTimer /> {test.duration_min} мин</span>
+                    {test.duration_min > 0 && <span><LuTimer /> {test.duration_min} мин</span>}
                     <span><LuTarget /> {test.max_score} балл</span>
                   </div>
                   {test.attempts > 0 && (
@@ -221,7 +223,7 @@ function ScoreChart({ history }) {
 function TakeTest({ session, onFinish }) {
   const [answers, setAnswers] = useState(session.answers || {});
   const [index, setIndex] = useState(0);
-  const [left, setLeft] = useState(() => Math.max(0, new Date(session.deadline) - Date.now()));
+  const [left, setLeft] = useState(() => (session.deadline ? Math.max(0, new Date(session.deadline) - Date.now()) : null));
   const [submitting, setSubmitting] = useState(false);
   const answersRef = useRef(answers);
   const submittedRef = useRef(false);
@@ -244,8 +246,9 @@ function TakeTest({ session, onFinish }) {
     }
   }, [session, onFinish]);
 
-  // Таймер: уақыт біткенде өзі тапсырады
+  // Таймер: уақыт біткенде өзі тапсырады (уақыт шектеусіз тестте таймер жоқ)
   useEffect(() => {
+    if (!session.deadline) return undefined;
     const timer = setInterval(() => {
       const ms = Math.max(0, new Date(session.deadline) - Date.now());
       setLeft(ms);
@@ -306,9 +309,11 @@ function TakeTest({ session, onFinish }) {
           <h2>{session.test.title}</h2>
           <span className="muted-text">{answered}/{session.questions.length} жауап берілді</span>
         </div>
-        <div className={`timer ${left < 60000 ? 'urgent' : ''}`}>
-          <LuTimer /> {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-        </div>
+        {left !== null && (
+          <div className={`timer ${left < 60000 ? 'urgent' : ''}`}>
+            <LuTimer /> {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+          </div>
+        )}
       </div>
 
       <div className="question-dots">

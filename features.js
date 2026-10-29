@@ -110,6 +110,13 @@ export const featureMigrations = `
     name VARCHAR(100) PRIMARY KEY,
     loaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   );
+  -- duration_min = 0: уақыт шектеусіз тест. Бір рет: бар тесттердің бәрін таймерсіз етеміз
+  DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM seed_log WHERE name = 'untimed-tests') THEN
+      UPDATE tests SET duration_min = 0;
+      INSERT INTO seed_log (name) VALUES ('untimed-tests');
+    END IF;
+  END $$;
 
   -- Формула карточкалары
   CREATE TABLE IF NOT EXISTS flashcards (
@@ -185,7 +192,7 @@ export async function seedContent(pool) {
         const created = await client.query(
           `INSERT INTO tests (title, description, duration_min, is_published, topic, sort_order)
            VALUES ($1, $2, $3, TRUE, $4, $5) RETURNING id`,
-          [test.title, test.description || null, test.duration_min, test.topic || null, test.sort_order ?? order]
+          [test.title, test.description || null, 0, test.topic || null, test.sort_order ?? order]
         );
         for (const [idx, q] of test.questions.entries()) {
           await client.query(
@@ -707,7 +714,8 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       if (is_published && questions.length === 0) {
         return res.status(400).json({ error: 'Жариялау үшін кемінде бір толық сұрақ керек' });
       }
-      const duration = Math.min(300, Math.max(1, Number(duration_min) || 60));
+      // 0 — уақыт шектеусіз (әдепкі)
+      const duration = Math.min(300, Math.max(0, Math.floor(Number(duration_min)) || 0));
 
       await client.query('BEGIN');
       let testId = id;
@@ -780,7 +788,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
           (SELECT mistakes_done_at IS NOT NULL FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NOT NULL
            ORDER BY finished_at DESC LIMIT 1) AS mistakes_done,
           (SELECT id FROM test_attempts WHERE test_id = t.id AND student_id = $1 AND finished_at IS NULL
-             AND started_at + (t.duration_min * INTERVAL '1 minute') + INTERVAL '${GRACE_SECONDS} seconds' > NOW()
+             AND (t.duration_min = 0 OR started_at + (t.duration_min * INTERVAL '1 minute') + INTERVAL '${GRACE_SECONDS} seconds' > NOW())
            ORDER BY started_at DESC LIMIT 1) AS active_attempt
         FROM tests t WHERE t.is_published ORDER BY t.topic NULLS LAST, t.sort_order, t.created_at DESC
       `, [req.student.id]);
@@ -801,7 +809,9 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       attempt_id: attempt.id,
       test: { id: test.id, title: test.title, duration_min: test.duration_min },
       started_at: attempt.started_at,
-      deadline: new Date(new Date(attempt.started_at).getTime() + test.duration_min * 60000).toISOString(),
+      deadline: test.duration_min > 0
+        ? new Date(new Date(attempt.started_at).getTime() + test.duration_min * 60000).toISOString()
+        : null,
       answers: attempt.answers || {},
       questions: questions.rows
     };
@@ -817,7 +827,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
       const active = await pool.query(`
         SELECT * FROM test_attempts
         WHERE test_id = $1 AND student_id = $2 AND finished_at IS NULL
-          AND started_at + ($3 * INTERVAL '1 minute') > NOW()
+          AND ($3::int = 0 OR started_at + ($3 * INTERVAL '1 minute') > NOW())
         ORDER BY started_at DESC LIMIT 1
       `, [t.id, req.student.id, t.duration_min]);
 
@@ -893,7 +903,9 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
 
       if (!a.finished_at) {
         // Уақыт өтсе де қабылдаймыз, бірақ соңғы сақталған жауаптармен
-        const deadline = new Date(a.started_at).getTime() + (a.duration_min * 60 + GRACE_SECONDS) * 1000;
+        const deadline = a.duration_min > 0
+          ? new Date(a.started_at).getTime() + (a.duration_min * 60 + GRACE_SECONDS) * 1000
+          : Infinity;
         const answers = Date.now() <= deadline && req.body.answers ? req.body.answers : (a.answers || {});
 
         const questions = await pool.query(

@@ -15,7 +15,7 @@ export default function AdminTests() {
 
   const openEditor = async (test) => {
     if (!test) {
-      setEditing({ title: '', description: '', duration_min: 60, is_published: false, questions: [emptyQuestion()] });
+      setEditing({ title: '', description: '', duration_min: 0, is_published: false, questions: [emptyQuestion()] });
       return;
     }
     try {
@@ -55,7 +55,7 @@ export default function AdminTests() {
               <div className="grow">
                 {t.topic && <span className="card-topic inline">{t.topic}</span>}
                 <strong>{t.title}</strong>
-                <span className="muted-text">{t.questions} сұрақ · {t.duration_min} мин · {t.attempts} рет тапсырылды</span>
+                <span className="muted-text">{t.questions} сұрақ · {t.duration_min > 0 ? `${t.duration_min} мин` : 'уақыт шектеусіз'} · {t.attempts} рет тапсырылды</span>
               </div>
               <span className={`status-pill ${t.is_published ? 'on' : 'off'}`}>
                 {t.is_published ? 'Жарияланған' : 'Жоба'}
@@ -141,8 +141,8 @@ function TestEditor({ initial, onClose }) {
           <input value={test.title} onChange={(e) => setField('title', e.target.value)} placeholder="мысалы: ҰБТ математика №5" />
         </label>
         <label className="field-label">
-          Уақыты (минут)
-          <input type="number" min="1" max="300" value={test.duration_min} onChange={(e) => setField('duration_min', e.target.value)} />
+          Уақыты (минут, 0 — шектеусіз)
+          <input type="number" min="0" max="300" title="0 — уақыт шектеусіз" value={test.duration_min} onChange={(e) => setField('duration_min', e.target.value)} />
         </label>
       </div>
       <label className="field-label">
