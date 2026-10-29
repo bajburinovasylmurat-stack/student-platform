@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Features.css';
+import MathText from '../../components/MathText';
 import { api, errorText } from '../../api';
 import { LuArrowRight, LuBrain, LuCheck, LuPencil, LuPlus, LuTrash2 } from 'react-icons/lu';
 
@@ -79,8 +80,8 @@ export default function AdminFlashcards() {
           <div key={c.id} className="admin-row">
             <div className="grow">
               {c.topic && <span className="card-topic inline">{c.topic}</span>}
-              <strong className="pre">{c.front}</strong>
-              <span className="muted-text pre"><LuArrowRight /> {c.back}</span>
+              <strong className="pre"><MathText text={c.front} /></strong>
+              <span className="muted-text pre"><LuArrowRight /> <MathText text={c.back} /></span>
             </div>
             <button className="secondary-btn" onClick={() => setForm({ ...c, topic: c.topic || '' })} title="Өзгерту" aria-label="Өзгерту"><LuPencil /></button>
             <button className="danger-btn" onClick={() => remove(c)} title="Өшіру" aria-label="Өшіру"><LuTrash2 /></button>

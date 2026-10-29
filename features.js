@@ -222,6 +222,10 @@ export async function seedContent(pool) {
           [v.title, v.category, v.id, v.section || null]
         );
       }
+      // Тақырыптың карточкаларын жаңа нұсқасымен толық алмастыру (мәтіні түзетілгенде)
+      if (content.replace_flashcards_topic) {
+        await client.query('DELETE FROM flashcards WHERE topic = $1', [content.replace_flashcards_topic]);
+      }
       for (const card of content.flashcards || []) {
         await client.query(
           `INSERT INTO flashcards (topic, front, back)
@@ -348,7 +352,7 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
         chat_id: chatId,
         text: `✅ ${student.rows[0].name}, ескертулер қосылды!\n\n` +
           '• Таңертең — бүгінгі жоспар\n• Кешке — орындалмаған тапсырмалар\n• Куратор жаңа жоспар құрғанда\n\n' +
-          'Өшіру үшін: /stop'
+          'Ескертулер барлық оқушыда әрдайым қосулы.'
       });
       return true;
     }
@@ -1073,15 +1077,16 @@ export function registerFeatures(app, { pool, verifyToken, requireRole, tg, tele
 
   app.post('/api/announcements', verifyToken, requireRole('admin'), async (req, res) => {
     try {
-      const { title, body, notify_telegram } = req.body;
+      const { title, body } = req.body;
       if (!title?.trim()) return res.status(400).json({ error: 'Тақырып қажет' });
       const result = await pool.query(
         'INSERT INTO announcements (title, body, created_by) VALUES ($1, $2, $3) RETURNING id, title, body, created_at',
         [title.trim(), body?.trim() || null, req.student.id]
       );
 
+      // Хабарландыру әрдайым Telegram-ды байланыстырған барлық оқушы мен кураторға кетеді
       let telegram = 0;
-      if (notify_telegram && telegramEnabled()) {
+      if (telegramEnabled()) {
         const recipients = await pool.query(
           "SELECT id FROM students WHERE telegram_chat_id IS NOT NULL AND notify_enabled AND COALESCE(role, 'student') <> 'admin'"
         );

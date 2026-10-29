@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../styles/Features.css';
 import { api, currentUserId } from '../../api';
+import MathText from '../../components/MathText';
 import { LuArrowLeft, LuArrowRight, LuBrain, LuCheck, LuPartyPopper, LuRotateCcw } from 'react-icons/lu';
 
 // Формула карточкалары: аударып жаттау, «білемін» белгісі осы құрылғыда сақталады
@@ -109,11 +110,11 @@ export default function Flashcards() {
               <div className="flashcard-inner">
                 <div className="flashcard-face front">
                   {card.topic && <span className="card-topic">{card.topic}</span>}
-                  <div className={`card-text ${card.front.length > 60 ? 'long' : ''}`}>{card.front}</div>
+                  <div className={`card-text ${textLength(card.front) > 60 ? 'long' : ''}`}><MathText text={card.front} /></div>
                   <span className="card-hint">Аудару үшін басыңыз</span>
                 </div>
                 <div className="flashcard-face back">
-                  <div className={`card-text ${card.back.length > 60 ? 'long' : ''}`}>{card.back}</div>
+                  <div className={`card-text ${textLength(card.back) > 60 ? 'long' : ''}`}><MathText text={card.back} /></div>
                   {known.has(card.id) && <span className="card-known"><LuCheck /> Жатталған</span>}
                 </div>
               </div>
@@ -134,3 +135,6 @@ export default function Flashcards() {
     </div>
   );
 }
+
+// Карточкадағы көрінетін мәтін ұзындығы: LaTeX командалары ($\\log_{a}$ т.б.) есепке алынбайды
+const textLength = (text) => String(text || '').replace(/\\[a-zA-Z]+|[{}$^_]/g, '').length;
